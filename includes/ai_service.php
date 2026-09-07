@@ -4,7 +4,8 @@
  *
  * Dos modos:
  *   1) REAL  - si AI_API_KEY esta definida en .env, se llama a la API
- *              de OpenAI (chat completions) via curl.
+ *              del proveedor configurado (OpenAI compatible: OpenAI, Groq, ...)
+ *              via curl, usando AI_BASE_URL y AI_MODEL.
  *   2) SIMULADO - si no hay clave, se usan heuristicas deterministas
  *              para que el proyecto funcione y se pueda demostrar.
  *
@@ -27,7 +28,9 @@ function ai_simulado(): bool
 }
 
 /**
- * Llama al modelo de OpenAI y devuelve el texto de la respuesta.
+ * Llama al modelo de IA (cualquier proveedor OpenAI-compatible: OpenAI, Groq, ...)
+ * y devuelve el texto de la respuesta. Reintenta hasta 3 veces ante errores
+ * transitorios (429/5xx), respuestas vacias o JSON mode no soportado.
  * Lanza RuntimeException ante cualquier error.
  */
 function ai_llamar(string $systemPrompt, string $userPrompt, bool $json = true): string
@@ -36,20 +39,59 @@ function ai_llamar(string $systemPrompt, string $userPrompt, bool $json = true):
         throw new RuntimeException('IA no configurada: define AI_API_KEY en el archivo .env.');
     }
 
-    $url = 'https://api.openai.com/v1/chat/completions';
-    $payload = [
+    $url = AI_BASE_URL . '/chat/completions';
+    $payloadBase = [
         'model'       => AI_MODEL,
         'messages'    => [
             ['role' => 'system', 'content' => $systemPrompt],
             ['role' => 'user',   'content' => $userPrompt],
         ],
-        'max_tokens'  => 300,
+        'max_tokens'  => 1024,
         'temperature' => 0,
     ];
     if ($json) {
-        $payload['response_format'] = ['type' => 'json_object'];
+        $payloadBase['response_format'] = ['type' => 'json_object'];
     }
 
+    $payload = $payloadBase;
+    $maxIntentos = 3;
+    for ($intento = 1; $intento <= $maxIntentos; $intento++) {
+        [$code, $body] = ai_peticion($url, $payload);
+
+        // Tolerancia: si el proveedor/modelo no soporta JSON mode, se reintenta sin el
+        if ($code === 400 && $json && isset($payload['response_format'])) {
+            $payload = $payloadBase;
+            unset($payload['response_format']);
+            continue;
+        }
+
+        $data = json_decode($body, true);
+        $content = trim((string)($data['choices'][0]['message']['content'] ?? ''));
+
+        if ($code === 200 && $content !== '') {
+            return $content;
+        }
+
+        // Errores transitorios o respuestas vacias: reintentar (no sobre cargas de 4xx)
+        $recuperable = in_array($code, [429, 500, 502, 503, 504], true) || ($code === 200 && $content === '');
+        if ($recuperable && $intento < $maxIntentos) {
+            usleep(500000 * $intento);
+            continue;
+        }
+
+        if ($code !== 200) {
+            $msg = $data['error']['message'] ?? 'respuesta desconocida';
+            throw new RuntimeException('La API de IA respondio con el codigo ' . $code . ': ' . $msg);
+        }
+        throw new RuntimeException('La API de IA devolvio repetidamente una respuesta vacia.');
+    }
+
+    throw new RuntimeException('La API de IA no pudo completar la peticion.');
+}
+
+/** Ejecuta una peticion POST JSON a la API y devuelve [codigo HTTP, cuerpo]. */
+function ai_peticion(string $url, array $payload): array
+{
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -61,20 +103,15 @@ function ai_llamar(string $systemPrompt, string $userPrompt, bool $json = true):
         ],
         CURLOPT_TIMEOUT        => 30,
     ]);
-    $resp = curl_exec($ch);
-    $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $body = curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $curlError = curl_error($ch);
     curl_close($ch);
 
-    if ($resp === false) {
+    if ($body === false) {
         throw new RuntimeException('Error de conexion con la API de IA: ' . $curlError);
     }
-    $data = json_decode($resp, true);
-    if ($httpCode !== 200 || !isset($data['choices'][0]['message']['content'])) {
-        $msg = $data['error']['message'] ?? 'respuesta desconocida';
-        throw new RuntimeException('La API de IA respondio con el codigo ' . $httpCode . ': ' . $msg);
-    }
-    return trim((string)$data['choices'][0]['message']['content']);
+    return [$code, (string)$body];
 }
 
 /** Pide a la IA una respuesta JSON y la decodifica. */
@@ -156,7 +193,7 @@ function ia_detectar_anomalias(array $metrics): array
     if (ai_simulado()) {
         return simular_anomalias($metrics);
     }
-    if (count($metrics) < 2) {
+    if (count($metrics) < 1) {
         return [];
     }
 

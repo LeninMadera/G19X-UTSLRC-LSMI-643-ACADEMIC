@@ -116,7 +116,17 @@ Niveles: **>=85 Excelente**, **70–84 Aceptable**, **<70 Por mejorar**, y un re
 
 El servicio vive en `includes/ai_service.php` y se expone por `api/ai.php`.
 
-- **Conexion real**: agrega tu clave OpenAI en `.env` (`AI_API_KEY`). El modelo se configura con `AI_MODEL` (por defecto `gpt-3.5-turbo`). La clave **nunca llega al navegador**; toda la comunicacion ocurre en el servidor.
+- **Conexion real**: agrega tu clave de API en `.env` (`AI_API_KEY`). El modelo se configura con `AI_MODEL` y el proveedor con `AI_BASE_URL`. La clave **nunca llega al navegador**; toda la comunicacion ocurre en el servidor.
+- **Proveedores**: el sistema acepta cualquier API de chat compatible con el formato de OpenAI (`/v1/chat/completions`). Por defecto usa OpenAI (`https://api.openai.com/v1`), pero puedes usar **Groq** (capa gratuita):
+  1. Crea una cuenta en la consola de Groq y genera una API key gratuita.
+  2. Configura tu `.env` (usa un modelo que soporte JSON mode; en esta cuenta el recomendado es `openai/gpt-oss-20b`):
+     ```
+     AI_API_KEY=gsk_tu_clave_de_groq
+     AI_MODEL=openai/gpt-oss-20b
+     AI_BASE_URL=https://api.groq.com/openai/v1
+     ```
+     Para ver los modelos disponibles en tu cuenta: `GET https://api.groq.com/openai/v1/models`.
+  3. Si el modelo elegido no soporta JSON mode, el servicio reintenta la peticion sin el automaticamente.
 - **Conexion simulada**: si `AI_API_KEY` esta vacia, el modulo opera en **modo simulado** usando heuristicas locales deterministas (misma interfaz y mismos efectos), ideal para demostrar el proyecto sin consumir tokens. El panel de IA lo indica con un aviso.
 
 Acciones disponibles (con resultados guardados en la tabla `ai_detections` y/o `categoria_ia`/`etiquetas_ia` del dataset):

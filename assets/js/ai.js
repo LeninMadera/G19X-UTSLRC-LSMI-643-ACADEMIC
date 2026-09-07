@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const json = await api('/api/ai.php?action=status');
         if (json.success) {
             const modo = json.data.disponible
-                ? 'IA REAL conectada (modelo ' + esc(json.data.modelo) + ')'
+                ? 'IA REAL conectada — proveedor ' + esc(json.data.proveedor) + ', modelo ' + esc(json.data.modelo)
                 : 'MODO SIMULADO: sin API key configurada. Se usan heuristicas locales.';
             aiMode.textContent = 'Estado: ' + modo;
             if (!json.data.disponible) aiMode.classList.add('badge-pending');

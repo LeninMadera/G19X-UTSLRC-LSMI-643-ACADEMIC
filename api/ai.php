@@ -44,6 +44,7 @@ switch ($action) {
             'disponible' => ai_disponible(),
             'simulado'   => ai_simulado(),
             'modelo'     => AI_MODEL,
+            'proveedor'  => parse_url(AI_BASE_URL, PHP_URL_HOST) ?: 'desconocido',
         ]);
         break;
 

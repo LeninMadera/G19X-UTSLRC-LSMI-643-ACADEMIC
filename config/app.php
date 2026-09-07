@@ -40,9 +40,10 @@ define('DB_NAME', $env['DB_NAME'] ?? 'gobierno_datos_ia');
 define('DB_USER', $env['DB_USER'] ?? 'root');
 define('DB_PASS', $env['DB_PASS'] ?? '');
 
-// Configuracion de IA (OpenAI)
-define('AI_API_KEY', $env['AI_API_KEY'] ?? '');
-define('AI_MODEL',   $env['AI_MODEL']   ?? 'gpt-3.5-turbo');
+// Configuracion de IA (proveedor OpenAI-compatible: OpenAI, Groq, etc.)
+define('AI_API_KEY',  $env['AI_API_KEY']  ?? '');
+define('AI_MODEL',    $env['AI_MODEL']    ?? 'gpt-3.5-turbo');
+define('AI_BASE_URL', $env['AI_BASE_URL'] ?? 'https://api.openai.com/v1');
 
 // URL base y clave de sesion
 define('APP_URL', $env['APP_URL'] ?? 'http://localhost/gobierno-datos-ia');
