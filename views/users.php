@@ -8,7 +8,68 @@ if ($current['rol'] !== 'admin') {
 }
 ?>
 <section class="panel">
-    <h2>Gestion de usuarios</h2>
-    <p class="muted">Este modulo se implementara en la Etapa 2 (CRUD de usuarios por administrador).</p>
+    <div class="toolbar">
+        <h2>Usuarios del sistema</h2>
+        <button id="btn-nuevo" class="btn btn-primary">Nuevo usuario</button>
+    </div>
+
+    <div id="msg" class="alert hidden"></div>
+
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Creado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="users-tbody">
+                <tr><td colspan="7" class="muted center">Cargando...</td></tr>
+            </tbody>
+        </table>
+    </div>
 </section>
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+
+<!-- Modal de formulario (crear / editar) -->
+<div id="modal-backdrop" class="modal-backdrop hidden">
+    <div class="modal">
+        <h3 id="modal-title">Nuevo usuario</h3>
+        <form id="user-form" autocomplete="off">
+            <input type="hidden" id="user-id" name="id" value="0">
+            <div class="field">
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" name="nombre" maxlength="80" required>
+            </div>
+            <div class="field">
+                <label for="email">Correo electronico</label>
+                <input type="email" id="email" name="email" maxlength="120" required>
+            </div>
+            <div class="field">
+                <label for="password">Contrasena <span class="muted small">(min 8; vacia = no cambia)</span></label>
+                <input type="password" id="password" name="password" placeholder="••••••••">
+            </div>
+            <div class="field">
+                <label for="rol_id">Rol</label>
+                <select id="rol_id" name="rol_id" required></select>
+            </div>
+            <div class="checkbox-field">
+                <input type="checkbox" id="activo" name="activo" value="1" checked>
+                <label for="activo">Usuario activo</label>
+            </div>
+            <div id="form-error" class="alert alert-error hidden"></div>
+            <div class="actions">
+                <button type="button" id="btn-cancelar" class="btn btn-ghost">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<?php
+$pageScript = 'users.js';
+require_once __DIR__ . '/includes/footer.php'; ?>
