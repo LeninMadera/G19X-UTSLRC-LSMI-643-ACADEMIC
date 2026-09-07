@@ -1,9 +1,74 @@
 <?php
 $pageTitle = 'Reportes';
+$rol = currentRole();
 require_once __DIR__ . '/includes/header.php';
 ?>
 <section class="panel">
-    <h2>Reportes</h2>
-    <p class="muted">Este modulo se implementara en la Etapa 7 (metricas y graficos del dashboard).</p>
+    <div class="toolbar">
+        <div>
+            <h2>Reportes</h2>
+            <p class="muted small">Estado actual de la calidad de datos y bitacora del sistema.</p>
+        </div>
+        <button class="btn" id="rp-refresh">Actualizar</button>
+    </div>
 </section>
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+
+<section class="panel">
+    <h2>Estado de calidad por dataset</h2>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Dataset</th>
+                    <th>Categoria</th>
+                    <th>Ultimo score</th>
+                    <th>Ultima medicion</th>
+                    <th>Nivel</th>
+                </tr>
+            </thead>
+            <tbody id="rp-tabla"></tbody>
+        </table>
+    </div>
+</section>
+
+<?php if ($rol === 'admin'): ?>
+<section class="panel">
+    <h2>Bitacora de actividad (admin)</h2>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Accion</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody id="rp-log"></tbody>
+        </table>
+    </div>
+    <p class="muted small" id="rp-log-info"></p>
+</section>
+<?php endif; ?>
+
+<section class="panel">
+    <h2>Alertas y recomendaciones de IA</h2>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Dataset</th>
+                    <th>Tipo</th>
+                    <th>Severidad</th>
+                    <th>Descripcion</th>
+                </tr>
+            </thead>
+            <tbody id="rp-alertas"></tbody>
+        </table>
+    </div>
+</section>
+
+<?php
+$pageScript = 'reports.js';
+require_once __DIR__ . '/includes/footer.php'; ?>

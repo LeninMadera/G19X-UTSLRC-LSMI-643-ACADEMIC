@@ -217,7 +217,42 @@ body {
 .card h3 { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; }
 .card-num { font-size: 2rem; font-weight: 700; margin: 0.3rem 0; }
 
-/* ---------- Tablas ---------- */
+/* ---------- Dashboard (KPIs y graficos) ---------- */
+.cards-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+.kpi { text-align: center; }
+.kpi-num { font-size: 2.1rem; font-weight: 700; }
+.kpi-label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; margin-top: 0.2rem; }
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+}
+.chart-box { position: relative; }
+.chart-box canvas { width: 100%; height: 260px; display: block; }
+.legend-row { display: flex; align-items: center; gap: 1rem; color: var(--muted); }
+.legend-row .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+.bar-col { display: flex; flex-direction: column; gap: 0.7rem; }
+.bar-row { display: flex; align-items: center; gap: 0.6rem; }
+.bar-label { min-width: 88px; font-size: 0.85rem; }
+.bar-track { flex: 1; background: #f1f5f9; border-radius: 6px; overflow: hidden; height: 12px; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #38bdf8); }
+.bar-val { width: 28px; font-size: 0.85rem; font-weight: 600; }
+
+.list-notif { list-style: none; }
+.list-notif li {
+    padding: 0.6rem 0.3rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+}
+
+/* ---------- Panel / Cards ---------- */
 .table-wrap { overflow-x: auto; }
 table.table {
     width: 100%;
@@ -300,4 +335,5 @@ table.table {
     .sidebar { width: 100%; flex-direction: row; align-items: center; flex-wrap: wrap; }
     .sidebar-nav { flex-direction: row; flex-wrap: wrap; }
     .content { padding: 1rem; }
+    .grid-2 { grid-template-columns: 1fr; }
 }

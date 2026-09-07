@@ -3,26 +3,63 @@ $pageTitle = 'Dashboard';
 require_once __DIR__ . '/includes/header.php';
 ?>
 <section class="panel">
-    <h2>Bienvenido/a, <?= e($current['name']) ?></h2>
-    <p class="muted">Este es el panel principal del proyecto. A partir de la Etapa 7
-       mostrara aqui las metricas del gobierno de datos y las alertas de IA.</p>
+    <div class="toolbar">
+        <div>
+            <h2>Panel de control</h2>
+            <p class="muted small" id="dl-fecha">Cargando indicadores...</p>
+        </div>
+        <button class="btn" id="dl-refresh">Actualizar</button>
+    </div>
 </section>
 
-<div class="cards">
-    <div class="card">
-        <h3>Catalogo</h3>
-        <p class="card-num">0</p>
-        <p class="muted">datasets registrados</p>
+<section class="cards-kpis" id="dl-kpis">
+    <div class="card kpi">
+        <div class="kpi-num" id="dl-kpi-datasets">-</div>
+        <div class="kpi-label">Datasets registrados</div>
     </div>
-    <div class="card">
-        <h3>Calidad promedio</h3>
-        <p class="card-num">--</p>
-        <p class="muted">score global</p>
+    <div class="card kpi">
+        <div class="kpi-num" id="dl-kpi-calidad">-</div>
+        <div class="kpi-label">Calidad promedio</div>
     </div>
-    <div class="card">
-        <h3>Alertas IA</h3>
-        <p class="card-num">0</p>
-        <p class="muted">anomalias pendientes</p>
+    <div class="card kpi">
+        <div class="kpi-num" id="dl-kpi-alertas">-</div>
+        <div class="kpi-label">Alertas IA pendientes</div>
     </div>
+    <div class="card kpi">
+        <div class="kpi-num" id="dl-kpi-politicas">-</div>
+        <div class="kpi-label">Politicas activas</div>
+    </div>
+</section>
+
+<div class="grid-2">
+    <section class="panel">
+        <h2>Score de calidad por dataset</h2>
+        <div class="chart-box"><canvas id="dl-chart-scores" height="260"></canvas></div>
+        <div class="legend-row small">
+            <span class="dot" style="background:#16a34a"></span> 85+ Excelente
+            <span class="dot" style="background:#d97706"></span> 70-84 Aceptable
+            <span class="dot" style="background:#dc2626"></span> &lt; 70 Por mejorar
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Categorias de datos</h2>
+        <div id="dl-categorias" class="bar-col"></div>
+    </section>
 </div>
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+
+<div class="grid-2">
+    <section class="panel">
+        <h2>Alertas recientes (IA)</h2>
+        <ul id="dl-alertas" class="list-notif"></ul>
+    </section>
+
+    <section class="panel">
+        <h2>Actividad reciente</h2>
+        <ul id="dl-actividad" class="list-notif"></ul>
+    </section>
+</div>
+
+<?php
+$pageScript = 'dashboard.js';
+require_once __DIR__ . '/includes/footer.php'; ?>
