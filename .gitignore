@@ -1,0 +1,20 @@
+# Datos sensibles del entorno
+.env
+
+# Configuracion local especial que no debe publicarse
+config/local*.php
+
+# Dependencias
+/vendor/
+
+# Caché y temporales
+*.log
+*.tmp
+Thumbs.db
+.DS_Store
+
+# VsCode (opcional)
+.vscode/settings.json
+
+# XAMPP / WAMP
+.htaccess
