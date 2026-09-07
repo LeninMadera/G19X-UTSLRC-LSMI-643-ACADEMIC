@@ -5,10 +5,11 @@
 require_once __DIR__ . '/../config/database.php';
 
 /**
- * Devuelve una respuesta JSON y detiene la ejecucion.
+ * Devuelve una respuesta JSON con codigo HTTP opcional y detiene la ejecucion.
  */
-function respondJson(bool $success, $data = null, string $message = ''): void
+function respondJson(bool $success, $data = null, string $message = '', int $statusCode = 200): void
 {
+    http_response_code($success ? $statusCode : ($statusCode === 200 ? 400 : $statusCode));
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'success' => $success,
@@ -31,6 +32,20 @@ function input(string $key, $default = null, int $maxLen = 2000)
         return $default;
     }
     return mb_substr($value, 0, $maxLen);
+}
+
+/**
+ * Lee el cuerpo de la peticion y devuelve un array.
+ * Soporta JSON (para Postman) y Form-Data (para el frontend).
+ */
+function jsonInput(): array
+{
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+    if (is_array($data)) {
+        return $data;
+    }
+    return $_POST;
 }
 
 /**
