@@ -69,19 +69,42 @@ body {
 
 .field { margin-bottom: 1rem; }
 .field label { display: block; font-weight: 600; margin-bottom: 0.35rem; font-size: 0.9rem; }
-.field input {
+.field input,
+.field select,
+.field textarea {
     width: 100%;
     padding: 0.65rem 0.8rem;
     border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 0.95rem;
+    background: #fff;
+    font-family: inherit;
     transition: border-color 0.15s;
 }
-.field input:focus {
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
+
+/* ---------- Etiquetas / tags ---------- */
+.tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.tag {
+    background: #eff6ff;
+    color: var(--primary-dark);
+    border: 1px solid #bfdbfe;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+}
+.score-badge {
+    font-weight: 700;
+}
+.score-good { color: var(--success); }
+.score-warn { color: var(--warning); }
+.score-bad  { color: var(--danger); }
 
 /* ---------- Botones ---------- */
 .btn {
