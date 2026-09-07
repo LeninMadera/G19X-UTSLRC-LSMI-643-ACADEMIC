@@ -48,5 +48,18 @@ define('AI_MODEL',   $env['AI_MODEL']   ?? 'gpt-3.5-turbo');
 define('APP_URL', $env['APP_URL'] ?? 'http://localhost/gobierno-datos-ia');
 define('APP_KEY', $env['APP_KEY'] ?? '');
 
+// Modo depuracion: 0 oculta errores en produccion, 1 solo en desarrollo
+define('APP_DEBUG', ($env['APP_DEBUG'] ?? '0') === '1');
+
 // Ruta raiz del proyecto (util para includes)
 define('ROOT_PATH', dirname(__DIR__));
+
+// Politica de errores: nunca mostrar trazas al usuario final
+error_reporting(E_ALL);
+ini_set('display_errors', APP_DEBUG ? '1' : '0');
+ini_set('log_errors', '1');
+
+// Cabeceras de seguridad basicas en todas las respuestas
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: strict-origin-when-cross-origin');

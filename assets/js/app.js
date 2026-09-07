@@ -4,6 +4,8 @@
    ============================================================ */
 
 // PRIVADO: acceso al backend; respeta el rol definido por el servidor.
+// Nunca lanza excepciones: ante un fallo de red o respuesta invalida
+// devuelve un JSON con success=false para que cada modulo lo muestre.
 async function api(action, data = {}, method = 'POST') {
     const url = window.APP_URL + action;
     const opts = { method, headers: {} };
@@ -15,8 +17,20 @@ async function api(action, data = {}, method = 'POST') {
         opts.body = JSON.stringify(data);
     }
 
-    const res = await fetch(url, opts);
-    return res.json();
+    try {
+        const res = await fetch(url, opts);
+        const type = (res.headers.get('content-type') || '');
+        if (type.indexOf('application/json') !== -1) {
+            return await res.json();
+        }
+        const texto = await res.text();
+        throw new Error(texto ? 'Respuesta invalida del servidor.' : 'Sin respuesta del servidor.');
+    } catch (err) {
+        if (err instanceof SyntaxError) {
+            return { success: false, message: 'El servidor no respondio en formato valido.' };
+        }
+        return { success: false, message: 'Error de conexion con el servidor.' };
+    }
 }
 
 function showAlert(containerId, message, type = 'error') {

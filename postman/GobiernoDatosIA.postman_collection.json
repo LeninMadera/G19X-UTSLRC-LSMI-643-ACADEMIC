@@ -1,0 +1,127 @@
+{
+  "info": {
+    "_postman_id": "f3a9b7e2-5d1a-4c8f-9a7b-6e0d4c2f8a10",
+    "name": "Gobierno de Datos con IA",
+    "description": "Coleccion de pruebas de la API REST de la Plataforma de Gobierno de Datos con Inteligencia Artificial (PHP + MySQL).\n\nAUTENTICACION: el sistema usa sesiones por cookie. Ejecuta primero el request \"Auth / Login\" para abrir sesion; Postman conservara la cookie `GDIA_SESSION` para el resto de las peticiones.\n\nVARIABLE baseUrl: apunta a la raiz del proyecto servida por PHP (ej: http://127.0.0.1:8000).\n\nUSUARIOS DE PRUEBA (seed):\n- admin@example.com / Admin123! (administrador)\n- steward@example.com / Steward123! (steward)\n- owner@example.com / Owner123! (dueno de datos)\n- analyst@example.com / Analyst123! (analista, solo lectura)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth.php?action=login", "host": ["{{baseUrl}}"], "path": ["api", "auth.php"], "query": [{ "key": "action", "value": "login" }] },
+            "body": { "mode": "raw", "raw": "{ \"email\": \"admin@example.com\", \"password\": \"Admin123!\" }" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login exitoso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.rol).to.eql('admin');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "Logout", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/auth.php?action=logout", "host": ["{{baseUrl}}"], "path": ["api", "auth.php"], "query": [{ "key": "action", "value": "logout" }] } } },
+        { "name": "Session (usuario actual)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/auth.php?action=session", "host": ["{{baseUrl}}"], "path": ["api", "auth.php"], "query": [{ "key": "action", "value": "session" }] } } }
+      ]
+    },
+    {
+      "name": "Datasets",
+      "item": [
+        {
+          "name": "Listar datasets (busqueda)",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=list&search=ventas&categoria=Finanzas", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "list" }, { "key": "search", "value": "ventas" }, { "key": "categoria", "value": "Finanzas" }] } }
+        },
+        { "name": "Detalle dataset (id=1)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=detail&id=1", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "detail" }, { "key": "id", "value": "1" }] } } },
+        {
+          "name": "Crear dataset",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Catalogo de productos 2025\", \"descripcion\": \"Listado maestros de productos para la empresa.\", \"categoria\": \"Operaciones\", \"origen\": \"SAP\", \"owner_id\": 4, \"activo\": 1 }" } }
+        },
+        {
+          "name": "Actualizar dataset (id=8)",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=update&id=8", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "update" }, { "key": "id", "value": "8" }] }, "body": { "mode": "raw", "raw": "{ \"descripcion\": \"Listado maestro de productos con clasificacion IA.\" }" } }
+        },
+        { "name": "Eliminar dataset (id=8)", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=delete&id=8", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "delete" }, { "key": "id", "value": "8" }] } } }
+      ]
+    },
+    {
+      "name": "Calidad",
+      "item": [
+        { "name": "Historial del dataset 1", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/quality.php?action=history&dataset_id=1", "host": ["{{baseUrl}}"], "path": ["api", "quality.php"], "query": [{ "key": "action", "value": "history" }, { "key": "dataset_id", "value": "1" }] } } },
+        {
+          "name": "Registrar medicion",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/quality.php?action=register", "host": ["{{baseUrl}}"], "path": ["api", "quality.php"], "query": [{ "key": "action", "value": "register" }] }, "body": { "mode": "raw", "raw": "{\n  \"dataset_id\": 1,\n  \"completitud\": 92.0,\n  \"exactitud\": 88.5,\n  \"consistencia\": 95.0,\n  \"vigencia\": 90.0,\n  \"unicidad\": 97.5\n}" } }
+        },
+        { "name": "Eliminar medicion (id=8)", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/quality.php?action=delete&id=8", "host": ["{{baseUrl}}"], "path": ["api", "quality.php"], "query": [{ "key": "action", "value": "delete" }, { "key": "id", "value": "8" }] } } }
+      ]
+    },
+    {
+      "name": "Politicas",
+      "item": [
+        { "name": "Listar politicas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/policies.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "list" }] } } },
+        {
+          "name": "Crear politica",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"titulo\": \"Retencion minima de ventas\", \"descripcion\": \"Los datos de ventas deben conservarse 5 anios.\", \"tipo\": \"retencion\", \"estado\": \"activa\" }" } }
+        },
+        {
+          "name": "Asignar politica a datasets",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=assign&id=5", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "assign" }, { "key": "id", "value": "5" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_ids\": [1, 2] }" } }
+        },
+        {
+          "name": "Desasignar politicas",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=unassign&id=5", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "unassign" }, { "key": "id", "value": "5" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_ids\": [1, 2] }" } }
+        },
+        { "name": "Eliminar politica (id=5)", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/policies.php?action=delete&id=5", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "delete" }, { "key": "id", "value": "5" }] } } }
+      ]
+    },
+    {
+      "name": "Usuarios (admin)",
+      "item": [
+        { "name": "Listar usuarios", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/users.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "list" }] } } },
+        { "name": "Listar roles", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/users.php?action=roles", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "roles" }] } } },
+        {
+          "name": "Crear usuario",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/users.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Nuevo Analista\", \"email\": \"nuevo@example.com\", \"password\": \"Prueba123!\", \"rol\": \"analyst\" }" } }
+        },
+        {
+          "name": "Actualizar usuario (id=8)",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/users.php?action=update&id=8", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "update" }, { "key": "id", "value": "8" }] }, "body": { "mode": "raw", "raw": "{ \"activo\": 0 }" } }
+        },
+        { "name": "Eliminar usuario (id=8)", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/users.php?action=delete&id=8", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "delete" }, { "key": "id", "value": "8" }] } } }
+      ]
+    },
+    {
+      "name": "Inteligencia Artificial",
+      "item": [
+        { "name": "Estado de la IA (real o simulada)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/ai.php?action=status", "host": ["{{baseUrl}}"], "path": ["api", "ai.php"], "query": [{ "key": "action", "value": "status" }] } } },
+        { "name": "Clasificar dataset", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/ai.php?action=classify", "host": ["{{baseUrl}}"], "path": ["api", "ai.php"], "query": [{ "key": "action", "value": "classify" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_id\": 2 }" } } },
+        { "name": "Detectar anomalias", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/ai.php?action=anomalies", "host": ["{{baseUrl}}"], "path": ["api", "ai.php"], "query": [{ "key": "action", "value": "anomalies" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_id\": 4 }" } } },
+        { "name": "Resumen del estado", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/ai.php?action=summary", "host": ["{{baseUrl}}"], "path": ["api", "ai.php"], "query": [{ "key": "action", "value": "summary" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_id\": 1 }" } } },
+        { "name": "Sugerencias de mejora", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/ai.php?action=suggest", "host": ["{{baseUrl}}"], "path": ["api", "ai.php"], "query": [{ "key": "action", "value": "suggest" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_id\": 4 }" } } }
+      ]
+    },
+    {
+      "name": "Reportes",
+      "item": [
+        { "name": "Overview del dashboard", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/reports.php?action=overview", "host": ["{{baseUrl}}"], "path": ["api", "reports.php"], "query": [{ "key": "action", "value": "overview" }] } } },
+        { "name": "Alertas de IA", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/reports.php?action=alerts&limit=20", "host": ["{{baseUrl}}"], "path": ["api", "reports.php"], "query": [{ "key": "action", "value": "alerts" }, { "key": "limit", "value": "20" }] } } },
+        { "name": "Bitacora (solo admin)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/reports.php?action=logs&limit=50", "host": ["{{baseUrl}}"], "path": ["api", "reports.php"], "query": [{ "key": "action", "value": "logs" }, { "key": "limit", "value": "50" }] } } }
+      ]
+    }
+  ]
+}
