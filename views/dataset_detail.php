@@ -2,37 +2,56 @@
 $pageTitle = 'Detalle de dataset';
 require_once __DIR__ . '/includes/header.php';
 ?>
-<section class="panel">
-    <div class="toolbar">
-        <a href="<?= e(APP_URL) ?>/views/datasets.php" class="btn btn-ghost">← Volver al catalogo</a>
-        <button id="btn-editar" class="btn btn-primary hidden">Editar</button>
+<div class="page-head">
+    <a href="<?= e(APP_URL) ?>/views/datasets.php" class="btn btn-ghost">
+        <svg class="ico" aria-hidden="true"><use href="#i-back"></use></svg>
+        Volver al catalogo
+    </a>
+    <div class="page-head-actions">
+        <button id="btn-confirmar-clasif" class="btn hidden">Confirmar clasificacion IA</button>
+        <button id="btn-editar" class="btn btn-primary hidden">Editar dataset</button>
     </div>
-    <div id="msg" class="alert hidden"></div>
+</div>
 
-    <div id="cargando" class="muted">Cargando detalle...</div>
+<div id="msg" class="alert hidden"></div>
 
-    <div id="detalle" class="hidden">
-        <div class="cards">
-            <div class="card">
-                <h3>Nombre</h3>
+<div id="cargando" class="panel">
+    <p class="muted center">Cargando detalle del dataset...</p>
+</div>
+
+<div id="detalle" class="stack hidden">
+    <section class="panel">
+        <div class="cards cards-kpis">
+            <div class="card kpi">
+                <div class="kpi-head">
+                    <span class="kpi-ico is-info"><svg class="ico" aria-hidden="true"><use href="#i-db"></use></svg></span>
+                    <span class="kpi-label">Dataset</span>
+                </div>
                 <p class="card-text" id="d-nombre">--</p>
                 <div class="tags" id="d-etiquetas"></div>
             </div>
-            <div class="card">
-                <h3>Score de calidad</h3>
-                <p class="card-num" id="d-score">--</p>
-                <p class="muted" id="d-score-fecha"></p>
+            <div class="card kpi">
+                <div class="kpi-head">
+                    <span class="kpi-ico is-ok"><svg class="ico" aria-hidden="true"><use href="#i-gauge"></use></svg></span>
+                    <span class="kpi-label">Score de calidad</span>
+                </div>
+                <p class="kpi-num" id="d-score">--</p>
+                <p class="kpi-hint" id="d-score-fecha"></p>
             </div>
-            <div class="card">
-                <h3>Estado</h3>
+            <div class="card kpi">
+                <div class="kpi-head">
+                    <span class="kpi-ico is-neutral"><svg class="ico" aria-hidden="true"><use href="#i-shield"></use></svg></span>
+                    <span class="kpi-label">Estado</span>
+                </div>
                 <p class="card-text" id="d-estado">--</p>
-                <p class="muted">Categoria IA: <span id="d-categoria-ia">--</span></p>
-                <button id="btn-confirmar-clasif" class="btn btn-sm hidden">Confirmar clasificacion IA</button>
+                <p class="kpi-hint">Categoria IA: <span id="d-categoria-ia">--</span></p>
             </div>
         </div>
+    </section>
 
-        <div class="panel">
-            <h2>Informacion general</h2>
+    <section class="panel">
+        <h2>Informacion general</h2>
+        <div class="table-wrap">
             <table class="table detail-table">
                 <tr><th>Categoria</th><td id="d-categoria">--</td></tr>
                 <tr><th>Origen de datos</th><td id="d-origen">--</td></tr>
@@ -43,66 +62,86 @@ require_once __DIR__ . '/includes/header.php';
                 <tr><th>Ultima actualizacion</th><td id="d-actualizado">--</td></tr>
             </table>
         </div>
+    </section>
 
-        <div class="panel">
-            <h2>Ultima medicion de calidad</h2>
-            <div class="cards" id="d-dimensiones"></div>
+    <section class="panel">
+        <h2>Ultima medicion de calidad</h2>
+        <div class="cards cards-kpis" id="d-dimensiones"></div>
+    </section>
+
+    <section class="panel">
+        <h2>Politicas vinculadas</h2>
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Titulo</th><th>Tipo</th><th>Estado</th></tr></thead>
+                <tbody id="d-politicas"><tr><td colspan="3" class="muted center">Sin politicas asignadas.</td></tr></tbody>
+            </table>
         </div>
+    </section>
 
-        <div class="panel">
-            <h2>Politicas vinculadas</h2>
-            <div class="table-wrap">
-                <table class="table">
-                    <thead><tr><th>Titulo</th><th>Tipo</th><th>Estado</th></tr></thead>
-                    <tbody id="d-politicas"><tr><td colspan="3" class="muted center">Sin politicas asignadas.</td></tr></tbody>
-                </table>
+    <section class="panel">
+        <h2>Cumplimiento normativo</h2>
+        <p class="muted small">Registro declarativo interno del equipo de gobierno de datos; no constituye un dictamen legal.</p>
+        <div class="cards cards-kpis">
+            <div class="card kpi">
+                <div class="kpi-head">
+                    <span class="kpi-ico is-info"><svg class="ico" aria-hidden="true"><use href="#i-file"></use></svg></span>
+                    <span class="kpi-label">Aplicables</span>
+                </div>
+                <p class="kpi-num" id="dc-aplicables">--</p>
+            </div>
+            <div class="card kpi">
+                <div class="kpi-head">
+                    <span class="kpi-ico is-ok"><svg class="ico" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                    <span class="kpi-label">Evaluados</span>
+                </div>
+                <p class="kpi-num" id="dc-evaluados">--</p>
+            </div>
+            <div class="card kpi">
+                <div class="kpi-head">
+                    <span class="kpi-ico is-warn"><svg class="ico" aria-hidden="true"><use href="#i-clock"></use></svg></span>
+                    <span class="kpi-label">Pendientes</span>
+                </div>
+                <p class="kpi-num" id="dc-pendientes">--</p>
+            </div>
+            <div class="card kpi">
+                <div class="kpi-head">
+                    <span class="kpi-ico is-neutral"><svg class="ico" aria-hidden="true"><use href="#i-list"></use></svg></span>
+                    <span class="kpi-label">No aplica</span>
+                </div>
+                <p class="kpi-num" id="dc-noaplica">--</p>
+            </div>
+            <div class="card kpi">
+                <div class="kpi-head">
+                    <span class="kpi-ico is-info"><svg class="ico" aria-hidden="true"><use href="#i-chart"></use></svg></span>
+                    <span class="kpi-label">Cumplimiento</span>
+                </div>
+                <p class="kpi-num" id="dc-cumplimiento">--</p>
             </div>
         </div>
-
-        <div class="panel">
-            <h2>Cumplimiento normativo</h2>
-            <p class="muted small">Registro declarativo interno del equipo de gobierno de datos; no constituye un dictamen legal.</p>
-            <div class="cards">
-                <div class="card">
-                    <h3>Aplicables</h3>
-                    <p class="card-num" id="dc-aplicables">--</p>
-                </div>
-                <div class="card">
-                    <h3>Evaluados</h3>
-                    <p class="card-num" id="dc-evaluados">--</p>
-                </div>
-                <div class="card">
-                    <h3>Pendientes</h3>
-                    <p class="card-num" id="dc-pendientes">--</p>
-                </div>
-                <div class="card">
-                    <h3>No aplica</h3>
-                    <p class="card-num" id="dc-noaplica">--</p>
-                </div>
-                <div class="card">
-                    <h3>Cumplimiento</h3>
-                    <p class="card-num" id="dc-cumplimiento">--</p>
-                </div>
-            </div>
-            <button id="btn-agregar-eval" class="btn btn-primary hidden">Agregar evaluacion</button>
-            <div class="table-wrap">
-                <table class="table">
-                    <thead><tr><th>Control</th><th>Referencia</th><th>Severidad</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th><th>Evaluador</th><th>Fecha</th><th>Acciones</th></tr></thead>
-                    <tbody id="d-compliance"><tr><td colspan="9" class="muted center">Cargando...</td></tr></tbody>
-                </table>
-            </div>
+        <div class="section-head">
+            <span class="section-label">Evaluaciones</span>
+            <button id="btn-agregar-eval" class="btn btn-primary btn-sm hidden">Agregar evaluacion</button>
         </div>
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Control</th><th>Referencia</th><th>Severidad</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th><th>Evaluador</th><th>Fecha</th><th>Acciones</th></tr></thead>
+                <tbody id="d-compliance"><tr><td colspan="9" class="muted center">Cargando...</td></tr></tbody>
+            </table>
+        </div>
+    </section>
 
-        <div class="panel">
-            <h2>Linaje de datos</h2>
-            <p class="muted small">Recibe informacion de</p>
+    <details class="disclosure">
+        <summary>Linaje de datos</summary>
+        <div class="disclosure-body">
+            <span class="block-label">Recibe informacion de</span>
             <div class="table-wrap">
                 <table class="table">
                     <thead><tr><th>Dataset origen</th><th>Tipo</th><th>Descripcion</th></tr></thead>
                     <tbody id="d-linaje-entrada"><tr><td colspan="3" class="muted center">Sin relaciones de entrada.</td></tr></tbody>
                 </table>
             </div>
-            <p class="muted small">Envia informacion a</p>
+            <span class="block-label">Envia informacion a</span>
             <div class="table-wrap">
                 <table class="table">
                     <thead><tr><th>Dataset destino</th><th>Tipo</th><th>Descripcion</th></tr></thead>
@@ -110,9 +149,11 @@ require_once __DIR__ . '/includes/header.php';
                 </table>
             </div>
         </div>
+    </details>
 
-        <div class="panel">
-            <h2>Analisis de IA reciente</h2>
+    <details class="disclosure">
+        <summary>Analisis de IA reciente</summary>
+        <div class="disclosure-body">
             <div class="table-wrap">
                 <table class="table">
                     <thead><tr><th>Tipo</th><th>Severidad</th><th>Hallazgo</th><th>Recomendacion</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
@@ -120,8 +161,8 @@ require_once __DIR__ . '/includes/header.php';
                 </table>
             </div>
         </div>
-    </div>
-</section>
+    </details>
+</div>
 
 <!-- Modal evaluacion de control en este dataset -->
 <div id="modal-eval" class="modal-backdrop hidden">

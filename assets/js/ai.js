@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? 'IA REAL conectada — proveedor ' + esc(json.data.proveedor) + ', modelo ' + esc(json.data.modelo)
                 : 'MODO SIMULADO: sin API key configurada. Se usan heuristicas locales.';
             aiMode.textContent = 'Estado: ' + modo;
-            if (!json.data.disponible) aiMode.classList.add('badge-pending');
+            aiMode.classList.add(json.data.disponible ? 'badge-ok' : 'badge-warn');
         }
     }
 

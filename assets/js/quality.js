@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML = '';
         json.data.metrics.forEach(m => {
             const warn = m.bajo_umbral
-                ? ' <span class="badge badge-pending">bajo umbral</span>' : '';
+                ? ' <span class="badge badge-warn">bajo umbral</span>' : '';
             const tr = document.createElement('tr');
             tr.innerHTML =
                 '<td>' + esc(m.fecha_medicion) + '</td>' +

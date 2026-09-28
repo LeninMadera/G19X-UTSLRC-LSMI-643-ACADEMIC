@@ -10,50 +10,73 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
     </div>
 
-    <div class="cards" id="kpis">
-        <div class="card">
-            <h3>Fuentes activas</h3>
-            <p class="card-num" id="kpi-activas">--</p>
+    <div class="cards-kpis" id="kpis">
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-info"><svg class="ico" aria-hidden="true"><use href="#i-globe"></use></svg></span>
+                <span class="kpi-label">Fuentes activas</span>
+            </div>
+            <p class="kpi-num" id="kpi-activas">--</p>
         </div>
-        <div class="card">
-            <h3>Total de fuentes</h3>
-            <p class="card-num" id="kpi-total">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-neutral"><svg class="ico" aria-hidden="true"><use href="#i-list"></use></svg></span>
+                <span class="kpi-label">Total de fuentes</span>
+            </div>
+            <p class="kpi-num" id="kpi-total">--</p>
         </div>
-        <div class="card">
-            <h3>Ultimas sincronizaciones ok</h3>
-            <p class="card-num" id="kpi-ok">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-ok"><svg class="ico" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                <span class="kpi-label">Ultimas sincronizaciones ok</span>
+            </div>
+            <p class="kpi-num" id="kpi-ok">--</p>
         </div>
-        <div class="card">
-            <h3>Registros leidos</h3>
-            <p class="card-num" id="kpi-registros">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-info"><svg class="ico" aria-hidden="true"><use href="#i-chart"></use></svg></span>
+                <span class="kpi-label">Registros leidos</span>
+            </div>
+            <p class="kpi-num" id="kpi-registros">--</p>
         </div>
     </div>
 
     <div id="msg" class="alert hidden"></div>
 
+    <div class="section-head">
+        <span class="section-label">Fuentes registradas</span>
+        <span class="pill-summary" id="int-resumen"></span>
+    </div>
+
     <div class="table-wrap">
         <table class="table">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Nombre</th>
                     <th>Tipo</th>
                     <th>Dataset vinculado</th>
                     <th>Estado</th>
                     <th>Ultimo estado</th>
                     <th>Ultima ejecucion</th>
-                    <th>Corridas</th>
+                    <th class="col-num">Corridas</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="sources-tbody">
-                <tr><td colspan="9" class="muted center">Cargando...</td></tr>
+                <tr><td colspan="8" class="muted center">Cargando...</td></tr>
             </tbody>
         </table>
     </div>
-
-    <p class="muted small">Cada fuente es una <strong>API REST que se consume por GET (JSON)</strong>. El modulo valida la URL (proteccion SSRF con resolucion DNS), limita el tamano de la respuesta y <strong>no copia los datos externos a MySQL</strong>: solo registra metadatos de cada corrida (total de registros y campos detectados). Probando conexion se verifica conectividad y formato; sincronizando se actualiza el estado y el historial de la fuente. Los hosts locales o privados solo se permiten con <code>INTEGRACION_PERMITIR_LOCALHOST=true</code> (pruebas).</p>
+    <p class="table-note" id="int-tabla-info"></p>
 </section>
+
+<details class="disclosure">
+    <summary>Como funcionan las fuentes externas</summary>
+    <div class="disclosure-body">
+        <p class="muted small">Cada fuente es una <strong>API REST que se consume por GET (JSON)</strong>. El modulo valida la URL (proteccion SSRF con resolucion DNS), limita el tamano de la respuesta y <strong>no copia los datos externos a MySQL</strong>: solo registra metadatos de cada corrida (total de registros y campos detectados).</p>
+        <p class="muted small">Probando conexion se verifica conectividad y formato; sincronizando se actualiza el estado y el historial de la fuente. Los hosts locales o privados solo se permiten con <code>INTEGRACION_PERMITIR_LOCALHOST=true</code> (pruebas).</p>
+    </div>
+</details>
 
 <!-- Modal formulario de fuente -->
 <div id="modal-fuente" class="modal-backdrop hidden">
@@ -110,14 +133,14 @@ require_once __DIR__ . '/includes/header.php';
         <div class="table-wrap">
             <table class="table">
                 <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Tipo</th>
-                        <th>Estado</th>
-                        <th>Registros</th>
-                        <th>Duracion</th>
-                        <th>Detalle</th>
-                    </tr>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th class="col-num">Registros</th>
+                    <th class="col-num">Duracion</th>
+                    <th>Detalle</th>
+                </tr>
                 </thead>
                 <tbody id="hist-tbody">
                     <tr><td colspan="6" class="muted center">Cargando...</td></tr>

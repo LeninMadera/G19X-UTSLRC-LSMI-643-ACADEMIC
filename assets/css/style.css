@@ -428,9 +428,11 @@ code {
 .badge-info     { background: var(--info-soft);     color: var(--info);     border-color: var(--info-line); }
 .badge-neutral  { background: var(--neutral-soft);  color: var(--neutral);  border-color: var(--neutral-line); }
 
-/* Alias conservados: el JS existente sigue emitiendo estas tres */
+/* Alias conservados para las vistas aun no migradas a ok/warn/error/neutral.
+   badge-inactive es neutro: en monitoring e integrations significaba
+   "sin ejecutar" y no un fallo. */
 .badge-active   { background: var(--ok-soft);      color: var(--ok);      border-color: var(--ok-line); }
-.badge-inactive { background: var(--danger-soft);  color: var(--danger);  border-color: var(--danger-line); }
+.badge-inactive { background: var(--neutral-soft); color: var(--neutral); border-color: var(--neutral-line); }
 .badge-pending  { background: var(--warn-soft);    color: var(--warn);    border-color: var(--warn-line); }
 
 /* ------------------------------------------------------------
@@ -491,12 +493,6 @@ code {
     color: var(--text);
 }
 
-/* Se declara despues de .card-num porque el JS reutiliza ambas clases
-   a la vez (class="card-num score-badge score-warn"). */
-.score-good { color: var(--ok); }
-.score-warn { color: var(--warn); }
-.score-bad { color: var(--danger); }
-
 .card-text { font-size: 0.95rem; font-weight: 600; margin-top: 0.35rem; color: var(--text); }
 .card p.muted { font-size: 0.78rem; margin-top: 0.3rem; }
 
@@ -519,6 +515,13 @@ code {
 }
 .kpi-ico .ico { width: 16px; height: 16px; }
 
+/* Tono del icono segun el significado del indicador */
+.kpi-ico.is-ok      { background: var(--ok-soft);      border-color: var(--ok-line);      color: var(--ok); }
+.kpi-ico.is-warn    { background: var(--warn-soft);    border-color: var(--warn-line);    color: var(--warn); }
+.kpi-ico.is-error   { background: var(--danger-soft);  border-color: var(--danger-line);  color: var(--danger); }
+.kpi-ico.is-neutral { background: var(--neutral-soft); border-color: var(--neutral-line); color: var(--neutral); }
+.kpi-ico.is-info    { background: var(--info-soft);    border-color: var(--info-line);    color: var(--info); }
+
 .kpi-num { font-size: 1.9rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: var(--text); }
 .kpi-label {
     color: var(--text-3);
@@ -529,6 +532,15 @@ code {
     margin-top: 0.35rem;
 }
 .kpi-head .kpi-label { margin-top: 0; flex: 1; }
+
+/* Linea de apoyo bajo un KPI */
+.kpi-hint { color: var(--text-3); font-size: 0.75rem; margin-top: 0.1rem; }
+
+/* Se declara despues de .card-num y .kpi-num porque el JS reutiliza ambas
+   clases a la vez (class="kpi-num score-badge score-warn"). */
+.score-good { color: var(--ok); }
+.score-warn { color: var(--warn); }
+.score-bad { color: var(--danger); }
 
 /* ------------------------------------------------------------
    9. Tablas
@@ -581,14 +593,18 @@ table.table {
 .actions-cell { white-space: nowrap; text-align: right; }
 .actions-cell .btn + .btn { margin-left: 0.3rem; }
 
-/* Tabla de pares etiqueta/valor del detalle de dataset */
+/* Tabla de pares etiqueta/valor del detalle de dataset.
+   table-layout fijo + anchos minimos: sin esto la tabla se dimensiona al
+   contenido y desborda la pagina en movil, porque el contenedor .table-wrap
+   no puede encoger por debajo del min-content de la tabla. */
+.detail-table { table-layout: fixed; min-width: 420px; }
 .detail-table th {
     width: 34%;
     background: var(--surface-2);
     color: var(--text-2);
     font-weight: 600;
 }
-.detail-table td { color: var(--text); }
+.detail-table td { color: var(--text); overflow-wrap: anywhere; }
 
 /* ------------------------------------------------------------
    10. Dashboard: graficos y listas
@@ -843,7 +859,91 @@ table.table {
 .table-note { margin-top: 0.7rem; color: var(--text-3); font-size: 0.78rem; }
 
 /* ------------------------------------------------------------
-   15. Responsive
+   16. Monitoreo, integraciones y cumplimiento
+   ------------------------------------------------------------ */
+
+/* Columna vertical de paneles: evita paneles anidados.
+   min-width:0 en los hijos es imprescindible: los items de grid tienen
+   min-width:auto, asi que sin esto la pista crece hasta el min-content de
+   la tabla mas ancha y el panel vuelve a desbordar la pagina en movil. */
+.stack { display: grid; gap: 1rem; align-content: start; }
+.stack > * { min-width: 0; }
+.stack-tight { display: grid; gap: 0.6rem; }
+.stack-tight > * { min-width: 0; }
+
+/* Encabezado de pagina con accion principal a la derecha */
+.page-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+.page-head h2 { margin: 0; font-size: 1.05rem; font-weight: 650; letter-spacing: -0.01em; }
+.page-head-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+
+/* Bloque plegable: reemplaza el parrafo tecnico siempre visible */
+.disclosure {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+.disclosure > summary {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.8rem 1.1rem;
+    cursor: pointer;
+    list-style: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+}
+.disclosure > summary::-webkit-details-marker { display: none; }
+.disclosure > summary:hover { background: var(--surface-2); }
+.disclosure > summary:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.disclosure > summary::after {
+    content: '';
+    margin-left: auto;
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-right: 1.8px solid var(--text-3);
+    border-bottom: 1.8px solid var(--text-3);
+    transform: rotate(45deg);
+    transition: transform 0.15s ease;
+}
+.disclosure[open] > summary { border-bottom: 1px solid var(--border); }
+.disclosure[open] > summary::after { transform: rotate(-135deg); }
+.disclosure-hint { color: var(--text-3); font-size: 0.78rem; font-weight: 500; }
+.disclosure-body { padding: 1.1rem; }
+.disclosure-body > *:first-child { margin-top: 0; }
+.disclosure-body > *:last-child { margin-bottom: 0; }
+
+/* Subtitulo de bloque de formulario dentro de un panel */
+.block-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    margin-bottom: 0.5rem;
+}
+
+/* Fila de filtros */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+.filter-bar select { min-width: 165px; width: auto; }
+
+/* ------------------------------------------------------------
+   17. Responsive
    ------------------------------------------------------------ */
 @media (max-width: 1280px) {
     .content { padding-inline: 1.4rem; }
@@ -899,4 +999,8 @@ table.table {
     .toolbar input[type="search"] { min-width: 0; width: 100%; }
     .toolbar { flex-direction: column; align-items: stretch; }
     .toolbar select { width: 100%; }
+    .filter-bar { flex-direction: column; align-items: stretch; }
+    .filter-bar select { width: 100%; }
+    .page-head { flex-direction: column; align-items: stretch; }
+    .page-head-actions { justify-content: flex-start; }
 }

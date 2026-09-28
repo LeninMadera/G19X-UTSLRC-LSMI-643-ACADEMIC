@@ -10,30 +10,46 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
     </div>
 
-    <div class="cards" id="kpis">
-        <div class="card">
-            <h3>Controles</h3>
-            <p class="card-num" id="kpi-controles">--</p>
+    <div class="cards-kpis" id="kpis">
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-info"><svg class="ico" aria-hidden="true"><use href="#i-shield"></use></svg></span>
+                <span class="kpi-label">Controles</span>
+            </div>
+            <p class="kpi-num" id="kpi-controles">--</p>
         </div>
-        <div class="card">
-            <h3>Activos</h3>
-            <p class="card-num" id="kpi-activos">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-ok"><svg class="ico" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                <span class="kpi-label">Activos</span>
+            </div>
+            <p class="kpi-num" id="kpi-activos">--</p>
         </div>
-        <div class="card">
-            <h3>Criticos / Alta</h3>
-            <p class="card-num" id="kpi-criticas">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-error"><svg class="ico" aria-hidden="true"><use href="#i-alert"></use></svg></span>
+                <span class="kpi-label">Criticos / Alta</span>
+            </div>
+            <p class="kpi-num" id="kpi-criticas">--</p>
         </div>
-        <div class="card">
-            <h3>Evaluaciones</h3>
-            <p class="card-num" id="kpi-evaluaciones">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-neutral"><svg class="ico" aria-hidden="true"><use href="#i-list"></use></svg></span>
+                <span class="kpi-label">Evaluaciones</span>
+            </div>
+            <p class="kpi-num" id="kpi-evaluaciones">--</p>
         </div>
-        <div class="card">
-            <h3>Cumplimiento global</h3>
-            <p class="card-num" id="kpi-cumplimiento">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-info"><svg class="ico" aria-hidden="true"><use href="#i-chart"></use></svg></span>
+                <span class="kpi-label">Cumplimiento global</span>
+            </div>
+            <p class="kpi-num" id="kpi-cumplimiento">--</p>
         </div>
     </div>
 
-    <div class="toolbar">
+    <div class="filter-bar">
+        <span class="block-label">Filtros</span>
         <select id="filtro-severidad">
             <option value="">Todas las severidades</option>
             <option value="baja">Baja</option>
@@ -50,6 +66,11 @@ require_once __DIR__ . '/includes/header.php';
 
     <div id="msg" class="alert hidden"></div>
 
+    <div class="section-head">
+        <span class="section-label">Controles registrados</span>
+        <span class="pill-summary" id="comp-resumen"></span>
+    </div>
+
     <div class="table-wrap">
         <table class="table">
             <thead>
@@ -59,7 +80,7 @@ require_once __DIR__ . '/includes/header.php';
                     <th>Severidad</th>
                     <th>Estado</th>
                     <th>Politica</th>
-                    <th>Evaluaciones</th>
+                    <th class="col-num">Evaluaciones</th>
                     <th>Creado por</th>
                     <th>Acciones</th>
                 </tr>
@@ -69,8 +90,8 @@ require_once __DIR__ . '/includes/header.php';
             </tbody>
         </table>
     </div>
-
-    <p class="muted small">Los controles son un registro declarativo interno del equipo de gobierno de datos y no constituyen un dictamen legal.</p>
+    <p class="table-note" id="comp-tabla-info"></p>
+    <p class="table-note">Los controles son un registro declarativo interno del equipo de gobierno de datos y no constituyen un dictamen legal.</p>
 </section>
 
 <!-- Modal formulario control -->

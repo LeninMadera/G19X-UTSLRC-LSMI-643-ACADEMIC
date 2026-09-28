@@ -30,15 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => msg.classList.add('hidden'), 4000);
     }
 
+    const TONO_SEVERIDAD = { alta: 'error', media: 'warn', baja: 'neutral' };
+
     function badgeSeveridad(sev) {
-        const cls = (sev === 'critica' || sev === 'alta') ? 'inactive'
-            : (sev === 'media' ? 'pending' : 'active');
-        return '<span class="badge badge-' + cls + '">' + esc(sev) + '</span>';
+        const clave = String(sev || '').toLowerCase();
+        return '<span class="badge badge-' + (TONO_SEVERIDAD[clave] || 'neutral') + '">' + esc(sev) + '</span>';
     }
 
     function badgeEstado(est) {
-        const cls = est === 'activo' ? 'active' : 'inactive';
-        return '<span class="badge badge-' + cls + '">' + esc(est) + '</span>';
+        return '<span class="badge badge-' + (est === 'activo' ? 'ok' : 'neutral') + '">' + esc(est) + '</span>';
     }
 
     function llenarSeveridades(valor) {
@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         estado.datasets  = json.data.datasets;
         estado.policies  = json.data.policies;
         pintarKpis(json.data.resumen);
+        pintarResumen(json.data.resumen);
         llenarSelects();
         pintarTabla();
     }
@@ -68,6 +69,24 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('kpi-evaluaciones').textContent = r.evaluaciones;
         document.getElementById('kpi-cumplimiento').textContent =
             r.cumplimiento_pct != null ? r.cumplimiento_pct + '%' : '--';
+    }
+
+    /* Chip de resumen: cumplimiento global de los controles evaluados. */
+    function pintarResumen(r) {
+        const pct = r.cumplimiento_pct;
+        const pill = document.getElementById('comp-resumen');
+        if (pct == null) {
+            pill.className = 'pill-summary is-neutral';
+            pill.innerHTML = '<span class="dot"></span>Sin evaluaciones todavia';
+            return;
+        }
+        const tono = pct >= 85 ? 'is-ok' : pct >= 70 ? 'is-warn' : 'is-error';
+        pill.className = 'pill-summary ' + tono;
+        pill.innerHTML = '<span class="dot"></span>' + esc(
+            r.criticas > 0
+                ? pct + '% de cumplimiento con ' + r.criticas + ' control(es) criticos o de alta'
+                : pct + '% de cumplimiento global'
+        );
     }
 
     function llenarSelects() {
@@ -101,6 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (filtrados.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" class="muted center">Sin controles para los filtros elegidos.</td></tr>';
+            document.getElementById('comp-tabla-info').textContent = estado.controles.length > 0
+                ? 'Ajusta los filtros para ver los ' + estado.controles.length + ' controles registrados.'
+                : 'Aun no hay controles de cumplimiento registrados.';
             return;
         }
         filtrados.forEach(c => {
@@ -111,16 +133,18 @@ document.addEventListener('DOMContentLoaded', () => {
             ) : '-';
             const tr = document.createElement('tr');
             tr.innerHTML =
-                '<td>' + esc(c.nombre) + '</td>' +
-                '<td>' + esc(c.referencia || '-') + '</td>' +
+                '<td class="col-strong">' + esc(c.nombre) + '</td>' +
+                '<td class="col-soft">' + esc(c.referencia || '-') + '</td>' +
                 '<td>' + badgeSeveridad(c.severidad) + '</td>' +
                 '<td>' + badgeEstado(c.estado) + '</td>' +
-                '<td>' + esc(c.policy_titulo || '-') + '</td>' +
-                '<td>' + c.evaluaciones + '</td>' +
-                '<td>' + esc(c.creado_por || '-') + '</td>' +
+                '<td class="col-soft">' + esc(c.policy_titulo || '-') + '</td>' +
+                '<td class="col-num">' + c.evaluaciones + '</td>' +
+                '<td class="col-soft">' + esc(c.creado_por || '-') + '</td>' +
                 '<td class="actions-cell">' + acciones + '</td>';
             tbody.appendChild(tr);
         });
+        document.getElementById('comp-tabla-info').textContent =
+            'Mostrando ' + filtrados.length + ' de ' + estado.controles.length + ' controles.';
     }
 
     filtroSev.addEventListener('change', pintarTabla);

@@ -129,6 +129,20 @@ if ($initials === '') {
     <symbol id="i-clock" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
     </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/>
+    </symbol>
+    <symbol id="i-list" viewBox="0 0 24 24">
+        <path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/>
+        <path d="M3.5 6h.01"/><path d="M3.5 12h.01"/><path d="M3.5 18h.01"/>
+    </symbol>
+    <symbol id="i-back" viewBox="0 0 24 24">
+        <path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/>
+    </symbol>
+    <symbol id="i-link" viewBox="0 0 24 24">
+        <path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.2 1.2"/>
+        <path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.2-1.2"/>
+    </symbol>
 </defs></svg>
 
 <div class="app">

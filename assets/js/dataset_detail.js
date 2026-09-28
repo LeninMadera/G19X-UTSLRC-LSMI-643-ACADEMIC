@@ -33,8 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
         cargarCompliance();
     }
 
+    const TONO_SEVERIDAD = { alta: 'error', media: 'warn', baja: 'ok' };
+    const TONO_CLASIFICACION = { publico: 'info', interno: 'warn', confidencial: 'error', restringido: 'error' };
+    const TONO_EVAL = { cumple: 'ok', no_cumple: 'error', pendiente: 'warn', no_aplica: 'neutral' };
+    const TONO_DETECCION = { pendiente: 'warn', revisada: 'info', aplicada: 'ok', descartada: 'neutral' };
+
     function colorScore(s) {
         return s >= 85 ? 'score-good' : s >= 70 ? 'score-warn' : 'score-bad';
+    }
+
+    function sevBadge(sev) {
+        const clave = String(sev || '').toLowerCase();
+        return '<span class="badge badge-' + (TONO_SEVERIDAD[clave] || 'neutral') + '">' + esc(sev) + '</span>';
     }
 
     function cargarConData(d) {
@@ -45,16 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('d-categoria-ia').textContent = d.categoria_ia || 'no sugerida';
         document.getElementById('d-origen').textContent = d.origen;
         document.getElementById('d-clasificacion').innerHTML =
-            '<span class="badge badge-' +
-                ({ publico: 'active', interno: 'pending', confidencial: 'inactive', restringido: 'inactive' }[d.clasificacion] || 'active') +
-                '">' + esc(d.clasificacion || 'publico') + '</span>';
+            '<span class="badge badge-' + (TONO_CLASIFICACION[d.clasificacion] || 'neutral') + '">'
+            + esc(d.clasificacion || 'publico') + '</span>';
         document.getElementById('d-owner').textContent = d.owner_name + ' (' + d.owner_email + ')';
         document.getElementById('d-descripcion').textContent = d.descripcion || 'Sin descripcion.';
         document.getElementById('d-creado').textContent = d.fecha_creacion;
         document.getElementById('d-actualizado').textContent = d.fecha_actualizacion;
         document.getElementById('d-estado').innerHTML =
-            '<span class="badge badge-' + (d.activo == 1 ? 'active' : 'inactive') + '">' +
-            (d.activo == 1 ? 'activo' : 'inactivo') + '</span>';
+            '<span class="badge badge-' + (d.activo == 1 ? 'ok' : 'neutral') + '">'
+            + (d.activo == 1 ? 'activo' : 'inactivo') + '</span>';
 
         // Etiquetas IA
         const tags = document.getElementById('d-etiquetas');
@@ -72,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Score
         if (q) {
             document.getElementById('d-score').textContent = parseFloat(q.score).toFixed(1);
-            document.getElementById('d-score').className = 'card-num score-badge ' + colorScore(parseFloat(q.score));
+            document.getElementById('d-score').className = 'kpi-num score-badge ' + colorScore(parseFloat(q.score));
             document.getElementById('d-score-fecha').textContent = 'Medicion: ' + q.fecha_medicion;
         } else {
             document.getElementById('d-score').textContent = '--';
@@ -92,9 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
             dim.forEach(([label, val]) => {
                 const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = '<h3>' + label + '</h3>' +
-                    '<p class="card-num score-badge ' + colorScore(parseFloat(val)) + '">' +
+                card.className = 'card kpi';
+                card.innerHTML = '<div class="kpi-head"><span class="kpi-label">' + label + '</span></div>' +
+                    '<p class="kpi-num score-badge ' + colorScore(parseFloat(val)) + '">' +
                     parseFloat(val).toFixed(1) + '</p>';
                 dims.appendChild(card);
             });
@@ -110,9 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         d.politicas.forEach(p => {
             const tr = document.createElement('tr');
-            tr.innerHTML = '<td>' + esc(p.titulo) + '</td>' +
-                '<td>' + esc(p.tipo) + '</td>' +
-                '<td><span class="badge badge-' + (p.estado === 'activa' ? 'active' : 'inactive') + '">' + esc(p.estado) + '</span></td>';
+            tr.innerHTML = '<td class="col-strong">' + esc(p.titulo) + '</td>' +
+                '<td><span class="badge badge-info">' + esc(p.tipo) + '</span></td>' +
+                '<td><span class="badge badge-' + (p.estado === 'activa' ? 'ok' : 'neutral') + '">' + esc(p.estado) + '</span></td>';
             tbodyP.appendChild(tr);
         });
 
@@ -135,15 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const acciones = estado.puedeEdit ? accionesDeteccion(a) : '-';
             const tr = document.createElement('tr');
             tr.dataset.detId = a.id;
-            tr.innerHTML = '<td>' + esc(a.tipo) + '</td>' +
-                '<td><span class="badge badge-' +
-                    (a.severidad === 'critica' || a.severidad === 'alta' ? 'inactive' : a.severidad === 'media' ? 'pending' : 'active') +
-                    '">' + esc(a.severidad) + '</span></td>' +
-                '<td>' + esc(a.descripcion_ia || '') + '</td>' +
-                '<td>' + esc(a.recomendacion_ia || '-') + '</td>' +
-                '<td>' + esc(a.estado) + '</td>' +
-                '<td>' + fmtFecha(a.fecha) + '</td>' +
-                '<td>' + acciones + '</td>';
+            tr.innerHTML = '<td><span class="badge badge-info">' + esc(a.tipo) + '</span></td>' +
+                '<td>' + sevBadge(a.severidad) + '</td>' +
+                '<td class="col-soft">' + esc(a.descripcion_ia || '') + '</td>' +
+                '<td class="col-soft">' + esc(a.recomendacion_ia || '-') + '</td>' +
+                '<td><span class="badge badge-' + (TONO_DETECCION[a.estado] || 'neutral') + '">' + esc(a.estado) + '</span></td>' +
+                '<td class="col-date">' + fmtFecha(a.fecha) + '</td>' +
+                '<td class="actions-cell">' + acciones + '</td>';
             tbodyA.appendChild(tr);
         });
 
@@ -245,8 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const comp = { puede: false, controles: [], evaluaciones: [] };
 
     function badgeEvalEstado(est) {
-        const cls = est === 'cumple' ? 'active' : (est === 'pendiente' ? 'pending' : 'inactive');
-        return '<span class="badge badge-' + cls + '">' + esc(est.replace('_', ' ')) + '</span>';
+        return '<span class="badge badge-' + (TONO_EVAL[est] || 'neutral') + '">'
+            + esc(String(est).replace('_', ' ')) + '</span>';
     }
 
     async function cargarCompliance() {
@@ -268,6 +275,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('dc-cumplimiento').textContent =
             ind.cumplimiento_pct != null ? ind.cumplimiento_pct + '%' : '--';
 
+        const chipCumplimiento = document.getElementById('dc-cumplimiento');
+        const pct = ind.cumplimiento_pct;
+        chipCumplimiento.className = 'kpi-num' + (
+            pct == null ? ''
+                : pct >= 85 ? ' score-good' : pct >= 70 ? ' score-warn' : ' score-bad'
+        );
+
         const btnAgregar = document.getElementById('btn-agregar-eval');
         if (comp.puede && comp.controles.length > 0) {
             btnAgregar.classList.remove('hidden');
@@ -286,14 +300,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 : '-';
             const tr = document.createElement('tr');
             tr.innerHTML =
-                '<td>' + esc(ev.control) + '</td>' +
-                '<td>' + esc(ev.referencia || '-') + '</td>' +
-                '<td>' + (ev.severidad ? '<span class="tag">' + esc(ev.severidad) + '</span>' : '-') + '</td>' +
+                '<td class="col-strong">' + esc(ev.control) + '</td>' +
+                '<td class="col-soft">' + esc(ev.referencia || '-') + '</td>' +
+                '<td>' + (ev.severidad ? sevBadge(ev.severidad) : '<span class="muted">-</span>') + '</td>' +
                 '<td>' + badgeEvalEstado(ev.estado) + '</td>' +
-                '<td>' + esc(ev.observaciones || '-') + '</td>' +
-                '<td>' + esc(ev.evidencia || '-') + '</td>' +
-                '<td>' + esc(ev.evaluador || '-') + '</td>' +
-                '<td>' + fmtFecha(ev.fecha) + '</td>' +
+                '<td class="col-soft">' + esc(ev.observaciones || '-') + '</td>' +
+                '<td class="col-soft">' + esc(ev.evidencia || '-') + '</td>' +
+                '<td class="col-soft">' + esc(ev.evaluador || '-') + '</td>' +
+                '<td class="col-date">' + fmtFecha(ev.fecha) + '</td>' +
                 '<td class="actions-cell">' + acciones + '</td>';
             tbodyC.appendChild(tr);
         });

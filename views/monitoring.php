@@ -10,30 +10,50 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
     </div>
 
-    <div class="cards" id="kpis">
-        <div class="card">
-            <h3>Configuraciones activas</h3>
-            <p class="card-num" id="kpi-activas">--</p>
+    <div class="cards-kpis" id="kpis">
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-info"><svg class="ico" aria-hidden="true"><use href="#i-activity"></use></svg></span>
+                <span class="kpi-label">Configuraciones activas</span>
+            </div>
+            <p class="kpi-num" id="kpi-activas">--</p>
         </div>
-        <div class="card">
-            <h3>Total de configuraciones</h3>
-            <p class="card-num" id="kpi-configs">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-neutral"><svg class="ico" aria-hidden="true"><use href="#i-list"></use></svg></span>
+                <span class="kpi-label">Total de configuraciones</span>
+            </div>
+            <p class="kpi-num" id="kpi-configs">--</p>
         </div>
-        <div class="card">
-            <h3>Ejecuciones</h3>
-            <p class="card-num" id="kpi-ejecuciones">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-info"><svg class="ico" aria-hidden="true"><use href="#i-clock"></use></svg></span>
+                <span class="kpi-label">Ejecuciones</span>
+            </div>
+            <p class="kpi-num" id="kpi-ejecuciones">--</p>
         </div>
-        <div class="card">
-            <h3>Fallos</h3>
-            <p class="card-num" id="kpi-fallos">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-error"><svg class="ico" aria-hidden="true"><use href="#i-alert"></use></svg></span>
+                <span class="kpi-label">Fallos</span>
+            </div>
+            <p class="kpi-num" id="kpi-fallos">--</p>
         </div>
-        <div class="card">
-            <h3>Tasa de exito</h3>
-            <p class="card-num" id="kpi-tasa">--</p>
+        <div class="card kpi">
+            <div class="kpi-head">
+                <span class="kpi-ico is-ok"><svg class="ico" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                <span class="kpi-label">Tasa de exito</span>
+            </div>
+            <p class="kpi-num" id="kpi-tasa">--</p>
         </div>
     </div>
 
     <div id="msg" class="alert hidden"></div>
+
+    <div class="section-head">
+        <span class="section-label">Configuraciones</span>
+        <span class="pill-summary" id="mon-resumen"></span>
+    </div>
 
     <div class="table-wrap">
         <table class="table">
@@ -44,8 +64,8 @@ require_once __DIR__ . '/includes/header.php';
                     <th>Estado</th>
                     <th>Proxima ejecucion</th>
                     <th>Ultimo estado</th>
-                    <th>Ultimo score</th>
-                    <th>Anomalias</th>
+                    <th class="col-num">Ultimo score</th>
+                    <th class="col-num">Anomalias</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -54,9 +74,15 @@ require_once __DIR__ . '/includes/header.php';
             </tbody>
         </table>
     </div>
-
-    <p class="muted small">Cada ejecucion revalida la <strong>ultima medicion de calidad</strong> almacenada del dataset y ejecuta la deteccion de anomalias de IA. Las ejecuciones automaticas por vencimiento las dispara el programador <code>cli/monitor.bat</code> (se puede agendar en el Programador de tareas de Windows).</p>
+    <p class="table-note" id="mon-tabla-info"></p>
 </section>
+
+<details class="disclosure">
+    <summary>Como funciona el monitoreo continuo</summary>
+    <div class="disclosure-body">
+        <p class="muted small">Cada ejecucion revalida la <strong>ultima medicion de calidad</strong> almacenada del dataset y ejecuta la deteccion de anomalias de IA. Las ejecuciones automaticas por vencimiento las dispara el programador <code>cli/monitor.bat</code>, que puede agendar en el Programador de tareas de Windows.</p>
+    </div>
+</details>
 
 <!-- Modal formulario configuracion -->
 <div id="modal-config" class="modal-backdrop hidden">
@@ -100,14 +126,14 @@ require_once __DIR__ . '/includes/header.php';
         <div class="table-wrap">
             <table class="table">
                 <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Causa</th>
-                        <th>Estado</th>
-                        <th>Score</th>
-                        <th>Anomalias nuevas</th>
-                        <th>Detalle</th>
-                    </tr>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Causa</th>
+                    <th>Estado</th>
+                    <th class="col-num">Score</th>
+                    <th class="col-num">Anomalias nuevas</th>
+                    <th>Detalle</th>
+                </tr>
                 </thead>
                 <tbody id="runs-tbody">
                     <tr><td colspan="6" class="muted center">Cargando...</td></tr>

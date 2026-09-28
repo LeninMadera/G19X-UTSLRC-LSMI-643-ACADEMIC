@@ -26,20 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function badgeEstado(activo) {
         return activo == 1
-            ? '<span class="badge badge-active">activo</span>'
-            : '<span class="badge badge-inactive">inactivo</span>';
+            ? '<span class="badge badge-ok">activo</span>'
+            : '<span class="badge badge-neutral">inactivo</span>';
     }
 
     function badgeResultado(est) {
         if (!est) return '<span class="muted">--</span>';
         return est === 'ok'
-            ? '<span class="badge badge-active">ok</span>'
-            : '<span class="badge badge-inactive">error</span>';
-    }
-
-    function urlCorta(url) {
-        if (url.length <= 40) return url;
-        return url.slice(0, 37) + '...';
+            ? '<span class="badge badge-ok">ok</span>'
+            : '<span class="badge badge-error">error</span>';
     }
 
     function pintarKpis(r) {
@@ -48,6 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('kpi-total').textContent = r.total;
         document.getElementById('kpi-ok').textContent = r.ultimas_ok;
         document.getElementById('kpi-registros').textContent = r.registros_leidos;
+
+        const pill = document.getElementById('int-resumen');
+        const inactivas = Number(r.total) - Number(r.activas);
+        pill.className = 'pill-summary ' + (inactivas > 0 ? 'is-warn' : 'is-ok');
+        pill.innerHTML = '<span class="dot"></span>' + esc(
+            r.activas + ' de ' + r.total + ' fuentes activas'
+            + (inactivas > 0 ? ' y ' + inactivas + ' inactivas' : '')
+        );
     }
 
     function llenarDatasetSelect(seleccionado) {
@@ -65,7 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function pintarTabla() {
         tbody.innerHTML = '';
         if (estado.sources.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="muted center">Sin fuentes externas registradas.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="muted center">Sin fuentes externas registradas.</td></tr>';
+            document.getElementById('int-tabla-info').textContent = 'Registra una API REST para empezar a leer datos externos.';
             return;
         }
         estado.sources.forEach(s => {
@@ -83,24 +87,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const tr = document.createElement('tr');
             tr.dataset.source = s.id;
             tr.innerHTML =
-                '<td class="muted">' + s.id + '</td>' +
-                '<td>' + esc(s.nombre) + '</td>' +
-                '<td>' + esc(s.tipo) + '</td>' +
-                '<td>' + (s.dataset ? esc(s.dataset) : '<span class="muted">sin vincular</span>') + '</td>' +
-                '<td>' + badgeEstado(s.activo) + '</td>' +
+                '<td class="col-strong">' + esc(s.nombre) + '</td>' +
+                '<td><span class="badge badge-info">' + esc(s.tipo) + '</span></td>' +
+                '<td class="col-soft">' + (s.dataset ? esc(s.dataset) : '<span class="muted">sin vincular</span>') + '</td>' +
+                '<td class="col-estado">' + badgeEstado(s.activo) + '</td>' +
                 '<td>' + badgeResultado(s.ultimo_estado) + '</td>' +
-                '<td>' + (s.ultima_ejecucion ? fmtFecha(s.ultima_ejecucion) : '-') + '</td>' +
-                '<td>' + s.corridas + '</td>' +
+                '<td class="col-date">' + (s.ultima_ejecucion ? fmtFecha(s.ultima_ejecucion) : '<span class="muted">-</span>') + '</td>' +
+                '<td class="col-num">' + s.corridas + '</td>' +
                 '<td class="actions-cell">' + acciones + '</td>';
             tbody.appendChild(tr);
         });
+
+        const conError = estado.sources.filter(s => s.ultimo_estado && s.ultimo_estado !== 'ok').length;
+        document.getElementById('int-tabla-info').textContent =
+            estado.sources.length + ' fuentes, ' + conError + ' con ultimo resultado distinto de ok.';
     }
 
     async function cargar() {
         const json = await api('/api/integrations.php?action=list', {}, 'GET');
         tbody.innerHTML = '';
         if (!json.success) {
-            tbody.innerHTML = '<tr><td colspan="9" class="muted center">' + esc(json.message) + '</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="muted center">' + esc(json.message) + '</td></tr>';
             return;
         }
         estado.sources  = json.data.sources;
@@ -155,12 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 : '';
             const tr = document.createElement('tr');
             tr.innerHTML =
-                '<td>' + fmtFecha(r.fecha) + '</td>' +
-                '<td>' + esc(r.tipo_ejecucion === 'prueba' ? 'prueba' : 'sync') + '</td>' +
+                '<td class="col-date">' + fmtFecha(r.fecha) + '</td>' +
+                '<td><span class="badge badge-info">' + esc(r.tipo_ejecucion === 'prueba' ? 'prueba' : 'sync') + '</span></td>' +
                 '<td>' + badgeResultado(r.estado) + '</td>' +
-                '<td>' + r.registros_leidos + '</td>' +
-                '<td>' + r.duracion_ms + ' ms</td>' +
-                '<td class="muted small">' + esc(r.mensaje || '') + (md ? '<br>' + md : '') + '</td>';
+                '<td class="col-num">' + r.registros_leidos + '</td>' +
+                '<td class="col-num">' + r.duracion_ms + ' ms</td>' +
+                '<td class="col-soft">' + esc(r.mensaje || '') + (md ? '<br>' + md : '') + '</td>';
             histTbody.appendChild(tr);
         });
     }
@@ -168,8 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function actualizarFilaToggle(activo, sourceId) {
         const tr = tbody.querySelector('tr[data-source="' + sourceId + '"]');
         if (tr) {
-            const celdas = tr.querySelectorAll('td');
-            celdas[4].innerHTML = badgeEstado(activo);
+            const celda = tr.querySelector('.col-estado');
+            if (celda) celda.innerHTML = badgeEstado(activo);
             const btn = tr.querySelector('[data-toggle]');
             if (btn) btn.textContent = activo == 1 ? 'Desactivar' : 'Activar';
         }

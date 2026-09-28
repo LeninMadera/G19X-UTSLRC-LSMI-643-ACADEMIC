@@ -26,17 +26,30 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => msg.classList.add('hidden'), 5000);
     }
 
+    /* Classes de badge segun significado: ok / warn / error / neutral. */
     function badgeEstado(activo) {
         return activo == 1
-            ? '<span class="badge badge-active">activo</span>'
-            : '<span class="badge badge-inactive">inactivo</span>';
+            ? '<span class="badge badge-ok">activo</span>'
+            : '<span class="badge badge-neutral">inactivo</span>';
     }
 
     function badgeResultado(est) {
-        if (!est) return '--';
+        if (!est) return '<span class="muted">--</span>';
         return est === 'ok'
-            ? '<span class="badge badge-active">ok</span>'
-            : '<span class="badge badge-inactive">fallo</span>';
+            ? '<span class="badge badge-ok">ok</span>'
+            : '<span class="badge badge-error">fallo</span>';
+    }
+
+    function colorScore(s) {
+        const n = parseFloat(s);
+        if (Number.isNaN(n)) return '';
+        return n >= 85 ? 'score-good' : n >= 70 ? 'score-warn' : 'score-bad';
+    }
+
+    function celdaScore(s) {
+        return s == null
+            ? '<span class="muted">-</span>'
+            : '<strong class="score-badge ' + colorScore(s) + '">' + s + '</strong>';
     }
 
     function fmtFrecuencia(min) {
@@ -62,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tbody.innerHTML = '<tr><td colspan="8" class="muted center">' + esc(json.message) + '</td></tr>';
             return;
         }
-        estado.configs  = json.data.configs;
+        estado.configs = json.data.configs;
         estado.datasets = json.data.datasets;
         pintarKpis(json.data.resumen);
         llenarDatasetSelect();
@@ -77,6 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('kpi-fallos').textContent     = r.fallos;
         document.getElementById('kpi-tasa').textContent       =
             r.tasa_exito != null ? r.tasa_exito + '%' : '--';
+
+        const pill = document.getElementById('mon-resumen');
+        const tono = Number(r.fallos) > 0 ? 'is-error' : 'is-ok';
+        pill.className = 'pill-summary ' + tono;
+        pill.innerHTML = '<span class="dot"></span>' + esc(
+            r.fallos > 0
+                ? r.fallos + ' ' + (r.fallos === 1 ? 'fallo' : 'fallos') + ' en ' + r.ejecuciones + ' ejecuciones'
+                : 'Sin fallos en ' + r.ejecuciones + ' ejecuciones'
+        );
     }
 
     function llenarDatasetSelect() {
@@ -99,30 +121,43 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML = '';
         if (estado.configs.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" class="muted center">Sin configuraciones de monitoreo.</td></tr>';
+            document.getElementById('mon-tabla-info').textContent = 'Ningun dataset monitoreado todavia.';
             return;
         }
         estado.configs.forEach(c => {
+            // El boton de toggle cambia de texto segun el estado vigente.
+            const accionToggle = c.activo == 1 ? 'Desactivar' : 'Activar';
+
             const acciones = puedeEditar ? (
                 '<button class="btn btn-ghost btn-sm" data-run="' + c.id + '">Monitorear ahora</button> ' +
                 '<button class="btn btn-ghost btn-sm" data-edit="' + c.id + '">Editar</button> ' +
-                '<button class="btn btn-ghost btn-sm" data-toggle="' + c.id + '">' +
-                    (c.activo == 1 ? 'Desactivar' : 'Activar') + '</button> ' +
+                '<button class="btn btn-ghost btn-sm" data-toggle="' + c.id + '">' + accionToggle + '</button> ' +
                 '<button class="btn btn-ghost btn-sm" data-hist="' + c.id + '">Historial</button> ' +
                 '<button class="btn btn-danger btn-sm" data-del="' + c.id + '">Eliminar</button>'
             ) : '-';
 
+            const anomalias = Number(c.anomalias_ultimas || 0);
+            const celdaAnomalias = anomalias > 0
+                ? '<span class="badge badge-warn">' + anomalias + '</span>'
+                : '<span class="muted">0</span>';
+
             const tr = document.createElement('tr');
+            tr.dataset.config = c.id;
             tr.innerHTML =
-                '<td>' + esc(c.dataset) + '</td>' +
-                '<td>' + fmtFrecuencia(Number(c.frecuencia)) + '</td>' +
-                '<td>' + badgeEstado(c.activo) + '</td>' +
-                '<td>' + (c.proxima_ejecucion ? fmtFecha(c.proxima_ejecucion) : '-') + '</td>' +
+                '<td class="col-strong">' + esc(c.dataset) + '</td>' +
+                '<td class="col-soft">' + fmtFrecuencia(Number(c.frecuencia)) + '</td>' +
+                '<td class="col-estado">' + badgeEstado(c.activo) + '</td>' +
+                '<td class="col-date">' + (c.proxima_ejecucion ? fmtFecha(c.proxima_ejecucion) : '<span class="muted">-</span>') + '</td>' +
                 '<td>' + badgeResultado(c.estado_ultima) + '</td>' +
-                '<td>' + (c.score_ultimo != null ? c.score_ultimo : '-') + '</td>' +
-                '<td>' + c.anomalias_ultimas + '</td>' +
+                '<td class="col-num">' + celdaScore(c.score_ultimo) + '</td>' +
+                '<td class="col-num">' + celdaAnomalias + '</td>' +
                 '<td class="actions-cell">' + acciones + '</td>';
             tbody.appendChild(tr);
         });
+
+        const activas = estado.configs.filter(c => c.activo == 1).length;
+        document.getElementById('mon-tabla-info').textContent =
+            estado.configs.length + ' configuraciones, ' + activas + ' activas.';
     }
 
     function abrirForm(config) {
@@ -166,12 +201,14 @@ document.addEventListener('DOMContentLoaded', () => {
         json.data.runs.forEach(r => {
             const tr = document.createElement('tr');
             tr.innerHTML =
-                '<td>' + fmtFecha(r.fecha) + '</td>' +
-                '<td>' + esc(r.causa) + '</td>' +
+                '<td class="col-date">' + fmtFecha(r.fecha) + '</td>' +
+                '<td class="col-soft">' + esc(r.causa) + '</td>' +
                 '<td>' + badgeResultado(r.estado) + '</td>' +
-                '<td>' + (r.score != null ? r.score : '-') + '</td>' +
-                '<td>' + r.anomalias_nuevas + '</td>' +
-                '<td class="muted small">' + esc(r.resumen || '') + '</td>';
+                '<td class="col-num">' + celdaScore(r.score) + '</td>' +
+                '<td class="col-num">' + (Number(r.anomalias_nuevas) > 0
+                    ? '<span class="badge badge-warn">' + r.anomalias_nuevas + '</span>'
+                    : '<span class="muted">0</span>') + '</td>' +
+                '<td class="col-soft">' + esc(r.resumen || '') + '</td>';
             runsTbody.appendChild(tr);
         });
     }
@@ -211,9 +248,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (c) abrirForm(c);
         }
         if (btnTog) {
+            btnTog.disabled = true;
             const json = await api('/api/monitoring.php?action=toggle', { id: Number(btnTog.dataset.toggle) });
             mostrarMsg(json.message, json.success ? 'success' : 'error');
-            if (json.success) cargar();
+            if (json.success) {
+                // Refleja el cambio en la fila sin recargar la tabla completa.
+                const fila = btnTog.closest('tr');
+                const celda = fila && fila.querySelector('.col-estado');
+                const cfg = estado.configs.find(x => String(x.id) === String(btnTog.dataset.toggle));
+                if (celda && cfg) {
+                    cfg.activo = cfg.activo == 1 ? 0 : 1;
+                    celda.innerHTML = badgeEstado(cfg.activo);
+                    btnTog.textContent = cfg.activo == 1 ? 'Desactivar' : 'Activar';
+                }
+                btnTog.disabled = false;
+            } else {
+                btnTog.disabled = false;
+            }
         }
         if (btnHist) {
             abrirHistorial(btnHist.dataset.hist);
