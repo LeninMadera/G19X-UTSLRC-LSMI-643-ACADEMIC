@@ -9,27 +9,35 @@
 async function api(action, data = {}, method = 'POST') {
     const url = window.APP_URL + action;
     const opts = { method, headers: {} };
+    const admiteCuerpo = method !== 'GET' && method !== 'HEAD';
 
     if (data instanceof FormData) {
-        opts.body = data;
-    } else {
+        if (admiteCuerpo) opts.body = data;
+    } else if (admiteCuerpo) {
         opts.headers['Content-Type'] = 'application/json';
         opts.body = JSON.stringify(data);
     }
 
+    let res;
     try {
-        const res = await fetch(url, opts);
-        const type = (res.headers.get('content-type') || '');
-        if (type.indexOf('application/json') !== -1) {
-            return await res.json();
-        }
-        const texto = await res.text();
-        throw new Error(texto ? 'Respuesta invalida del servidor.' : 'Sin respuesta del servidor.');
+        res = await fetch(url, opts);
     } catch (err) {
-        if (err instanceof SyntaxError) {
-            return { success: false, message: 'El servidor no respondio en formato valido.' };
-        }
         return { success: false, message: 'Error de conexion con el servidor.' };
+    }
+
+    const type = (res.headers.get('content-type') || '');
+    if (type.indexOf('application/json') === -1) {
+        const texto = await res.text().catch(() => '');
+        return {
+            success: false,
+            message: texto ? 'Respuesta invalida del servidor.' : 'Sin respuesta del servidor.',
+        };
+    }
+
+    try {
+        return await res.json();
+    } catch (err) {
+        return { success: false, message: 'El servidor no respondio en formato valido.' };
     }
 }
 
