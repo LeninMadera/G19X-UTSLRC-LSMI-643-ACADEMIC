@@ -69,8 +69,13 @@ function drawBars(canvas, items) {
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, W, H);
 
+    // Los colores salen de los tokens de style.css para que el grafico
+    // y la leyenda de cada vista nunca se desincronicen.
+    const tokens = getComputedStyle(document.documentElement);
+    const tono = (nombre) => tokens.getPropertyValue(nombre).trim();
+
     if (!items || items.length === 0) {
-        ctx.fillStyle = '#94a3b8';
+        ctx.fillStyle = tono('--text-3');
         ctx.font = '13px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('Sin datos', W / 2, H / 2);
@@ -83,8 +88,8 @@ function drawBars(canvas, items) {
     const max = Math.max(1, ...items.map(i => i.value));
     const maxVal = Math.ceil(max / 5) * 5;
 
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.fillStyle = '#64748b';
+    ctx.strokeStyle = tono('--border-2');
+    ctx.fillStyle = tono('--text-3');
     ctx.font = '11px sans-serif';
     ctx.lineWidth = 1;
     for (let g = 0; g <= 4; g++) {
@@ -103,13 +108,13 @@ function drawBars(canvas, items) {
         const x = pad.left + i * bw;
         const h = (chartH * item.value) / maxVal;
         const y = pad.top + chartH - h;
-        ctx.fillStyle = item.value >= 85 ? '#16a34a' : item.value >= 70 ? '#d97706' : '#dc2626';
+        ctx.fillStyle = item.value >= 85 ? tono('--ok') : item.value >= 70 ? tono('--warn') : tono('--danger');
         ctx.fillRect(x + bw * 0.22, y, bw * 0.56, Math.max(h, 2));
-        ctx.fillStyle = '#475569';
+        ctx.fillStyle = tono('--text-2');
         ctx.font = 'bold 11px sans-serif';
         ctx.fillText(String(item.value), x + bw / 2, y - 6);
         ctx.font = '10px sans-serif';
-        ctx.fillStyle = '#334155';
+        ctx.fillStyle = tono('--text');
         const label = item.label.length > 17 ? item.label.slice(0, 16) + String.fromCharCode(8230) : item.label;
         ctx.fillText(label, x + bw / 2, H - 10);
     });

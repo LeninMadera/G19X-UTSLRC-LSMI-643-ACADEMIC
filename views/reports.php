@@ -9,8 +9,10 @@ $rol = currentRole();
             <h2>Reportes</h2>
             <p class="muted small">Estado actual de la calidad de datos y bitacora del sistema.</p>
         </div>
-        <a href="<?= e(APP_URL); ?>/api/reports.php?action=export" class="btn btn-ghost">Exportar CSV</a>
-        <button class="btn" id="rp-refresh">Actualizar</button>
+        <div class="toolbar-actions">
+            <a href="<?= e(APP_URL); ?>/api/reports.php?action=export" class="btn btn-ghost">Exportar CSV</a>
+            <button class="btn" id="rp-refresh">Actualizar</button>
+        </div>
     </div>
 </section>
 
@@ -22,7 +24,7 @@ $rol = currentRole();
                 <tr>
                     <th>Dataset</th>
                     <th>Categoria</th>
-                    <th>Ultimo score</th>
+                    <th class="col-num">Ultimo score</th>
                     <th>Ultima medicion</th>
                     <th>Nivel</th>
                 </tr>
@@ -30,6 +32,7 @@ $rol = currentRole();
             <tbody id="rp-tabla"></tbody>
         </table>
     </div>
+    <p class="table-note" id="rp-tabla-info"></p>
 </section>
 
 <?php if ($rol === 'admin'): ?>
@@ -48,7 +51,7 @@ $rol = currentRole();
             <tbody id="rp-log"></tbody>
         </table>
     </div>
-    <p class="muted small" id="rp-log-info"></p>
+    <p class="table-note" id="rp-log-info"></p>
 </section>
 <?php endif; ?>
 
@@ -62,13 +65,14 @@ $rol = currentRole();
                     <th>Dataset</th>
                     <th>Tipo</th>
                     <th>Severidad</th>
-                    <th>Descripcion</th>
-                    <th>Recomendacion</th>
+                    <th class="col-wide">Descripcion</th>
+                    <th class="col-wide">Recomendacion</th>
                 </tr>
             </thead>
             <tbody id="rp-alertas"></tbody>
         </table>
     </div>
+    <p class="table-note" id="rp-alertas-info"></p>
 </section>
 
 <?php

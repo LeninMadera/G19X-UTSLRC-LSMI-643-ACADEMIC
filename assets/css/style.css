@@ -500,8 +500,25 @@ code {
 .card-text { font-size: 0.95rem; font-weight: 600; margin-top: 0.35rem; color: var(--text); }
 .card p.muted { font-size: 0.78rem; margin-top: 0.3rem; }
 
-/* KPI del dashboard: alineado a la izquierda, valor grande */
-.kpi { text-align: left; }
+/* KPI del dashboard: icono + etiqueta arriba, valor protagonista abajo */
+.kpi { text-align: left; display: flex; flex-direction: column; gap: 0.5rem; }
+
+.kpi-head { display: flex; align-items: center; gap: 0.55rem; }
+
+.kpi-ico {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: var(--primary-soft);
+    border: 1px solid #dbe7fc;
+    color: var(--primary-dark);
+}
+.kpi-ico .ico { width: 16px; height: 16px; }
+
 .kpi-num { font-size: 1.9rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: var(--text); }
 .kpi-label {
     color: var(--text-3);
@@ -511,6 +528,7 @@ code {
     letter-spacing: 0.06em;
     margin-top: 0.35rem;
 }
+.kpi-head .kpi-label { margin-top: 0; flex: 1; }
 
 /* ------------------------------------------------------------
    9. Tablas
@@ -582,11 +600,13 @@ table.table {
     margin-bottom: 1.15rem;
 }
 
-.chart-box { position: relative; }
+.chart-box { position: relative; padding: 0.2rem 0; }
 .chart-box canvas { width: 100%; height: 260px; display: block; }
 
-.legend-row { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; color: var(--text-3); margin-top: 0.85rem; }
-.legend-row .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--neutral); }
+.legend-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 1.1rem; color: var(--text-3); margin-top: 0.9rem; }
+.legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+/* Base sin selector compuesto: los tonos (.dot-ok, etc.) la pisan por orden */
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--neutral); }
 .dot-ok { background: var(--ok); }
 .dot-warn { background: var(--warn); }
 .dot-error { background: var(--danger); }
@@ -605,6 +625,9 @@ table.table {
     font-size: 0.83rem;
 }
 .list-notif li:last-child { border-bottom: 0; }
+.list-notif .meta { color: var(--text-3); font-size: 0.75rem; margin-left: 0.5rem; white-space: nowrap; }
+.list-notif .desc { color: var(--text-2); font-size: 0.8rem; margin-top: 0.2rem; }
+.list-notif .empty { color: var(--text-3); text-align: center; padding: 1.9rem 0.5rem; }
 
 /* ------------------------------------------------------------
    11. Formularios
@@ -749,6 +772,77 @@ table.table {
 .assign-item:hover { background: var(--surface-2); }
 
 /* ------------------------------------------------------------
+   15. Dashboard y reportes
+   ------------------------------------------------------------ */
+
+/* Encabezado de seccion con nota a la derecha */
+.section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1.7rem 0 0.8rem;
+}
+.section-label {
+    font-size: 0.6875rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+}
+.section-label:first-child { margin-top: 0; }
+
+/* Chip de resumen: una sola linea compacta */
+.pill-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.pill-summary:empty { display: none; }
+.pill-summary .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--neutral); }
+.pill-summary.is-ok .dot { background: var(--ok); }
+.pill-summary.is-warn .dot { background: var(--warn); }
+.pill-summary.is-error .dot { background: var(--danger); }
+.pill-summary.is-warn { background: var(--warn-soft); border-color: var(--warn-line); color: var(--warn); }
+.pill-summary.is-error { background: var(--danger-soft); border-color: var(--danger-line); color: var(--danger); }
+.pill-summary.is-ok { background: var(--ok-soft); border-color: var(--ok-line); color: var(--ok); }
+
+.toolbar-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+
+/* Contador junto al titulo de un panel */
+.panel-count {
+    display: inline-flex;
+    align-items: center;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    color: var(--text-3);
+    border-radius: var(--radius-pill);
+    padding: 0.05rem 0.45rem;
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    vertical-align: middle;
+}
+
+/* Celdas de texto largo en tablas de reportes */
+.table .col-soft { color: var(--text-2); font-size: 0.8rem; }
+.table .col-num { text-align: right; font-variant-numeric: tabular-nums; }
+.table .col-date { white-space: nowrap; color: var(--text-2); }
+.table .col-wide { min-width: 220px; }
+.table .col-strong { font-weight: 650; }
+
+/* Nota al pie de una tabla */
+.table-note { margin-top: 0.7rem; color: var(--text-3); font-size: 0.78rem; }
+
+/* ------------------------------------------------------------
    15. Responsive
    ------------------------------------------------------------ */
 @media (max-width: 1280px) {
@@ -761,7 +855,12 @@ table.table {
 }
 
 @media (max-width: 820px) {
-    .app { flex-direction: column; }
+    .app {
+        flex-direction: column;
+        /* En columna el eje transversal es horizontal: sin stretch, .content
+           se dimensiona al contenido y las tablas anchas desbordan la pagina. */
+        align-items: stretch;
+    }
 
     .sidebar {
         position: static;
@@ -778,7 +877,13 @@ table.table {
     .sidebar-nav a.is-active::before { display: none; }
     .sidebar-foot { display: none; }
 
-    .content { padding: 0 1rem 2.5rem; }
+    .content {
+        /* margin-inline:auto centraría el bloque por contenido y en columna
+           anula el estiramiento de flex, dejando que las tablas anchas
+           desborden la pagina. */
+        margin-inline: 0;
+        padding: 0 1rem 2.5rem;
+    }
     .topbar { margin-inline: -1rem; padding-inline: 1rem; }
     .topbar-user .user-meta { display: none; }
 

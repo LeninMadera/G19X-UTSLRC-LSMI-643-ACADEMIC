@@ -12,14 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
         politicas: document.getElementById('dl-kpi-politicas'),
     };
 
-    function nivelBadge(score) {
-        if (score === null || score === undefined) {
-            return '<span class="badge badge-inactive">S / N</span>';
-        }
-        const clase = score >= 85 ? 'badge-active' : score >= 70 ? 'badge-pending' : 'badge-inactive';
-        const texto = score >= 85 ? 'Excelente' : score >= 70 ? 'Aceptable' : 'Por mejorar';
-        return '<span class="badge ' + clase + '">' + texto + ' (' + score + ')</span>';
-    }
+    /* Classes de badge segun significado: ok / warn / error / neutral. */
+    const TONO_SEVERIDAD = { alta: 'error', media: 'warn', baja: 'ok' };
 
     async function cargar() {
         const json = await api('/api/reports.php?action=overview', {}, 'GET');
@@ -48,6 +42,18 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('dl-fecha').textContent =
             'Actualizado: ' + new Date().toLocaleString();
 
+        /* Datos que la API ya devuelve y antes no se mostraban. */
+        const pendientes = (d.alertas_pendientes || 0) + (d.sugerencias_pendientes || 0);
+        const resumen = document.getElementById('dl-pendientes');
+        resumen.className = 'pill-summary ' + (pendientes === 0 ? 'is-ok' : 'is-warn');
+        resumen.innerHTML = '<span class="dot"></span>' + (pendientes === 0
+            ? 'Sin trabajo pendiente'
+            : (d.alertas_pendientes || 0) + ' alertas y ' + (d.sugerencias_pendientes || 0) + ' sugerencias');
+
+        document.getElementById('dl-mon-fecha').textContent = mon && mon.ultima_ejecucion
+            ? 'Ultima ejecucion: ' + fmtFecha(mon.ultima_ejecucion)
+            : 'Sin ejecuciones registradas';
+
         const conScore = (d.scores || []).filter(s => s.score !== null);
         drawBars(document.getElementById('dl-chart-scores'), conScore.map(s => ({
             label: s.nombre,
@@ -68,23 +74,23 @@ document.addEventListener('DOMContentLoaded', () => {
             cat.appendChild(row);
         });
         if ((d.por_categoria || []).length === 0) {
-            cat.innerHTML = '<p class="muted small">Sin datasets.</p>';
+            cat.innerHTML = '<p class="list-notif"><span class="empty">Sin datasets.</span></p>';
         }
 
         const listAl = document.getElementById('dl-alertas');
         listAl.innerHTML = '';
         (d.alertas || []).forEach(a => {
             const li = document.createElement('li');
-            const badge = a.severidad === 'media'
-                ? '<span class="badge badge-pending">media</span>'
-                : '<span class="badge badge-inactive">' + esc(a.severidad) + '</span>';
-            li.innerHTML = badge + ' ' + esc(a.dataset) +
-                '<span class="muted small" style="margin-left:8px">' + fmtFecha(a.fecha) + '</span>' +
-                '<div class="muted small">' + esc(a.descripcion_ia) + '</div>';
+            const severidad = String(a.severidad || '').toLowerCase();
+            const clase = TONO_SEVERIDAD[severidad] || 'neutral';
+            li.innerHTML = '<span class="badge badge-' + clase + '">' + esc(a.severidad) + '</span> '
+                + esc(a.dataset) +
+                '<span class="meta">' + fmtFecha(a.fecha) + '</span>' +
+                '<div class="desc">' + esc(a.descripcion_ia) + '</div>';
             listAl.appendChild(li);
         });
         if ((d.alertas || []).length === 0) {
-            listAl.innerHTML = '<li class="muted small">Sin alertas.</li>';
+            listAl.innerHTML = '<li class="empty">Sin alertas.</li>';
         }
 
         const listAct = document.getElementById('dl-actividad');
@@ -92,13 +98,13 @@ document.addEventListener('DOMContentLoaded', () => {
         (d.actividad || []).forEach(a => {
             const li = document.createElement('li');
             li.innerHTML = '<strong>' + esc(a.accion) + '</strong>'
-                + '<span class="muted small" style="margin:0 8px">' + esc(a.usuario || 'sistema') + '</span>'
-                + '<span class="muted small">' + fmtFecha(a.fecha) + '</span>'
-                + (a.detalle ? '<div class="muted small">' + esc(a.detalle) + '</div>' : '');
+                + '<span class="meta">' + esc(a.usuario || 'sistema') + '</span>'
+                + '<span class="meta">' + fmtFecha(a.fecha) + '</span>'
+                + (a.detalle ? '<div class="desc">' + esc(a.detalle) + '</div>' : '');
             listAct.appendChild(li);
         });
         if ((d.actividad || []).length === 0) {
-            listAct.innerHTML = '<li class="muted small">Sin actividad reciente.</li>';
+            listAct.innerHTML = '<li class="empty">Sin actividad reciente.</li>';
         }
     }
 
