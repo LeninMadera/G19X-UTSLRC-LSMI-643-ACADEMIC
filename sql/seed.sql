@@ -135,3 +135,26 @@ INSERT INTO compliance_evaluations (control_id, dataset_id, estado, observacione
 (3, 3, 'no_cumple', 'El nombre no cumple el prefijo estandar.',                                      NULL,          3),
 (4, 1, 'pendiente', 'En revision de la clasificacion asignada.',                                     NULL,          2),
 (4, 2, 'cumple',    NULL,                                                                            NULL,          2);
+
+-- ------------------------------------------------------------
+--  Configuraciones de monitoreo continuo
+--  Una por dataset (UNIQUE dataset_id). Los datasets 1 y 4 estan
+--  activos y con su proxima ejecucion programada; el dataset 2
+--  esta inactivo, por lo que NO sera elegible para el programador
+--  del CLI hasta reactivarse (proxima_ejecucion = NULL).
+-- ------------------------------------------------------------
+INSERT INTO monitoring_configs (dataset_id, frecuencia, activo, corriendo, proxima_ejecucion, estado_ultima, score_ultimo, anomalias_ultimas, ultima_ejecucion, creado_por) VALUES
+(1, 1440, 1, 0, NOW() + INTERVAL 1440 MINUTE, 'ok',    91.15, 1, NOW() - INTERVAL 1 DAY, 2),
+(2,  720, 0, 0, NULL,                              NULL,  NULL,  0, NULL,                2),
+(4,   60, 1, 0, NOW() + INTERVAL 60 MINUTE,  'ok',    79.10, 2, NOW() - INTERVAL 5 MINUTE, 2);
+
+-- ------------------------------------------------------------
+--  Historial de ejecuciones de monitoreo (ejemplo)
+--  La configuracion 1 (dataset 1) tuvo una corrida automatica y
+--  una manual; la configuracion 3 (dataset 4, frecuencia de 60
+--  minutos) una corrida automatica reciente.
+-- ------------------------------------------------------------
+INSERT INTO monitoring_runs (config_id, dataset_id, causa, estado, score, anomalias_nuevas, resumen) VALUES
+(1, 1, 'automatico', 'ok',    91.15, 1, 'Revalidacion de calidad completada; ultimo score 91.15; 1 anomalias nuevas.'),
+(1, 1, 'manual',     'ok',    91.15, 0, 'Revalidacion de calidad completada; ultimo score 91.15; 0 anomalias nuevas.'),
+(3, 4, 'automatico', 'ok',    79.10, 2, 'Revalidacion de calidad completada; ultimo score 79.10; 2 anomalias nuevas.');

@@ -176,47 +176,14 @@ switch ($action) {
             respondJson(false, null, 'Dataset invalido o sin permisos.');
         }
 
-        $stmt = db()->prepare(
-            'SELECT fecha_medicion, completitud, exactitud, consistencia, vigencia, unicidad, score
-             FROM quality_metrics WHERE dataset_id = :id ORDER BY fecha_medicion ASC'
-        );
-        $stmt->execute(['id' => $datasetId]);
-        $metrics = $stmt->fetchAll();
-
         try {
-            $anomalias = ia_detectar_anomalias($metrics);
+            $res = ai_ejecutar_anomalias($datasetId);
         } catch (RuntimeException $e) {
             respondJson(false, null, $e->getMessage());
         }
 
-        $insertadas = 0;
-        foreach ($anomalias as $a) {
-            $desc = mb_substr($a['descripcion'], 0, 500);
-            $prev = db()->prepare(
-                "SELECT id FROM ai_detections
-                 WHERE dataset_id = :id AND tipo = 'anomalia' AND estado = 'pendiente' AND descripcion_ia = :desc
-                 LIMIT 1"
-            );
-            $prev->execute(['id' => $datasetId, 'desc' => $desc]);
-            if ($prev->fetch() !== false) {
-                continue;
-            }
-            db()->prepare(
-                'INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, recomendacion_ia, estado)
-                 VALUES (:id, :tipo, :sev, :desc, :rec, :est)'
-            )->execute([
-                'id'    => $datasetId,
-                'tipo'  => 'anomalia',
-                'sev'   => $a['severidad'],
-                'desc'  => $desc,
-                'rec'   => mb_substr($a['recomendacion'] ?? '', 0, 500) ?: null,
-                'est'   => 'pendiente',
-            ]);
-            $insertadas++;
-        }
-
-        logActivity('ai:anomalies', ['dataset_id' => $datasetId, 'insertadas' => $insertadas, 'simulado' => ai_simulado()]);
-        respondJson(true, ['anomalias' => $anomalias], 'Analisis completado. ' . $insertadas . ' anomalias detectadas.');
+        logActivity('ai:anomalies', ['dataset_id' => $datasetId, 'insertadas' => $res['insertadas'], 'simulado' => ai_simulado()]);
+        respondJson(true, ['anomalias' => $res['detectadas']], 'Analisis completado. ' . $res['insertadas'] . ' anomalias detectadas.');
         break;
 
     case 'summary':

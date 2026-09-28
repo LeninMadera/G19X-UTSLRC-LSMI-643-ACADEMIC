@@ -11,7 +11,8 @@
     { "key": "user_id", "value": "9" },
     { "key": "policy_id", "value": "5" },
     { "key": "control_id", "value": "6" },
-    { "key": "lineage_id", "value": "1" }
+    { "key": "lineage_id", "value": "1" },
+    { "key": "monitoring_id", "value": "1" }
   ],
   "item": [
     {
@@ -328,6 +329,74 @@
         { "name": "Overview del dashboard", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/reports.php?action=overview", "host": ["{{baseUrl}}"], "path": ["api", "reports.php"], "query": [{ "key": "action", "value": "overview" }] } } },
         { "name": "Alertas de IA", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/reports.php?action=alerts&limit=20", "host": ["{{baseUrl}}"], "path": ["api", "reports.php"], "query": [{ "key": "action", "value": "alerts" }, { "key": "limit", "value": "20" }] } } },
         { "name": "Bitacora (solo admin)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/reports.php?action=logs&limit=50", "host": ["{{baseUrl}}"], "path": ["api", "reports.php"], "query": [{ "key": "action", "value": "logs" }, { "key": "limit", "value": "50" }] } } }
+      ]
+    },
+    {
+      "name": "Monitoreo",
+      "item": [
+        { "name": "Listar configuraciones", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "list" }] } } },
+        {
+          "name": "Crear configuracion",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_id\": \"{{dataset_id}}\", \"frecuencia\": 60 }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Crear configuracion exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.id).to.be.above(0);",
+                  "    pm.collectionVariables.set('monitoring_id', String(d.data.id));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ejecutar manualmente (id={{monitoring_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=run", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "run" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{monitoring_id}}\" }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Ejecutar monitoreo exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.omitido).to.eql(false);",
+                  "    pm.expect(['ok','fallo']).to.include(d.data.estado);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "Historial de ejecuciones (config_id={{monitoring_id}})", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=runs&config_id={{monitoring_id}}", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "runs" }, { "key": "config_id", "value": "{{monitoring_id}}" }] } } },
+        {
+          "name": "Actualizar configuracion (id={{monitoring_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{monitoring_id}}\", \"frecuencia\": 720, \"activo\": 1 }" } } },
+        {
+          "name": "Desactivar configuracion (id={{monitoring_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=toggle", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "toggle" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{monitoring_id}}\" }" } } },
+        {
+          "name": "Eliminar configuracion (id={{monitoring_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{monitoring_id}}\" }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Eliminar configuracion exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
       ]
     }
   ]

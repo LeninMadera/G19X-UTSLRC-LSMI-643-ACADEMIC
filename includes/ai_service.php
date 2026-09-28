@@ -287,6 +287,58 @@ function simular_anomalias(array $metrics): array
     return array_slice($resultado, 0, 4);
 }
 
+/**
+ * Ejecuta la deteccion de anomalias de un dataset y registra en
+ * ai_detections unicamente las nuevas (deduplicando por descripcion
+ * y estado pendiente). Se reutiliza desde api/ai.php y desde el
+ * motor de monitoreo continuo para que ambos usen la misma logica.
+ *
+ * Devuelve ['detectadas' => lista de anomalias, 'insertadas' => int].
+ */
+function ai_ejecutar_anomalias(int $datasetId): array
+{
+    $stmt = db()->prepare(
+        'SELECT fecha_medicion, completitud, exactitud, consistencia, vigencia, unicidad, score
+         FROM quality_metrics WHERE dataset_id = :id ORDER BY fecha_medicion ASC'
+    );
+    $stmt->execute(['id' => $datasetId]);
+    $metrics = $stmt->fetchAll();
+
+    if (count($metrics) === 0) {
+        return ['detectadas' => [], 'insertadas' => 0];
+    }
+
+    $anomalias = ia_detectar_anomalias($metrics);
+
+    $insertadas = 0;
+    foreach ($anomalias as $a) {
+        $desc = mb_substr($a['descripcion'], 0, 500);
+        $prev = db()->prepare(
+            "SELECT id FROM ai_detections
+             WHERE dataset_id = :id AND tipo = 'anomalia' AND estado = 'pendiente' AND descripcion_ia = :desc
+             LIMIT 1"
+        );
+        $prev->execute(['id' => $datasetId, 'desc' => $desc]);
+        if ($prev->fetch() !== false) {
+            continue;
+        }
+        db()->prepare(
+            'INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, recomendacion_ia, estado)
+             VALUES (:id, :tipo, :sev, :desc, :rec, :est)'
+        )->execute([
+            'id'    => $datasetId,
+            'tipo'  => 'anomalia',
+            'sev'   => $a['severidad'],
+            'desc'  => $desc,
+            'rec'   => mb_substr($a['recomendacion'] ?? '', 0, 500) ?: null,
+            'est'   => 'pendiente',
+        ]);
+        $insertadas++;
+    }
+
+    return ['detectadas' => $anomalias, 'insertadas' => $insertadas];
+}
+
 // ============================================================
 //  3) RESUMEN INTELIGENTE DEL ESTADO DE UN DATASET
 // ============================================================

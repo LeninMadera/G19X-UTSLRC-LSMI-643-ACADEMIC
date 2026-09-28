@@ -98,6 +98,7 @@ gobierno-datos-ia/
 - **Calidad**: registros de mediciones por dataset, calculo de score ponderado (5 dimensiones) y alerta visual cuando el score baja de 80.
 - **Politicas**: CRUD de politicas (naming, retencion, acceso, clasificacion) y asignacion/desasignacion a datasets.
 - **Cumplimiento**: catalogo de controles normativos (con norma/marco/categoria de referencia, severidad y politica vinculada) y evaluaciones por dataset (`cumple`, `no cumple`, `pendiente`, `no aplica`). Registro declarativo interno, **no es un dictamen legal**.
+- **Monitoreo**: configuraciones de revalidacion periodica de la calidad por dataset (una por dataset, frecuencia en minutos, activo/inactivo), ejecucion manual ("Monitorear ahora") y programada via CLI, historial de ejecuciones `ok/fallo` con score revalidado y anomalias nuevas, lock de concurrencia y 4 KPIs en el dashboard.
 - **Linaje de datos**: registro de relaciones `dataset origen -> dataset destino` con 6 tipos (`derivado_de`, `alimenta`, `integra`, `transforma`, `copia`, `version_de`). La ficha de cada dataset muestra de que datasets recibe y hacia que datasets envia informacion.
 - **IA**: clasificar dataset, detectar anomalias, resumen inteligente y sugerencias de mejora.
 - **Usuarios**: administracion de usuarios y roles (solo admin).
@@ -198,6 +199,27 @@ En ningún caso la búsqueda semántica deja al usuario sin resultados que la b�
 - La base de datos usa `utf8mb4_unicode_ci`, así que el `LIKE` ya ignora mayúsculas y acentos; los términos se comparan normalizados (minúsculas y sin tildes).
 - La latencia de la llamada al proveedor es de 1-3 s, por eso solo se dispara de forma explícita.
 
+## Monitoreo continuo de calidad
+
+El módulo revalida automáticamente la calidad de cada dataset **sin crear métricas nuevas**: cada ejecución reutiliza la **última medición de calidad almacenada** y corre la **detección de anomalías de IA** (`ai_ejecutar_anomalias`, compartida con el módulo de IA vía `includes/ai_service.php`).
+
+- **Configuraciones**: una por dataset (`monitoring_configs`), con frecuencia en minutos (1 a 43200; sugeridas: 5, 15, 30, 60, 180, 360, 720 y 1440). Un dataset **inactivo** nunca es elegible para ejecución automática y su `proxima_ejecucion` es NULL hasta reactivarse.
+- **Ejecuciones**: cada corrida queda en `monitoring_runs` como `ok` o `fallo`, con el score revalidado, anomalías nuevas y un resumen. Un dataset **sin mediciones de calidad** se registra como `fallo` con el resumen *"No existen mediciones de calidad registradas para este dataset"* (sin llamar a la IA, liberando el lock y programando la siguiente ejecución).
+- **Ejecución manual**: botón **"Monitorear ahora"** en la vista y `POST api/monitoring.php?action=run`. Ignora `proxima_ejecucion`.
+- **Ejecución automática (programada)**: el programador es el CLI `cli\monitor.php`, que ejecuta las configuraciones **activas y vencidas** (`proxima_ejecucion <= ahora`). Para automatizarlo en Windows crea una tarea en el Programador de tareas con `cli\monitor.bat`.
+- **Concurrencia**: cada configuración tiene un lock (`corriendo`) que descarta ejecuciones simultáneas (UPDATE atómico), por lo que el CLI puede programarse tan seguido como se quiera.
+- **Dashboard**: el panel de control suma 4 KPIs de monitoreo (monitoreos activos, ejecuciones, fallos y tasa de éxito).
+
+Bitácora: `monitoreo:configurar`, `monitoreo:activar`, `monitoreo:desactivar` y `monitoreo:ejecutar` (el CLI registra con usuario NULL).
+
+Uso rápido:
+
+```
+php cli\monitor.php --list
+php cli\monitor.php --run-id=1
+php cli\monitor.php
+```
+
 ## API REST
 
 Convencion: `api/<modulo>.php?action=<accion>`. Respuestas siempre en JSON:
@@ -216,6 +238,7 @@ Autenticacion por **cookie de sesion** (`GDIA_SESSION`): primero se llama al log
 | `quality.php` | `history`, `register`, `delete` |
 | `policies.php` | `list`, `get`, `create`, `update`, `delete`, `assign`, `unassign` |
 | `compliance.php` | `list`, `get`, `create`, `update`, `delete`, `evaluate`, `dataset_status` |
+| `monitoring.php` | `list`, `runs`, `create`, `update`, `toggle`, `run`, `delete` |
 | `lineage.php` | `list` (con `dataset_id`), `get`, `create`, `update`, `delete` |
 | `ai.php` | `status`, `classify`, `anomalies`, `summary`, `suggest`, `resolve`, `confirm_classify` |
 | `reports.php` | `overview`, `alerts`, `logs` (solo admin) |
@@ -231,6 +254,8 @@ POST /api/lineage.php?action=create   {"origen_id":2,"destino_id":1,"tipo":"alim
 POST /api/compliance.php?action=create   {"nombre":"Acceso minimo","referencia":"ISO 27001","severidad":"alta","policy_id":3}
 POST /api/compliance.php?action=evaluate {"control_id":1,"dataset_id":2,"estado":"cumple"}
 GET  /api/compliance.php?action=dataset_status&dataset_id=2
+POST /api/monitoring.php?action=create   {"dataset_id":1,"frecuencia":1440}
+POST /api/monitoring.php?action=run      {"id":1}
 GET  /api/reports.php?action=overview
 ```
 
@@ -245,11 +270,12 @@ En `postman/` hay una coleccion lista para importar:
 
 ## Base de datos
 
-11 tablas: `roles`, `users`, `datasets`, `quality_metrics`, `policies`, `policy_datasets`, `data_lineage`, `compliance_controls`, `compliance_evaluations`, `ai_detections` y `activity_logs`, con llaves foraneas, restricciones `CHECK` e indice para busquedas. El detalle completo esta en `sql/database.sql`.
+13 tablas: `roles`, `users`, `datasets`, `quality_metrics`, `policies`, `policy_datasets`, `data_lineage`, `compliance_controls`, `compliance_evaluations`, `monitoring_configs`, `monitoring_runs`, `ai_detections` y `activity_logs`, con llaves foraneas, restricciones `CHECK` e indices para busquedas. El detalle completo esta en `sql/database.sql`.
 
 Si tu base de datos ya existe y solo le falta un modulo, ejecuta la migracion correspondiente, que crea unicamente sus tablas con sus constraints, sin datos y sin tocar ninguna tabla previa (idempotente, se puede reejecutar):
 - `sql/migration_lineage.sql`: crea `data_lineage`.
 - `sql/migration_compliance.sql`: crea `compliance_controls` y `compliance_evaluations`.
+- `sql/migration_monitoring.sql`: crea `monitoring_configs` y `monitoring_runs`.
 
 Los datos de ejemplo estan en `sql/seed.sql` y solo aplican a bases nuevas.
 
@@ -266,7 +292,7 @@ Los datos de ejemplo estan en `sql/seed.sql` y solo aplican a bases nuevas.
 
 ## Pruebas realizadas
 
-Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7), cierre de seguridad (8), linaje de datos (9) y cumplimiento normativo (10). La coleccion de Postman permite re-ejecutar la API completa manualmente.
+Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7), cierre de seguridad (8), linaje de datos (9), cumplimiento normativo (10) y monitoreo continuo (11). La coleccion de Postman permite re-ejecutar la API completa manualmente.
 
 ## Nota sobre credenciales
 

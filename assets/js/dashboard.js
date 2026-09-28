@@ -31,6 +31,20 @@ document.addEventListener('DOMContentLoaded', () => {
         kpis.alertas.textContent = d.alertas_pendientes;
         kpis.politicas.textContent = d.politicas_activas;
 
+        const mon = d.monitoreo;
+        if (mon) {
+            document.getElementById('dl-kpi-mon-activas').textContent = mon.configs_activas;
+            document.getElementById('dl-kpi-mon-ejecuciones').textContent = mon.ejecuciones;
+            document.getElementById('dl-kpi-mon-fallos').textContent = mon.fallos;
+            document.getElementById('dl-kpi-mon-tasa').textContent =
+                mon.tasa_exito === null ? '-' : mon.tasa_exito + '%';
+        } else {
+            document.getElementById('dl-kpi-mon-activas').textContent = '-';
+            document.getElementById('dl-kpi-mon-ejecuciones').textContent = '-';
+            document.getElementById('dl-kpi-mon-fallos').textContent = '-';
+            document.getElementById('dl-kpi-mon-tasa').textContent = '-';
+        }
+
         document.getElementById('dl-fecha').textContent =
             'Actualizado: ' + new Date().toLocaleString();
 

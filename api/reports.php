@@ -62,6 +62,25 @@ switch ($action) {
              ORDER BY al.fecha DESC, al.id DESC LIMIT 8"
         )->fetchAll();
 
+        // Indicadores del monitoreo continuo. Si las tablas aun no
+        // existen (modulo no migrado), se degrada a null sin romper.
+        $monitoreo = null;
+        try {
+            $mOk   = (int)db()->query("SELECT COUNT(*) FROM monitoring_runs WHERE estado = 'ok'")->fetchColumn();
+            $mFal  = (int)db()->query("SELECT COUNT(*) FROM monitoring_runs WHERE estado = 'fallo'")->fetchColumn();
+            $mExito = ($mOk + $mFal) > 0 ? round($mOk * 100 / ($mOk + $mFal), 1) : null;
+            $monitoreo = [
+                'configs_activas'  => (int)db()->query('SELECT COUNT(*) FROM monitoring_configs WHERE activo = 1')->fetchColumn(),
+                'ejecuciones'      => $mOk + $mFal,
+                'ok'               => $mOk,
+                'fallos'           => $mFal,
+                'tasa_exito'       => $mExito,
+                'ultima_ejecucion' => db()->query('SELECT MAX(fecha) FROM monitoring_runs')->fetchColumn() ?: null,
+            ];
+        } catch (PDOException $e) {
+            $monitoreo = null;
+        }
+
         respondJson(true, [
             'total_datasets'   => $totalDatasets,
             'politicas_activas' => $politicasActivas,
@@ -72,6 +91,7 @@ switch ($action) {
             'por_categoria'    => $porCategoria,
             'alertas'          => $alertas,
             'actividad'        => $actividad,
+            'monitoreo'        => $monitoreo,
         ]);
         break;
 

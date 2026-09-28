@@ -34,6 +34,9 @@ echo [OK] Navegador abierto. Usuarios de prueba:
 echo      admin@example.com  /  Admin123!
 echo      steward@example.com  /  Steward123!
 echo.
+echo [INFO] Monitoreo continuo: programa cli\monitor.bat en el
+echo        Programador de tareas de Windows para ejecuciones automaticas.
+echo.
 echo Para detener el servidor, cierra la ventana "GDIA - PHP Server".
 echo.
 timeout /t 8 /nobreak >nul

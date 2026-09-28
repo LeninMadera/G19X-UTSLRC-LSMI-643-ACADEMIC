@@ -38,6 +38,7 @@ $titleText = $pageTitle ?? 'Gobierno de Datos';
         <a href="<?= e(APP_URL) ?>/views/quality.php">Calidad de datos</a>
         <a href="<?= e(APP_URL) ?>/views/policies.php">Politicas</a>
         <a href="<?= e(APP_URL) ?>/views/compliance.php">Cumplimiento</a>
+        <a href="<?= e(APP_URL) ?>/views/monitoring.php">Monitoreo</a>
         <a href="<?= e(APP_URL) ?>/views/lineage.php">Linaje de datos</a>
         <a href="<?= e(APP_URL) ?>/views/ai.php">Asistente IA</a>
         <a href="<?= e(APP_URL) ?>/views/reports.php">Reportes</a>

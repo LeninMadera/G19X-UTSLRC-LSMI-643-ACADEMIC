@@ -31,6 +31,25 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 </section>
 
+<section class="cards-kpis" id="dl-kpis-monitoreo">
+    <div class="card kpi">
+        <div class="kpi-num" id="dl-kpi-mon-activas">-</div>
+        <div class="kpi-label">Monitoreos activos</div>
+    </div>
+    <div class="card kpi">
+        <div class="kpi-num" id="dl-kpi-mon-ejecuciones">-</div>
+        <div class="kpi-label">Ejecuciones de monitoreo</div>
+    </div>
+    <div class="card kpi">
+        <div class="kpi-num" id="dl-kpi-mon-fallos">-</div>
+        <div class="kpi-label">Ejecuciones con fallo</div>
+    </div>
+    <div class="card kpi">
+        <div class="kpi-num" id="dl-kpi-mon-tasa">-</div>
+        <div class="kpi-label">Tasa de exito (monitoreo)</div>
+    </div>
+</section>
+
 <div class="grid-2">
     <section class="panel">
         <h2>Score de calidad por dataset</h2>

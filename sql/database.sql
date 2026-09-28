@@ -247,3 +247,61 @@ CREATE TABLE compliance_evaluations (
     CONSTRAINT chk_ce_estado CHECK (estado IN ('cumple', 'no_cumple', 'pendiente', 'no_aplica')),
     UNIQUE KEY uq_ce_control_dataset (control_id, dataset_id)
 ) ENGINE = InnoDB;
+
+-- ------------------------------------------------------------
+--  monitoring_configs
+--  Configuracion de monitoreo automatico de la calidad de un
+--  dataset (una por dataset). `activo` controla si el dataset
+--  es ejecutable; `corriendo` es un lock TINYINT que evita
+--  ejecuciones simultaneas (UPDATE atomico). `proxima_ejecucion`
+--  indica el siguiente vencimiento para el programador del CLI.
+-- ------------------------------------------------------------
+CREATE TABLE monitoring_configs (
+    id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    dataset_id       INT UNSIGNED NOT NULL,
+    frecuencia       INT UNSIGNED NOT NULL DEFAULT 1440,
+    activo           TINYINT(1)   NOT NULL DEFAULT 1,
+    corriendo        TINYINT(1)   NOT NULL DEFAULT 0,
+    proxima_ejecucion TIMESTAMP   NULL,
+    estado_ultima    VARCHAR(10)  NULL,        -- ok | fallo
+    score_ultimo     DECIMAL(5,2) NULL,
+    anomalias_ultimas INT          NOT NULL DEFAULT 0,
+    ultima_ejecucion TIMESTAMP    NULL,
+    creado_por       INT UNSIGNED NULL,
+    fecha_creacion   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_mc_dataset
+        FOREIGN KEY (dataset_id) REFERENCES datasets (id) ON DELETE CASCADE,
+    CONSTRAINT fk_mc_creator
+        FOREIGN KEY (creado_por) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT uq_mc_dataset UNIQUE (dataset_id),
+    CONSTRAINT chk_mc_frecuencia CHECK (frecuencia >= 1),
+    CONSTRAINT chk_mc_estado_ultima CHECK (estado_ultima IN ('ok', 'fallo') OR estado_ultima IS NULL),
+    INDEX idx_mc_proxima (activo, proxima_ejecucion)
+) ENGINE = InnoDB;
+
+-- ------------------------------------------------------------
+--  monitoring_runs
+--  Historial de ejecuciones del monitoreo: causa (manual o
+--  automatico), resultado (ok/fallo), el score revalidado (la
+--  ultima medicion almacenada; NULL si no habia mediciones),
+--  las anomalias nuevas insertadas en ai_detections y un resumen
+--  del motivo.
+-- ------------------------------------------------------------
+CREATE TABLE monitoring_runs (
+    id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    config_id        INT UNSIGNED NOT NULL,
+    dataset_id       INT UNSIGNED NOT NULL,
+    causa            VARCHAR(20)  NOT NULL DEFAULT 'automatico',
+    estado           VARCHAR(10)  NOT NULL,    -- ok | fallo
+    score            DECIMAL(5,2) NULL,
+    anomalias_nuevas INT          NOT NULL DEFAULT 0,
+    resumen          VARCHAR(1000) NULL,
+    fecha            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_mr_config
+        FOREIGN KEY (config_id) REFERENCES monitoring_configs (id) ON DELETE CASCADE,
+    CONSTRAINT fk_mr_dataset
+        FOREIGN KEY (dataset_id) REFERENCES datasets (id) ON DELETE CASCADE,
+    CONSTRAINT chk_mr_causa CHECK (causa IN ('manual', 'automatico')),
+    CONSTRAINT chk_mr_estado CHECK (estado IN ('ok', 'fallo')),
+    INDEX idx_mr_dataset_fecha (dataset_id, fecha DESC)
+) ENGINE = InnoDB;
