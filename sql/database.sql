@@ -196,3 +196,54 @@ CREATE TABLE activity_logs (
 -- Índice para acelerar la consulta del historial por dataset
 CREATE INDEX idx_quality_dataset_fecha
     ON quality_metrics (dataset_id, fecha_medicion DESC);
+
+-- ------------------------------------------------------------
+--  compliance_controls
+--  Catalogo de controles de cumplimiento normativo.
+--  El control se relaciona opcionalmente con una politica de
+--  gobierno de datos existente (reutilizacion) pero NO emite un
+--  dictamen legal: es un registro declarativo del equipo.
+-- ------------------------------------------------------------
+CREATE TABLE compliance_controls (
+    id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre         VARCHAR(150) NOT NULL,
+    descripcion    TEXT         NULL,
+    referencia     VARCHAR(150) NULL,   -- norma/marco/categoria de referencia
+    severidad      VARCHAR(20)  NOT NULL DEFAULT 'media',
+    estado         VARCHAR(20)  NOT NULL DEFAULT 'activo',
+    policy_id      INT UNSIGNED NULL,
+    creado_por     INT UNSIGNED NULL,
+    fecha_creacion TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_cc_policy
+        FOREIGN KEY (policy_id) REFERENCES policies (id) ON DELETE SET NULL,
+    CONSTRAINT fk_cc_creator
+        FOREIGN KEY (creado_por) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT chk_cc_severidad CHECK (severidad IN ('baja', 'media', 'alta', 'critica')),
+    CONSTRAINT chk_cc_estado CHECK (estado IN ('activo', 'inactivo'))
+) ENGINE = InnoDB;
+
+-- ------------------------------------------------------------
+--  compliance_evaluations
+--  Evaluacion de un control sobre un dataset (una por pareja,
+--  se actualiza al reevaluar). La fila define que el control
+--  aplica a ese dataset y su estado de cumplimiento.
+-- ------------------------------------------------------------
+CREATE TABLE compliance_evaluations (
+    id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    control_id    INT UNSIGNED NOT NULL,
+    dataset_id    INT UNSIGNED NOT NULL,
+    estado        VARCHAR(20)  NOT NULL DEFAULT 'pendiente',
+    observaciones TEXT         NULL,
+    evidencia     VARCHAR(255) NULL,
+    evaluador_id  INT UNSIGNED NULL,
+    fecha         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                 ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ce_control
+        FOREIGN KEY (control_id) REFERENCES compliance_controls (id) ON DELETE CASCADE,
+    CONSTRAINT fk_ce_dataset
+        FOREIGN KEY (dataset_id) REFERENCES datasets (id) ON DELETE CASCADE,
+    CONSTRAINT fk_ce_evaluador
+        FOREIGN KEY (evaluador_id) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT chk_ce_estado CHECK (estado IN ('cumple', 'no_cumple', 'pendiente', 'no_aplica')),
+    UNIQUE KEY uq_ce_control_dataset (control_id, dataset_id)
+) ENGINE = InnoDB;

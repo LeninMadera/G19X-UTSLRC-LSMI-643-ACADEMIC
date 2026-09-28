@@ -10,6 +10,7 @@
     { "key": "dataset_id", "value": "8" },
     { "key": "user_id", "value": "9" },
     { "key": "policy_id", "value": "5" },
+    { "key": "control_id", "value": "6" },
     { "key": "lineage_id", "value": "1" }
   ],
   "item": [
@@ -121,6 +122,81 @@
           "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=unassign", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "unassign" }] }, "body": { "mode": "raw", "raw": "{ \"policy_id\": \"{{policy_id}}\", \"dataset_id\": \"{{dataset_id}}\" }" } }
         },
         { "name": "Eliminar politica (id={{policy_id}})", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/policies.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{policy_id}}\" }" } } }
+      ]
+    },
+    {
+      "name": "Cumplimiento",
+      "item": [
+        { "name": "Listar controles", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "list" }] } } },
+        {
+          "name": "Crear control",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Politica de privacidad visible\", \"descripcion\": \"El dataset debe declarar su politica de privacidad.\", \"referencia\": \"LFPDPPP art. 22\", \"severidad\": \"alta\", \"estado\": \"activo\", \"policy_id\": 2 }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Crear control exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.id).to.be.above(0);",
+                  "    pm.collectionVariables.set('control_id', String(d.data.id));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar control (id={{control_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{control_id}}\", \"nombre\": \"Politica de privacidad visible\", \"descripcion\": \"Politica de privacidad declarada y auditable.\", \"referencia\": \"LFPDPPP art. 22\", \"severidad\": \"critica\", \"estado\": \"activo\", \"policy_id\": 2 }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Actualizar control exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Evaluar control en dataset",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=evaluate", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "evaluate" }] }, "body": { "mode": "raw", "raw": "{ \"control_id\": \"{{control_id}}\", \"dataset_id\": \"{{dataset_id}}\", \"estado\": \"cumple\", \"observaciones\": \"Evidencia verificada.\", \"evidencia\": \"SOP-COM-001\" }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Evaluar control exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "Estado cumplimiento por dataset (id={{dataset_id}})", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=dataset_status&dataset_id={{dataset_id}}", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "dataset_status" }, { "key": "dataset_id", "value": "{{dataset_id}}" }] } } },
+        { "name": "Eliminar control (id={{control_id}})", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{control_id}}\" }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Eliminar control exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
       ]
     },
     {

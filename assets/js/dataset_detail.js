@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         cargarConData(json.data);
+        cargarCompliance();
     }
 
     function colorScore(s) {
@@ -235,6 +236,144 @@ document.addEventListener('DOMContentLoaded', () => {
         const tr = e.target.closest('tr');
         if (!tr || !tr.dataset.detId) return;
         resolver(tr.dataset.detId, btn.dataset.res);
+    });
+
+    // ------------------ Cumplimiento normativo ------------------
+    const compForm  = document.getElementById('eval-form');
+    const compModal = document.getElementById('modal-eval');
+    const compError = document.getElementById('eval-form-error');
+    const comp = { puede: false, controles: [], evaluaciones: [] };
+
+    function badgeEvalEstado(est) {
+        const cls = est === 'cumple' ? 'active' : (est === 'pendiente' ? 'pending' : 'inactive');
+        return '<span class="badge badge-' + cls + '">' + esc(est.replace('_', ' ')) + '</span>';
+    }
+
+    async function cargarCompliance() {
+        const json = await api('/api/compliance.php?action=dataset_status&dataset_id=' + id);
+        const tbodyC = document.getElementById('d-compliance');
+        if (!json.success) {
+            tbodyC.innerHTML = '<tr><td colspan="9" class="muted center">' + esc(json.message) + '</td></tr>';
+            return;
+        }
+        comp.puede = json.data.puede_evaluar;
+        comp.evaluaciones = json.data.evaluaciones;
+        comp.controles = json.data.controles_disponibles;
+
+        const ind = json.data.indicadores;
+        document.getElementById('dc-aplicables').textContent = ind.aplicables;
+        document.getElementById('dc-evaluados').textContent = ind.evaluados;
+        document.getElementById('dc-pendientes').textContent = ind.pendientes;
+        document.getElementById('dc-noaplica').textContent = ind.no_aplica;
+        document.getElementById('dc-cumplimiento').textContent =
+            ind.cumplimiento_pct != null ? ind.cumplimiento_pct + '%' : '--';
+
+        const btnAgregar = document.getElementById('btn-agregar-eval');
+        if (comp.puede && comp.controles.length > 0) {
+            btnAgregar.classList.remove('hidden');
+        } else {
+            btnAgregar.classList.add('hidden');
+        }
+
+        tbodyC.innerHTML = '';
+        if (comp.evaluaciones.length === 0) {
+            tbodyC.innerHTML = '<tr><td colspan="9" class="muted center">Sin evaluaciones registradas para este dataset.</td></tr>';
+            return;
+        }
+        comp.evaluaciones.forEach(ev => {
+            const acciones = comp.puede
+                ? '<button class="btn btn-ghost btn-sm" data-cedit="' + ev.control_id + '">Evaluar</button>'
+                : '-';
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + esc(ev.control) + '</td>' +
+                '<td>' + esc(ev.referencia || '-') + '</td>' +
+                '<td>' + (ev.severidad ? '<span class="tag">' + esc(ev.severidad) + '</span>' : '-') + '</td>' +
+                '<td>' + badgeEvalEstado(ev.estado) + '</td>' +
+                '<td>' + esc(ev.observaciones || '-') + '</td>' +
+                '<td>' + esc(ev.evidencia || '-') + '</td>' +
+                '<td>' + esc(ev.evaluador || '-') + '</td>' +
+                '<td>' + fmtFecha(ev.fecha) + '</td>' +
+                '<td class="actions-cell">' + acciones + '</td>';
+            tbodyC.appendChild(tr);
+        });
+    }
+
+    function abrirEval(controlId) {
+        const sel = document.getElementById('eval-cselect');
+        const evaluacion = comp.evaluaciones.find(x => String(x.control_id) === String(controlId));
+
+        compForm.reset();
+        compError.classList.add('hidden');
+
+        if (evaluacion) {
+            document.getElementById('eval-title').textContent = 'Reevaluar control';
+            sel.innerHTML = '';
+            const opt = document.createElement('option');
+            opt.value = evaluacion.control_id;
+            opt.textContent = evaluacion.control;
+            sel.appendChild(opt);
+            sel.disabled = true;
+            document.getElementById('eval-control').value = evaluacion.control_id;
+            document.getElementById('eval-estado').value = evaluacion.estado;
+            document.getElementById('eval-observaciones').value = evaluacion.observaciones || '';
+            document.getElementById('eval-evidencia').value = evaluacion.evidencia || '';
+        } else {
+            document.getElementById('eval-title').textContent = 'Agregar evaluacion';
+            sel.disabled = false;
+            sel.innerHTML = '<option value="">Selecciona un control</option>';
+            comp.controles.forEach(c => {
+                const o = document.createElement('option');
+                o.value = c.id;
+                o.textContent = c.nombre;
+                sel.appendChild(o);
+            });
+            document.getElementById('eval-control').value = '';
+            document.getElementById('eval-estado').value = 'cumple';
+        }
+        compModal.classList.remove('hidden');
+    }
+
+    document.getElementById('btn-agregar-eval').addEventListener('click', () => abrirEval(null));
+
+    document.getElementById('d-compliance').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-cedit]');
+        if (btn) abrirEval(btn.dataset.cedit);
+    });
+
+    document.querySelectorAll('[data-close]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById(btn.dataset.close).classList.add('hidden');
+        });
+    });
+    compModal.addEventListener('click', (e) => {
+        if (e.target === compModal) compModal.classList.add('hidden');
+    });
+
+    compForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(compForm);
+        let controlId = document.getElementById('eval-control').value;
+        if (!controlId) controlId = document.getElementById('eval-cselect').value;
+        if (!controlId) {
+            compError.textContent = 'Debes seleccionar un control.';
+            compError.classList.remove('hidden');
+            return;
+        }
+        data.set('control_id', Number(controlId));
+        data.set('dataset_id', Number(id));
+
+        const json = await api('/api/compliance.php?action=evaluate', data);
+        msg.className = 'alert alert-' + (json.success ? 'success' : 'error');
+        msg.textContent = json.message;
+        msg.classList.remove('hidden');
+        if (json.success) {
+            compModal.classList.add('hidden');
+            await cargar();
+        } else {
+            compError.textContent = json.message;
+            compError.classList.remove('hidden');
+        }
     });
 
     cargar();

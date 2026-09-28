@@ -60,6 +60,40 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <div class="panel">
+            <h2>Cumplimiento normativo</h2>
+            <p class="muted small">Registro declarativo interno del equipo de gobierno de datos; no constituye un dictamen legal.</p>
+            <div class="cards">
+                <div class="card">
+                    <h3>Aplicables</h3>
+                    <p class="card-num" id="dc-aplicables">--</p>
+                </div>
+                <div class="card">
+                    <h3>Evaluados</h3>
+                    <p class="card-num" id="dc-evaluados">--</p>
+                </div>
+                <div class="card">
+                    <h3>Pendientes</h3>
+                    <p class="card-num" id="dc-pendientes">--</p>
+                </div>
+                <div class="card">
+                    <h3>No aplica</h3>
+                    <p class="card-num" id="dc-noaplica">--</p>
+                </div>
+                <div class="card">
+                    <h3>Cumplimiento</h3>
+                    <p class="card-num" id="dc-cumplimiento">--</p>
+                </div>
+            </div>
+            <button id="btn-agregar-eval" class="btn btn-primary hidden">Agregar evaluacion</button>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th>Control</th><th>Referencia</th><th>Severidad</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th><th>Evaluador</th><th>Fecha</th><th>Acciones</th></tr></thead>
+                    <tbody id="d-compliance"><tr><td colspan="9" class="muted center">Cargando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
             <h2>Linaje de datos</h2>
             <p class="muted small">Recibe informacion de</p>
             <div class="table-wrap">
@@ -88,6 +122,42 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
 </section>
+
+<!-- Modal evaluacion de control en este dataset -->
+<div id="modal-eval" class="modal-backdrop hidden">
+    <div class="modal">
+        <h3 id="eval-title">Evaluar control</h3>
+        <form id="eval-form" autocomplete="off">
+            <input type="hidden" id="eval-control" name="control_id" value="0">
+            <div class="field">
+                <label for="eval-cselect">Control</label>
+                <select id="eval-cselect" required></select>
+            </div>
+            <div class="field">
+                <label for="eval-estado">Estado</label>
+                <select id="eval-estado" name="estado">
+                    <option value="cumple">Cumple</option>
+                    <option value="no_cumple">No cumple</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="no_aplica">No aplica</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="eval-observaciones">Observaciones</label>
+                <textarea id="eval-observaciones" name="observaciones" rows="3" maxlength="5000"></textarea>
+            </div>
+            <div class="field">
+                <label for="eval-evidencia">Evidencia (URL / identificador)</label>
+                <input type="text" id="eval-evidencia" name="evidencia" maxlength="255" placeholder="Ej: SOP-RET-001">
+            </div>
+            <div id="eval-form-error" class="alert alert-error hidden"></div>
+            <div class="actions">
+                <button type="button" class="btn btn-ghost" data-close="modal-eval">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <?php
 $pageScript = 'dataset_detail.js';

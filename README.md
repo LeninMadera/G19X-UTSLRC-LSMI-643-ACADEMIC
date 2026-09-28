@@ -23,15 +23,16 @@ La aplicacion se construyo por etapas (E0 a E8) y cada etapa se probo de forma m
 ```
 gobierno-datos-ia/
 ├── api/               Endpoints REST (JSON): auth, users, datasets, quality,
-│                      policies, lineage, ai, reports
+│                      policies, compliance, lineage, ai, reports
 ├── config/            Carga de .env, constantes, conexion PDO
 ├── includes/          Funciones (auth, rol, log, JSON), servicio de IA
 │                      y busqueda semantica (semantic_search.php)
 ├── views/             Paginas HTML (login, dashboard, usuarios, datasets,
-│                      calidad, politicas, linaje, IA, reportes)
+│                      calidad, politicas, cumplimiento, linaje, IA, reportes)
 ├── assets/            CSS, JavaScript (vanilla, sin librerias)
 ├── sql/               database.sql (estructura), migration_lineage.sql
-│                      (migracion del modulo de linaje) y seed.sql
+│                      y migration_compliance.sql (migraciones por modulo)
+│                      y seed.sql
 ├── postman/           Coleccion y entorno de Postman
 ├── .env               Credenciales locales (NO se sube a GitHub)
 └── index.php          Punto de entrada (redirige al login/dashboard)
@@ -83,6 +84,7 @@ gobierno-datos-ia/
 | Datasets | CRUD todos | CRUD todos | CRUD solo los suyos | Solo lectura |
 | Calidad | Registra/elimina | Registra/elimina | Solo los suyos | Solo lectura |
 | Politicas | CRUD + asignacion | CRUD + asignacion | — | Solo lectura |
+| Cumplimiento | CRUD controles + evalua | CRUD controles + evalua | Evalua solo sus datasets | Solo lectura |
 | Linaje de datos | CRUD | CRUD | Solo entre sus datasets | Solo lectura |
 | Usuarios | CRUD | — | — | — |
 | IA (4 acciones) | Si | Si | Solo sus datasets | No |
@@ -95,6 +97,7 @@ gobierno-datos-ia/
 - **Datasets**: catalogo con busqueda literal y **busqueda semantica asistida por IA**, filtro por categoria, ficha de detalle (score, dimensiones, politicas asignadas, detectores de IA, etiquetas IA).
 - **Calidad**: registros de mediciones por dataset, calculo de score ponderado (5 dimensiones) y alerta visual cuando el score baja de 80.
 - **Politicas**: CRUD de politicas (naming, retencion, acceso, clasificacion) y asignacion/desasignacion a datasets.
+- **Cumplimiento**: catalogo de controles normativos (con norma/marco/categoria de referencia, severidad y politica vinculada) y evaluaciones por dataset (`cumple`, `no cumple`, `pendiente`, `no aplica`). Registro declarativo interno, **no es un dictamen legal**.
 - **Linaje de datos**: registro de relaciones `dataset origen -> dataset destino` con 6 tipos (`derivado_de`, `alimenta`, `integra`, `transforma`, `copia`, `version_de`). La ficha de cada dataset muestra de que datasets recibe y hacia que datasets envia informacion.
 - **IA**: clasificar dataset, detectar anomalias, resumen inteligente y sugerencias de mejora.
 - **Usuarios**: administracion de usuarios y roles (solo admin).
@@ -212,6 +215,7 @@ Autenticacion por **cookie de sesion** (`GDIA_SESSION`): primero se llama al log
 | `datasets.php` | `list` (con `search`, `categoria`), `search` (busqueda semantica con `q`, `categoria`), `detail`, `create`, `update`, `delete` |
 | `quality.php` | `history`, `register`, `delete` |
 | `policies.php` | `list`, `get`, `create`, `update`, `delete`, `assign`, `unassign` |
+| `compliance.php` | `list`, `get`, `create`, `update`, `delete`, `evaluate`, `dataset_status` |
 | `lineage.php` | `list` (con `dataset_id`), `get`, `create`, `update`, `delete` |
 | `ai.php` | `status`, `classify`, `anomalies`, `summary`, `suggest`, `resolve`, `confirm_classify` |
 | `reports.php` | `overview`, `alerts`, `logs` (solo admin) |
@@ -224,6 +228,9 @@ GET  /api/datasets.php?action=detail&id=1
 POST /api/quality.php?action=register {"dataset_id":1,"completitud":92,"exactitud":88.5,...}
 POST /api/ai.php?action=classify      {"dataset_id":1}
 POST /api/lineage.php?action=create   {"origen_id":2,"destino_id":1,"tipo":"alimenta"}
+POST /api/compliance.php?action=create   {"nombre":"Acceso minimo","referencia":"ISO 27001","severidad":"alta","policy_id":3}
+POST /api/compliance.php?action=evaluate {"control_id":1,"dataset_id":2,"estado":"cumple"}
+GET  /api/compliance.php?action=dataset_status&dataset_id=2
 GET  /api/reports.php?action=overview
 ```
 
@@ -238,9 +245,13 @@ En `postman/` hay una coleccion lista para importar:
 
 ## Base de datos
 
-9 tablas: `roles`, `users`, `datasets`, `quality_metrics`, `policies`, `policy_datasets`, `data_lineage`, `ai_detections` y `activity_logs`, con llaves foraneas, restricciones `CHECK` e indice para busquedas. El detalle completo esta en `sql/database.sql`.
+11 tablas: `roles`, `users`, `datasets`, `quality_metrics`, `policies`, `policy_datasets`, `data_lineage`, `compliance_controls`, `compliance_evaluations`, `ai_detections` y `activity_logs`, con llaves foraneas, restricciones `CHECK` e indice para busquedas. El detalle completo esta en `sql/database.sql`.
 
-Si tu base de datos ya existe y solo le falta la tabla de linaje, ejecuta `sql/migration_lineage.sql`: crea unicamente `data_lineage` con sus constraints, sin datos y sin tocar ninguna tabla previa (es idempotente, se puede reejecutar). Los datos de ejemplo de linaje estan en `sql/seed.sql` y solo aplican a bases nuevas.
+Si tu base de datos ya existe y solo le falta un modulo, ejecuta la migracion correspondiente, que crea unicamente sus tablas con sus constraints, sin datos y sin tocar ninguna tabla previa (idempotente, se puede reejecutar):
+- `sql/migration_lineage.sql`: crea `data_lineage`.
+- `sql/migration_compliance.sql`: crea `compliance_controls` y `compliance_evaluations`.
+
+Los datos de ejemplo estan en `sql/seed.sql` y solo aplican a bases nuevas.
 
 ## Seguridad aplicada
 
@@ -255,7 +266,7 @@ Si tu base de datos ya existe y solo le falta la tabla de linaje, ejecuta `sql/m
 
 ## Pruebas realizadas
 
-Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7), cierre de seguridad (8) y linaje de datos (9). La coleccion de Postman permite re-ejecutar la API completa manualmente.
+Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7), cierre de seguridad (8), linaje de datos (9) y cumplimiento normativo (10). La coleccion de Postman permite re-ejecutar la API completa manualmente.
 
 ## Nota sobre credenciales
 

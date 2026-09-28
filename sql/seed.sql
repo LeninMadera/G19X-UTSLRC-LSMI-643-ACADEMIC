@@ -105,3 +105,33 @@ INSERT INTO activity_logs (user_id, accion, detalle, ip) VALUES
 (1, 'login',     '{"rol":"admin"}',    '127.0.0.1'),
 (2, 'calidad:register', '{"dataset_id":1,"score":92.8}', '127.0.0.1'),
 (3, 'datasets:update',  '{"dataset_id":2}', '127.0.0.1');
+
+-- ------------------------------------------------------------
+--  Controles de cumplimiento (ejemplos academicos)
+--  Los controles son un registro declarativo interno del equipo;
+--  NO constituyen un dictamen legal. La columna referencia indica
+--  la norma/marco/categoria de referencia y policy_id reutiliza una
+--  politica de gobierno existente.
+-- ------------------------------------------------------------
+INSERT INTO compliance_controls (nombre, descripcion, referencia, severidad, estado, policy_id, creado_por) VALUES
+('Retencion de datos personales', 'Conservar los datos personales solo mientras se usan, sin retener mas de lo necesario.', 'LFPDPPP art. 9', 'alta', 'activo', 2, 2),
+('Acceso minimo a datos sensibles', 'El acceso a datos sensibles se otorga bajo el principio de minimo privilegio.', 'ISO 27001 A.9', 'media', 'activo', 3, 2),
+('Naming estandar de tablas', 'Los nombres de tablas y columnas deben seguir el estandar interno de gobierno.', 'Marco interno de gobierno de datos', 'baja', 'activo', 1, 2),
+('Clasificacion de informacion', 'Todo dataset con datos personales debe marcarse como confidencial o restringido.', 'LFPDPPP art. 3', 'critica', 'activo', 4, 1);
+
+-- ------------------------------------------------------------
+--  Evaluaciones de ejemplo (una fila por pareja control/dataset)
+--  La fila define que el control aplica a ese dataset y su estado.
+--  Usa los IDs 1-4 de los controles y datasets creados mas arriba.
+-- ------------------------------------------------------------
+INSERT INTO compliance_evaluations (control_id, dataset_id, estado, observaciones, evidencia, evaluador_id) VALUES
+(1, 1, 'cumple',    'Se conserva 5 anios y se elimina el historico anterior en el cierre anual.', 'SOP-RET-001',  2),
+(1, 2, 'cumple',    'Los datos de contacto se purgan al cierre del ciclo.',                          'SOP-RET-001',  2),
+(2, 1, 'cumple',    'Acceso restringido al equipo comercial.',                                       'AUD-2026-010', 2),
+(2, 2, 'no_cumple', 'El CRM expone campos de contacto a todo el rol analyst.',                       'AUD-2026-014', 2),
+(2, 4, 'no_aplica', 'La encuesta no contiene datos personales directos.',                            NULL,          2),
+(3, 1, 'cumple',    'Nombre en formato entidad_tema.',                                               NULL,          3),
+(3, 2, 'cumple',    NULL,                                                                            NULL,          3),
+(3, 3, 'no_cumple', 'El nombre no cumple el prefijo estandar.',                                      NULL,          3),
+(4, 1, 'pendiente', 'En revision de la clasificacion asignada.',                                     NULL,          2),
+(4, 2, 'cumple',    NULL,                                                                            NULL,          2);
