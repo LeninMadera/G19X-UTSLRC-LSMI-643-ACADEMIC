@@ -1,5 +1,6 @@
 <?php
 // Vista exclusiva de administradores
+$pageTitle = 'Usuarios';
 require_once __DIR__ . '/includes/header.php';
 
 if ($current['rol'] !== 'admin') {
