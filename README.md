@@ -37,9 +37,13 @@ gobierno-datos-ia/
 │                      y migration_compliance.sql (migraciones por modulo)
 │                      y seed.sql
 ├── postman/           Coleccion y entorno de Postman
-├── .env               Credenciales locales (NO se sube a GitHub)
+├── .env.example       Plantilla de configuracion (SI se entrega, sin secretos)
 └── index.php          Punto de entrada (redirige al login/dashboard)
 ```
+
+> `.env` no aparece en la estructura porque es un archivo **local y personal**:
+> no se versiona, no se entrega y no debe compartirse. Ver
+> [Configuracion local y secretos](#configuracion-local-y-secretos).
 
 ## Requisitos
 
@@ -60,7 +64,15 @@ gobierno-datos-ia/
    $pdo->exec(file_get_contents(__DIR__ . '/sql/seed.sql')); // datos iniciales
    ```
 
-3. Copia `.env.example` a `.env` y completa tus credenciales (MySQL, URL base, APP_KEY, opcionalmente la clave de OpenAI).
+3. Copia `.env.example` a `.env` y completa tus credenciales (MySQL, URL base y, opcionalmente, `APP_KEY` y la clave de OpenAI):
+
+   ```
+   Copy-Item .env.example .env      # Windows PowerShell
+   cp .env.example .env             # Linux / macOS
+   ```
+
+   Edita **solo el `.env`** resultante con tus valores reales. `.env.example` es la
+   plantilla y debe permanecer siempre sin secretos.
 4. Ejecuta el servidor de desarrollo:
 
    ```
@@ -335,13 +347,44 @@ Limitacion conocida de CSRF: **la sesion por si sola NO protege contra CSRF**. L
 
 Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7), cierre de seguridad (8), linaje de datos (9), cumplimiento normativo (10), monitoreo continuo (11) y fuentes externas / integraciones (12). La coleccion de Postman permite re-ejecutar la API completa manualmente.
 
-## Nota sobre credenciales
+## Configuracion local y secretos
 
-El archivo `.env` con tus claves esta excluido de Git. Nunca lo subas a GitHub. Genera `APP_KEY` con:
+El archivo `.env` contiene **tu configuracion local**: contrasena de MySQL y clave de
+OpenAI/Groq. Por eso:
+
+- **No se sube a GitHub.** Ya esta en `.gitignore` y no forma parte del historial del repositorio.
+- **No se incluye en la entrega.** Si compartes el proyecto, compártelo **sin `.env`**: quien lo reciba
+  crea el suyo copiando `.env.example`.
+- **Nunca se documentan aquí sus valores.** Este README y `.env.example` solo contienen
+  nombres de variables y ejemplos.
+
+`APP_KEY` está en `.env` como variable **opcional y reservada**: el proyecto la carga
+pero no la usa en ningún proceso, así que puedes dejarla vacía y el sistema funciona
+igual. Si más adelante se usa para cifrar sesiones o firmar datos, se genera con:
 
 ```
 php -r "echo bin2hex(random_bytes(16));"
 ```
+
+Si una clave llega a publicarse por error, revócala y genera una nueva en el proveedor:
+borrarla del archivo no basta si ya quedó expuesta.
+
+### Qué excluir al comprimir el proyecto para entregar
+
+Al generar el ZIP de entrega, deja fuera:
+
+| Qué excluir | Por qué |
+|---|---|
+| `.env` | Contiene contrasena de BD y clave de IA (y `APP_KEY` si la rellenaste) |
+| `.git/` | Historial completo del repositorio |
+| `config/local*.php` | Configuracion local si llegara a existir |
+| `.vscode/settings.json` | Preferencias locales del editor |
+| `*.log`, `*.tmp`, `Thumbs.db`, `.DS_Store` | Temporales y basura del sistema |
+| `vendor/` | Dependencias (se regeneran; este proyecto no usa Composer) |
+| `*.pem`, `*.key`, `*.p12`, `*.crt`, `*.sqlite`, `*.db` | Claves privadas y bases de datos locales |
+
+Incluye **`.env.example`**: es lo que permite a otra persona configurar y ejecutar el
+proyecto sin conocer tus secretos.
 
 ## Referencias oficiales
 

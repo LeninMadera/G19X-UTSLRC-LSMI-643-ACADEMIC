@@ -45,8 +45,11 @@ define('AI_API_KEY',  $env['AI_API_KEY']  ?? '');
 define('AI_MODEL',    $env['AI_MODEL']    ?? 'gpt-3.5-turbo');
 define('AI_BASE_URL', $env['AI_BASE_URL'] ?? 'https://api.openai.com/v1');
 
-// URL base y clave de sesion
+// URL base del proyecto
 define('APP_URL', $env['APP_URL'] ?? 'http://localhost/gobierno-datos-ia');
+
+// Reservada: se carga desde .env pero no interviene en ningun proceso
+// (las sesiones usan session_start() y las contrasenas, password_hash()).
 define('APP_KEY', $env['APP_KEY'] ?? '');
 
 // Integracion con fuentes externas (consumo REST/JSON via cURL).
