@@ -57,6 +57,7 @@ CREATE TABLE datasets (
     owner_id           INT UNSIGNED NOT NULL,    -- Data Owner responsable
     categoria_ia       VARCHAR(50)  NULL,        -- sugerida por IA
     etiquetas_ia       JSON         NULL,        -- JSON array de etiquetas
+    clasificacion      VARCHAR(20)  NULL         DEFAULT 'publico', -- publico|interno|confidencial|restringido
     activo             TINYINT(1)   NOT NULL DEFAULT 1,
     fecha_creacion     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -141,6 +142,39 @@ CREATE TABLE ai_detections (
         FOREIGN KEY (dataset_id) REFERENCES datasets (id) ON DELETE CASCADE,
     CONSTRAINT chk_severidad CHECK (severidad IN ('baja', 'media', 'alta', 'critica')),
     CONSTRAINT chk_estado_ia CHECK (estado IN ('pendiente', 'revisada', 'aplicada', 'descartada'))
+) ENGINE = InnoDB;
+
+-- ------------------------------------------------------------
+--  data_lineage
+--  Relaciones de linaje entre datasets del catalogo.
+--  Cada fila indica que el dataset origen aporta informacion al
+--  dataset destino segun el tipo de relacion.
+--
+--  Ejemplo: 1 -> 2 con tipo 'alimenta' significa que el dataset 1
+--  alimenta al dataset 2.
+--  Al borrar un dataset sus relaciones se eliminan solas
+--  (ON DELETE CASCADE). La misma pareja origen/destino puede
+--  repetirse siempre que cambie el tipo de relacion.
+-- ------------------------------------------------------------
+CREATE TABLE data_lineage (
+    id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    origen_id     INT UNSIGNED NOT NULL,
+    destino_id    INT UNSIGNED NOT NULL,
+    tipo          VARCHAR(30)  NOT NULL,
+    descripcion   VARCHAR(500) NULL,
+    creado_por    INT UNSIGNED NULL,
+    fecha_creacion TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_dl_origen
+        FOREIGN KEY (origen_id) REFERENCES datasets (id) ON DELETE CASCADE,
+    CONSTRAINT fk_dl_destino
+        FOREIGN KEY (destino_id) REFERENCES datasets (id) ON DELETE CASCADE,
+    CONSTRAINT fk_dl_creator
+        FOREIGN KEY (creado_por) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT chk_dl_tipo CHECK (tipo IN (
+        'derivado_de', 'alimenta', 'integra', 'transforma', 'copia', 'version_de'
+    )),
+    CONSTRAINT chk_dl_distintos CHECK (origen_id <> destino_id),
+    UNIQUE KEY uq_dl_relacion (origen_id, destino_id, tipo)
 ) ENGINE = InnoDB;
 
 -- ------------------------------------------------------------

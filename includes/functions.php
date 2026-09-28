@@ -65,6 +65,36 @@ function e(?string $value): string
 }
 
 /**
+ * Neutraliza celdas que empiezan con caracteres de formula (=, +, -, @)
+ * para evitar inyeccion de formulas CSV al abrir el archivo en Excel.
+ */
+function celdaCsv($valor): string
+{
+    $s = (string)$valor;
+    if ($s !== '' && in_array($s[0], ['=', '+', '-', '@'], true)) {
+        return "'" . $s;
+    }
+    return $s;
+}
+
+/**
+ * Descarga un archivo CSV (con BOM UTF-8 para compatibilidad con Excel).
+ */
+function descargarCsv(string $filename, array $headers, array $rows): void
+{
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    echo "\xEF\xBB\xBF";
+    $out = fopen('php://output', 'w');
+    fputcsv($out, array_map('celdaCsv', $headers));
+    foreach ($rows as $row) {
+        fputcsv($out, array_map('celdaCsv', $row));
+    }
+    fclose($out);
+    exit;
+}
+
+/**
  * Inicia la sesion de forma segura (httponly, cookie de sesion).
  */
 function startSession(): void
@@ -125,7 +155,7 @@ function currentUser(): ?array
 function requireAuth(): void
 {
     if (currentUser() === null) {
-        respondJson(false, null, 'No autorizado. Inicia sesion primero.');
+        respondJson(false, null, 'No autorizado. Inicia sesion primero.', 401);
     }
 }
 
@@ -137,7 +167,7 @@ function requireRole(array $allowedRoles): void
     requireAuth();
     $rol = currentRole();
     if (!in_array($rol, $allowedRoles, true)) {
-        respondJson(false, null, 'No tienes permisos para esta accion.');
+        respondJson(false, null, 'No tienes permisos para esta accion.', 403);
     }
 }
 

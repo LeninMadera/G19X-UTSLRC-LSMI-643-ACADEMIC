@@ -3,12 +3,15 @@
  * API del catalogo de datasets.
  *
  *   GET  api/datasets.php?action=list&search=...&categoria=...   (todos los roles)
+ *   GET  api/datasets.php?action=search&q=...&categoria=...      (todos los roles, busqueda semantica con IA)
  *   GET  api/datasets.php?action=detail&id=N                      (todos los roles)
+ *   GET  api/datasets.php?action=export&search=...&categoria=...  (todos los roles, CSV)
  *   POST api/datasets.php?action=create                           (admin, steward, owner)
  *   POST api/datasets.php?action=update                           (admin, steward, owner en su dataset)
  *   POST api/datasets.php?action=delete                           (admin, steward)
  */
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/semantic_search.php';
 
 requireAuth();
 
@@ -17,6 +20,7 @@ $action = query('action', '');
 // Catalogos cerrados: evita valores inventados en categoria/origen
 const CATEGORIAS = ['Finanzas', 'Clientes', 'Operaciones', 'Ventas', 'Recursos Humanos', 'Marketing', 'Legal', 'Otros'];
 const ORIGENES  = ['Base de datos', 'Archivo', 'API', 'CRM', 'SQL Server', 'CSV', 'Otro'];
+const CLASIFICACIONES = ['publico', 'interno', 'confidencial', 'restringido'];
 
 /** Usuarios validos como Data Owner (rol 'owner' o admin). */
 function obtenerOwners(): array
@@ -49,8 +53,8 @@ switch ($action) {
         $search    = trim((string) query('search', ''));
         $categoria = trim((string) query('categoria', ''));
 
-        $sql = 'SELECT d.id, d.nombre, d.descripcion, d.categoria, d.origen, d.activo,
-                       d.categoria_ia, d.etiquetas_ia, u.nombre AS owner_name,
+        $sql = 'SELECT d.id, d.nombre, d.descripcion, d.categoria, d.origen, d.activo, d.clasificacion,
+                       d.categoria_ia, d.etiquetas_ia, d.owner_id, u.nombre AS owner_name,
                        (SELECT qm.score FROM quality_metrics qm
                          WHERE qm.dataset_id = d.id
                          ORDER BY qm.fecha_medicion DESC, qm.id DESC LIMIT 1) AS ultimo_score
@@ -60,9 +64,16 @@ switch ($action) {
         $params = [];
 
         if ($search !== '') {
-            $sql .= ' AND (d.nombre LIKE :search_a OR d.descripcion LIKE :search_b)';
-            $params['search_a'] = '%' . $search . '%';
-            $params['search_b'] = '%' . $search . '%';
+            // Campos de texto buscables del dataset. Un placeholder distinto
+            // por columna: con emulacion de prepares desactivada reutilizar el
+            // mismo placeholder varias veces provoke SQLSTATE[HY093].
+            $likes = [];
+            foreach (CAMPOS_BUSQUEDA as $col => $campo) {
+                $ph = 'search_' . $col;
+                $likes[] = "d.{$campo} LIKE :{$ph}";
+                $params[$ph] = '%' . $search . '%';
+            }
+            $sql .= ' AND (' . implode(' OR ', $likes) . ')';
         }
         if ($categoria !== '') {
             $sql .= ' AND d.categoria = :categoria';
@@ -78,6 +89,128 @@ switch ($action) {
             'datasets'   => $datasets,
             'categorias' => CATEGORIAS,
             'owners'     => obtenerOwners(),
+        ]);
+        break;
+
+    case 'search':
+        // Busqueda semantica asistida por IA: la IA expande la consulta en
+        // terminos relacionados, SQL trae las candidatas y PHP las ordena por
+        // relevancia. Mismos permisos que 'list' (solo requireAuth).
+        $search    = mb_substr(trim((string) query('q', '')), 0, MAX_QUERY);
+        $categoria = trim((string) query('categoria', ''));
+
+        if ($search === '') {
+            respondJson(true, [
+                'datasets'      => [],
+                'categorias'    => CATEGORIAS,
+                'terminos'      => [],
+                'simulado'      => ai_simulado(),
+                'fallback'      => false,
+            ], 'Escribe una consulta para usar la busqueda semantica.');
+        }
+
+        // 1) Expansion de la consulta, con cache FIFO en la sesion
+        $claveCache = sem_normalizar($search);
+        $fallback   = false;
+        $cache      = sem_cache_leer($claveCache);
+
+        if ($cache !== null) {
+            $expansion = $cache;
+        } else {
+            try {
+                $expansion = sem_expandir_consulta($search, CATEGORIAS);
+                sem_cache_guardar($claveCache, $expansion);
+            } catch (Throwable $e) {
+                // La IA fallo o no devolvio nada utilizable: se degrada a la
+                // busqueda literal con el termino original, sin expansion.
+                $expansion = sem_simular_expansion($search);
+                $expansion['otros']    = [];
+                $expansion['simulado'] = true;
+                $fallback = true;
+            }
+        }
+
+        // 2) Lista de terminos: el original pesa mas que los expandidos.
+        //    En fallback solo se busca el termino original, tal cual.
+        if ($fallback) {
+            $terminosBusqueda = [
+                ['texto' => $expansion['original'], 'etiqueta' => $expansion['original'], 'original' => true],
+            ];
+        } else {
+            $terminosBusqueda = sem_lista_terminos($expansion);
+        }
+
+        // 3) Candidatas: cualquier termino en cualquier campo de texto
+        $resultados = [];
+
+        // Una consulta sin texto utilizable (solo signos o palabras vacias)
+        // no genera terminos: se responde vacio en lugar de consultar.
+        if ($terminosBusqueda !== []) {
+            $sql = 'SELECT d.id, d.nombre, d.descripcion, d.categoria, d.origen, d.activo, d.clasificacion,
+                           d.categoria_ia, d.etiquetas_ia, d.owner_id, d.fecha_actualizacion,
+                           u.nombre AS owner_name,
+                           (SELECT qm.score FROM quality_metrics qm
+                             WHERE qm.dataset_id = d.id
+                             ORDER BY qm.fecha_medicion DESC, qm.id DESC LIMIT 1) AS ultimo_score
+                    FROM datasets d
+                    INNER JOIN users u ON u.id = d.owner_id
+                    WHERE 1 = 1';
+            $params = [];
+
+            // Un placeholder distinto por cada par termino/campo: con emulacion
+            // de prepares desactivada reutilizarlo Provocaria SQLSTATE[HY093].
+            $likes = [];
+            $i = 0;
+            foreach ($terminosBusqueda as $t) {
+                foreach (CAMPOS_BUSQUEDA as $campo) {
+                    $ph = 'sem_' . $i++;
+                    $likes[] = "d.{$campo} LIKE :{$ph}";
+                    $params[$ph] = '%' . $t['texto'] . '%';
+                }
+            }
+            $sql .= ' AND (' . implode(' OR ', $likes) . ')';
+
+            if ($categoria !== '') {
+                $sql .= ' AND d.categoria = :categoria';
+                $params['categoria'] = $categoria;
+            }
+
+            $stmt = db()->prepare($sql);
+            $stmt->execute($params);
+
+            // 4) Orden por relevancia ponderada
+            $puntuacion = [
+                'original'        => $expansion['original'],
+                'original_factor' => FACTOR_TERMINO_ORIGINAL,
+                'todos'           => $terminosBusqueda,
+            ];
+            $resultados = sem_puntuar($stmt->fetchAll(), $puntuacion);
+
+            $maximo = sem_maximo_puntaje($puntuacion);
+            foreach ($resultados as &$r) {
+                $r['puntos']    = (int) $r['puntos'];
+                $r['relevancia'] = $maximo > 0
+                    ? (int) min(100, round($r['puntos'] * 100 / $maximo))
+                    : 0;
+            }
+            unset($r);
+        }
+
+        // Solo datos operacionales: nunca la consulta ni los terminos.
+        logActivity('datasets:buscar', [
+            'modo'       => 'semantico',
+            'simulado'   => (bool) $expansion['simulado'],
+            'fallback'   => $fallback,
+            'resultados' => count($resultados),
+        ]);
+
+        respondJson(true, [
+            'datasets'       => $resultados,
+            'categorias'     => CATEGORIAS,
+            'terminos'       => array_column($terminosBusqueda, 'etiqueta'),
+            'interpretacion' => $expansion['interpretacion'],
+            'simulado'       => (bool) $expansion['simulado'],
+            'fallback'       => $fallback,
         ]);
         break;
 
@@ -132,6 +265,27 @@ switch ($action) {
         $stmt->execute(['id' => $id]);
         $dataset['detections'] = $stmt->fetchAll();
 
+        // Linaje de datos: de que datasets recibe y hacia que datasets envia
+        $stmt = db()->prepare(
+            'SELECT l.id, l.origen_id, d.nombre AS origen_nombre, l.tipo, l.descripcion, l.fecha_creacion
+             FROM data_lineage l
+             INNER JOIN datasets d ON d.id = l.origen_id
+             WHERE l.destino_id = :id
+             ORDER BY l.fecha_creacion DESC, l.id DESC'
+        );
+        $stmt->execute(['id' => $id]);
+        $dataset['linaje_entrada'] = $stmt->fetchAll();
+
+        $stmt = db()->prepare(
+            'SELECT l.id, l.destino_id, d.nombre AS destino_nombre, l.tipo, l.descripcion, l.fecha_creacion
+             FROM data_lineage l
+             INNER JOIN datasets d ON d.id = l.destino_id
+             WHERE l.origen_id = :id
+             ORDER BY l.fecha_creacion DESC, l.id DESC'
+        );
+        $stmt->execute(['id' => $id]);
+        $dataset['linaje_salida'] = $stmt->fetchAll();
+
         respondJson(true, $dataset);
         break;
 
@@ -143,6 +297,7 @@ switch ($action) {
         $descripcion = trim((string)($data['descripcion'] ?? ''));
         $categoria   = trim((string)($data['categoria'] ?? ''));
         $origen      = trim((string)($data['origen'] ?? ''));
+        $clasificacion = trim((string)($data['clasificacion'] ?? 'publico'));
         $ownerId     = (int)($data['owner_id'] ?? 0);
         $activo      = isset($data['activo']) ? (int)$data['activo'] : 1;
 
@@ -164,14 +319,17 @@ switch ($action) {
         if ($origen === '' || !in_array($origen, ORIGENES, true)) {
             respondJson(false, null, 'Origen invalido.');
         }
+        if (!in_array($clasificacion, CLASIFICACIONES, true)) {
+            respondJson(false, null, 'Clasificacion invalida.');
+        }
         if ($ownerId <= 0) {
             respondJson(false, null, 'Debes seleccionar un Data Owner.');
         }
 
         try {
             $stmt = db()->prepare(
-                'INSERT INTO datasets (nombre, descripcion, categoria, origen, owner_id, activo)
-                 VALUES (:nombre, :descripcion, :categoria, :origen, :owner_id, :activo)'
+                'INSERT INTO datasets (nombre, descripcion, categoria, origen, owner_id, clasificacion, activo)
+                 VALUES (:nombre, :descripcion, :categoria, :origen, :owner_id, :clasificacion, :activo)'
             );
             $stmt->execute([
                 'nombre'      => $nombre,
@@ -179,6 +337,7 @@ switch ($action) {
                 'categoria'   => $categoria,
                 'origen'      => $origen,
                 'owner_id'    => $ownerId,
+                'clasificacion' => $clasificacion,
                 'activo'      => $activo,
             ]);
             $datasetId = (int) db()->lastInsertId();
@@ -199,9 +358,15 @@ switch ($action) {
         $descripcion = trim((string)($data['descripcion'] ?? ''));
         $categoria   = trim((string)($data['categoria'] ?? ''));
         $origen      = trim((string)($data['origen'] ?? ''));
-        // El owner_id solo se cambia por admin/steward
+        $clasificacion = trim((string)($data['clasificacion'] ?? 'publico'));
         $ownerId     = (int)($data['owner_id'] ?? 0);
         $activo      = isset($data['activo']) ? (int)$data['activo'] : 1;
+
+        $rol = currentRole();
+        if ($rol === 'owner') {
+            // Un Data Owner solo puede gestionar sus propios datasets
+            $ownerId = (int) currentUser()['id'];
+        }
 
         if ($id <= 0) {
             respondJson(false, null, 'ID de dataset invalido.');
@@ -218,6 +383,9 @@ switch ($action) {
         if ($origen === '' || !in_array($origen, ORIGENES, true)) {
             respondJson(false, null, 'Origen invalido.');
         }
+        if (!in_array($clasificacion, CLASIFICACIONES, true)) {
+            respondJson(false, null, 'Clasificacion invalida.');
+        }
         if ($ownerId <= 0) {
             respondJson(false, null, 'Debes seleccionar un Data Owner.');
         }
@@ -226,7 +394,7 @@ switch ($action) {
             $stmt = db()->prepare(
                 'UPDATE datasets
                  SET nombre = :nombre, descripcion = :descripcion, categoria = :categoria,
-                     origen = :origen, owner_id = :owner_id, activo = :activo
+                     origen = :origen, owner_id = :owner_id, clasificacion = :clasificacion, activo = :activo
                  WHERE id = :id'
             );
             $stmt->execute([
@@ -235,6 +403,7 @@ switch ($action) {
                 'categoria'   => $categoria,
                 'origen'      => $origen,
                 'owner_id'    => $ownerId,
+                'clasificacion' => $clasificacion,
                 'activo'      => $activo,
                 'id'          => $id,
             ]);
@@ -267,6 +436,58 @@ switch ($action) {
 
         logActivity('datasets:delete', ['dataset_id' => $id]);
         respondJson(true, null, 'Dataset eliminado.');
+        break;
+
+    case 'export':
+        $search    = trim((string) query('search', ''));
+        $categoria = trim((string) query('categoria', ''));
+
+        $sql = 'SELECT d.id, d.nombre, d.descripcion, d.categoria, d.origen, d.clasificacion, d.activo,
+                       u.nombre AS owner_name, u.email AS owner_email,
+                       (SELECT qm.score FROM quality_metrics qm
+                         WHERE qm.dataset_id = d.id
+                         ORDER BY qm.fecha_medicion DESC, qm.id DESC LIMIT 1) AS ultimo_score
+                FROM datasets d
+                INNER JOIN users u ON u.id = d.owner_id
+                WHERE 1 = 1';
+        $params = [];
+
+        if ($search !== '') {
+            // Mismo criterio que en 'list': un placeholder por columna.
+            $likes = [];
+            foreach (CAMPOS_BUSQUEDA as $col => $campo) {
+                $ph = 'search_' . $col;
+                $likes[] = "d.{$campo} LIKE :{$ph}";
+                $params[$ph] = '%' . $search . '%';
+            }
+            $sql .= ' AND (' . implode(' OR ', $likes) . ')';
+        }
+        if ($categoria !== '') {
+            $sql .= ' AND d.categoria = :categoria';
+            $params['categoria'] = $categoria;
+        }
+
+        $stmt = db()->prepare($sql);
+        $stmt->execute($params);
+        $datos = $stmt->fetchAll();
+
+        $rows = array_map(function ($r) {
+            $nivel = $r['ultimo_score'] === null ? 'Sin mediciones'
+                : ($r['ultimo_score'] >= 85 ? 'Excelente' : ($r['ultimo_score'] >= 70 ? 'Aceptable' : 'Por mejorar'));
+            return [
+                $r['id'],
+                $r['nombre'],
+                $r['categoria'],
+                $r['origen'],
+                $r['clasificacion'] ?? 'publico',
+                $r['owner_name'] . ' <' . $r['owner_email'] . '>',
+                $r['activo'] == 1 ? 'Si' : 'No',
+                $r['ultimo_score'] ?? '',
+                $nivel,
+            ];
+        }, $datos);
+
+        descargarCsv('catalogo_datasets_' . date('Ymd_His') . '.csv', ['ID', 'Nombre', 'Categoria', 'Origen', 'Clasificacion', 'Propietario', 'Activo', 'Ultimo score', 'Nivel'], $rows);
         break;
 
     default:

@@ -63,6 +63,7 @@ switch ($action) {
         startSession();
         $_SESSION = [];
         session_destroy();
+        setcookie(session_name(), '', time() - 42000, '/');
         respondJson(true, null, 'Sesion cerrada.');
         break;
 

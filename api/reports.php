@@ -100,6 +100,22 @@ switch ($action) {
         respondJson(true, ['logs' => $stmt->fetchAll()]);
         break;
 
+    case 'export':
+        $rows = [];
+        foreach (ultimosScores() as $s) {
+            $nivel = $s['score'] === null ? 'Sin mediciones'
+                : ($s['score'] >= 85 ? 'Excelente' : ($s['score'] >= 70 ? 'Aceptable' : 'Por mejorar'));
+            $rows[] = [
+                $s['nombre'],
+                $s['categoria'],
+                $s['score'] ?? '',
+                $s['ultima_medicion'] ?? '',
+                $nivel,
+            ];
+        }
+        descargarCsv('reporte_calidad_' . date('Ymd_His') . '.csv', ['Dataset', 'Categoria', 'Ultimo score', 'Ultima medicion', 'Nivel'], $rows);
+        break;
+
     default:
         respondJson(false, null, 'Accion no valida.');
 }

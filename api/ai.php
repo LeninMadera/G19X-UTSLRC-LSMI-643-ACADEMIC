@@ -7,6 +7,8 @@
  *   POST api/ai.php?action=anomalies   (admin, steward, owner)
  *   POST api/ai.php?action=summary     (admin, steward, owner)
  *   POST api/ai.php?action=suggest     (admin, steward, owner)
+ *   POST api/ai.php?action=resolve     (admin, steward, owner)  body: { detection_id, estado }
+ *   POST api/ai.php?action=confirm_classify (admin, steward, owner) body: { detection_id }
  */
 require_once __DIR__ . '/../includes/ai_service.php';
 
@@ -38,6 +40,81 @@ function anomaliasPendientes(int $datasetId): int
 }
 
 switch ($action) {
+    // Indica que una deteccion fue atendida (estado pendiente -> revisada/aplicada/descartada).
+    // POST api/ai.php?action=resolve  body: { detection_id, estado }
+    case 'resolve':
+        requireRole(['admin', 'steward', 'owner']);
+        $data = jsonInput();
+        $detectionId = (int)($data['detection_id'] ?? 0);
+        $estado = trim((string)($data['estado'] ?? ''));
+        if ($detectionId <= 0) {
+            respondJson(false, null, 'Deteccion invalida.');
+        }
+        if (!in_array($estado, ['revisada', 'aplicada', 'descartada'], true)) {
+            respondJson(false, null, 'Estado invalido.');
+        }
+
+        $stmt = db()->prepare('SELECT dataset_id FROM ai_detections WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $detectionId]);
+        $det = $stmt->fetch();
+        if (!$det) {
+            respondJson(false, null, 'Deteccion no encontrada.', 404);
+        }
+        if (!puedeEditarDataset((int)$det['dataset_id'])) {
+            respondJson(false, null, 'No tienes permisos sobre este dataset.', 403);
+        }
+
+        db()->prepare('UPDATE ai_detections SET estado = :estado WHERE id = :id')
+            ->execute(['estado' => $estado, 'id' => $detectionId]);
+        logActivity('ai:resolve', ['detection_id' => $detectionId, 'estado' => $estado]);
+        respondJson(true, null, 'Estado actualizado a ' . $estado . '.');
+        break;
+
+    // Aplica la clasificacion sugerida por la IA al dataset y cierra la deteccion.
+    // POST api/ai.php?action=confirm_classify  body: { detection_id }
+    case 'confirm_classify':
+        requireRole(['admin', 'steward', 'owner']);
+        $data = jsonInput();
+        $detectionId = (int)($data['detection_id'] ?? 0);
+        if ($detectionId <= 0) {
+            respondJson(false, null, 'Deteccion invalida.');
+        }
+
+        $stmt = db()->prepare(
+            'SELECT dataset_id, tipo, estado, descripcion_ia FROM ai_detections WHERE id = :id LIMIT 1'
+        );
+        $stmt->execute(['id' => $detectionId]);
+        $det = $stmt->fetch();
+        if (!$det) {
+            respondJson(false, null, 'Deteccion no encontrada.', 404);
+        }
+        if ($det['tipo'] !== 'clasificacion') {
+            respondJson(false, null, 'La deteccion no es una clasificacion.');
+        }
+        if ($det['estado'] === 'aplicada') {
+            respondJson(false, null, 'La clasificacion ya fue aplicada.');
+        }
+        if (!puedeEditarDataset((int)$det['dataset_id'])) {
+            respondJson(false, null, 'No tienes permisos sobre este dataset.', 403);
+        }
+
+        $stmt = db()->prepare(
+            'SELECT categoria_ia, etiquetas_ia FROM datasets WHERE id = :id LIMIT 1'
+        );
+        $stmt->execute(['id' => $det['dataset_id']]);
+        $ds = $stmt->fetch();
+        if (!$ds || $ds['categoria_ia'] === null || $ds['categoria_ia'] === '') {
+            respondJson(false, null, 'No hay categoria de IA que confirmar.');
+        }
+
+        db()->prepare('UPDATE datasets SET categoria = :cat WHERE id = :id')
+            ->execute(['cat' => $ds['categoria_ia'], 'id' => $det['dataset_id']]);
+        db()->prepare("UPDATE ai_detections SET estado = 'aplicada' WHERE id = :id")
+            ->execute(['id' => $detectionId]);
+
+        logActivity('ai:confirm_classify', ['dataset_id' => $det['dataset_id'], 'categoria' => $ds['categoria_ia']]);
+        respondJson(true, ['categoria' => $ds['categoria_ia']], 'Clasificacion confirmada y aplicada al dataset.');
+        break;
 
     case 'status':
         respondJson(true, [
@@ -114,6 +191,16 @@ switch ($action) {
 
         $insertadas = 0;
         foreach ($anomalias as $a) {
+            $desc = mb_substr($a['descripcion'], 0, 500);
+            $prev = db()->prepare(
+                "SELECT id FROM ai_detections
+                 WHERE dataset_id = :id AND tipo = 'anomalia' AND estado = 'pendiente' AND descripcion_ia = :desc
+                 LIMIT 1"
+            );
+            $prev->execute(['id' => $datasetId, 'desc' => $desc]);
+            if ($prev->fetch() !== false) {
+                continue;
+            }
             db()->prepare(
                 'INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, recomendacion_ia, estado)
                  VALUES (:id, :tipo, :sev, :desc, :rec, :est)'
@@ -121,8 +208,8 @@ switch ($action) {
                 'id'    => $datasetId,
                 'tipo'  => 'anomalia',
                 'sev'   => $a['severidad'],
-                'desc'  => mb_substr($a['descripcion'], 0, 500),
-                'rec'   => null,
+                'desc'  => $desc,
+                'rec'   => mb_substr($a['recomendacion'] ?? '', 0, 500) ?: null,
                 'est'   => 'pendiente',
             ]);
             $insertadas++;
@@ -163,6 +250,16 @@ switch ($action) {
             respondJson(false, null, $e->getMessage());
         }
 
+        db()->prepare(
+            "INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, estado)
+             VALUES (:id, :tipo, :sev, :desc, 'aplicada')"
+        )->execute([
+            'id'    => $datasetId,
+            'tipo'  => 'resumen',
+            'sev'   => 'baja',
+            'desc'  => mb_substr($texto, 0, 500),
+        ]);
+
         logActivity('ai:summary', ['dataset_id' => $datasetId, 'simulado' => ai_simulado()]);
         respondJson(true, ['resumen' => $texto], '');
         break;
@@ -181,7 +278,7 @@ switch ($action) {
              ORDER BY fecha_medicion DESC, id DESC LIMIT 1'
         );
         $stmt->execute(['id' => $datasetId]);
-        $ultima = $stmt->fetch();
+        $ultima = $stmt->fetch() ?: null;
 
         try {
             $sugerencias = ia_sugerencias($ultima);
@@ -190,6 +287,16 @@ switch ($action) {
         }
 
         foreach ($sugerencias as $s) {
+            $desc = mb_substr($s['descripcion'], 0, 500);
+            $prev = db()->prepare(
+                "SELECT id FROM ai_detections
+                 WHERE dataset_id = :id AND tipo = 'sugerencia' AND estado = 'pendiente' AND descripcion_ia = :desc
+                 LIMIT 1"
+            );
+            $prev->execute(['id' => $datasetId, 'desc' => $desc]);
+            if ($prev->fetch() !== false) {
+                continue;
+            }
             db()->prepare(
                 'INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, recomendacion_ia, estado)
                  VALUES (:id, :tipo, :sev, :desc, :rec, :est)'
@@ -197,8 +304,8 @@ switch ($action) {
                 'id'    => $datasetId,
                 'tipo'  => 'sugerencia',
                 'sev'   => 'media',
-                'desc'  => mb_substr($s['recomendacion'], 0, 500),
-                'rec'   => null,
+                'desc'  => $desc,
+                'rec'   => mb_substr($s['recomendacion'], 0, 500),
                 'est'   => 'pendiente',
             ]);
         }

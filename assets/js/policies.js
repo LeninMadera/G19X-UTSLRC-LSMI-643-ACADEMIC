@@ -2,6 +2,8 @@
    Politicas de gobierno de datos
    ============================================================ */
 
+/* global api, esc */
+
 document.addEventListener('DOMContentLoaded', () => {
     const tbody      = document.getElementById('policies-tbody');
     const msg        = document.getElementById('msg');
@@ -15,11 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
         policies: [], datasets: [], current: null, preview: new Set()
     };
 
-    function esc(t) {
-        const div = document.createElement('div');
-        div.textContent = t == null ? '' : String(t);
-        return div.innerHTML;
-    }
+    const rol = document.querySelector('.badge-role')?.textContent || '';
+    const puedeEditar = ['admin', 'steward'].includes(rol);
 
     function mostrarMsg(texto, tipo = 'success') {
         msg.textContent = texto;
@@ -42,17 +41,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         json.data.policies.forEach(p => {
             const tr = document.createElement('tr');
+            const acciones = puedeEditar ? (
+                '<button class="btn btn-ghost btn-sm" data-edit="' + p.id + '">Editar</button> ' +
+                '<button class="btn btn-ghost btn-sm" data-assign="' + p.id + '">Asignar</button> ' +
+                '<button class="btn btn-danger btn-sm" data-del="' + p.id + '">Eliminar</button>'
+            ) : '-';
             tr.innerHTML =
                 '<td>' + esc(p.titulo) + '</td>' +
                 '<td>' + esc(p.tipo) + '</td>' +
                 '<td><span class="badge badge-' + (p.estado === 'activa' ? 'active' : 'inactive') + '">' + esc(p.estado) + '</span></td>' +
                 '<td>' + p.datasets_asignados + '</td>' +
                 '<td>' + esc(p.creado_por || '-') + '</td>' +
-                '<td class="actions-cell">' +
-                    '<button class="btn btn-ghost btn-sm" data-edit="' + p.id + '">Editar</button> ' +
-                    '<button class="btn btn-ghost btn-sm" data-assign="' + p.id + '">Asignar</button> ' +
-                    '<button class="btn btn-danger btn-sm" data-del="' + p.id + '">Eliminar</button>' +
-                '</td>';
+                '<td class="actions-cell">' + acciones + '</td>';
             tbody.appendChild(tr);
         });
     }
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modAssign.classList.remove('hidden');
     }
 
-    btnNueva.addEventListener('click', () => abrirModal(null));
+    if (btnNueva) btnNueva.addEventListener('click', () => abrirModal(null));
 
     document.querySelectorAll('[data-close]').forEach(btn => {
         btn.addEventListener('click', () => {

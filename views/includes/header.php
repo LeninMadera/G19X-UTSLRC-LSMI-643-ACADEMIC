@@ -20,7 +20,10 @@ $titleText = $pageTitle ?? 'Gobierno de Datos';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($titleText) ?> | Gobierno de Datos IA</title>
     <link rel="stylesheet" href="<?= e(APP_URL) ?>/assets/css/style.css">
-    <script>window.APP_URL = "<?= e(APP_URL) ?>";</script>
+    <script>
+        window.APP_URL = "<?= e(APP_URL) ?>";
+        window.APP_USER = { id: <?= (int)$current['id'] ?>, rol: "<?= e($current['rol']) ?>" };
+    </script>
 </head>
 <body>
 <div class="app">
@@ -34,6 +37,7 @@ $titleText = $pageTitle ?? 'Gobierno de Datos';
         <a href="<?= e(APP_URL) ?>/views/datasets.php">Catalogo de datos</a>
         <a href="<?= e(APP_URL) ?>/views/quality.php">Calidad de datos</a>
         <a href="<?= e(APP_URL) ?>/views/policies.php">Politicas</a>
+        <a href="<?= e(APP_URL) ?>/views/lineage.php">Linaje de datos</a>
         <a href="<?= e(APP_URL) ?>/views/ai.php">Asistente IA</a>
         <a href="<?= e(APP_URL) ?>/views/reports.php">Reportes</a>
         <?php if ($current['rol'] === 'admin'): ?>

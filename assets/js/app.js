@@ -33,16 +33,11 @@ async function api(action, data = {}, method = 'POST') {
     }
 }
 
-function showAlert(containerId, message, type = 'error') {
-    const el = document.getElementById(containerId);
-    if (!el) return;
-    el.className = 'alert alert-' + type;
-    el.textContent = message;
-}
-
-function hideAlert(containerId) {
-    const el = document.getElementById(containerId);
-    if (el) el.classList.add('hidden');
+// Escapa texto para insertarlo de forma segura en HTML (anti-XSS).
+function esc(t) {
+    const div = document.createElement('div');
+    div.textContent = t == null ? '' : String(t);
+    return div.innerHTML;
 }
 
 // Cierre de sesion global (boton con id="btn-logout")
@@ -77,7 +72,7 @@ function drawBars(canvas, items) {
     const pad = { top: 22, right: 10, bottom: 34, left: 42 };
     const chartW = W - pad.left - pad.right;
     const chartH = H - pad.top - pad.bottom;
-    const max = Math.max.apply(null, items.map(i => i.value), 1);
+    const max = Math.max(1, ...items.map(i => i.value));
     const maxVal = Math.ceil(max / 5) * 5;
 
     ctx.strokeStyle = '#e2e8f0';

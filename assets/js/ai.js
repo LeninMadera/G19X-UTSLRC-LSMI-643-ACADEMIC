@@ -2,6 +2,8 @@
    Asistente de Inteligencia Artificial
    ============================================================ */
 
+/* global api, esc, APP_USER */
+
 document.addEventListener('DOMContentLoaded', () => {
     const selDataset = document.getElementById('sel-dataset');
     const panelAcc   = document.getElementById('panel-acciones');
@@ -12,12 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const rol = document.querySelector('.badge-role')?.textContent || '';
     const puedeUsar = ['admin', 'steward', 'owner'].includes(rol);
+    const userId    = (window.APP_USER && window.APP_USER.id) || null;
 
-    function esc(t) {
-        const div = document.createElement('div');
-        div.textContent = t == null ? '' : String(t);
-        return div.innerHTML;
-    }
+    if (!puedeUsar && panelAcc) panelAcc.style.display = 'none';
 
     function mostrarMsg(texto, tipo = 'success') {
         msg.textContent = texto;
@@ -82,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!json.success) return;
         selDataset.innerHTML = '<option value="">Selecciona un dataset</option>';
         json.data.datasets.forEach(d => {
+            if (rol === 'owner' && Number(d.owner_id) !== Number(userId)) return;
             const opt = document.createElement('option');
             opt.value = d.id;
             opt.textContent = d.nombre;
@@ -101,11 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     selDataset.addEventListener('change', () => {
+        if (!puedeUsar) return;
         panelAcc.style.display = selDataset.value ? 'block' : 'none';
         panelRes.style.display = 'none';
     });
 
-    document.getElementById('panel-acciones').addEventListener('click', async (e) => {
+    panelAcc.addEventListener('click', async (e) => {
         const btn = e.target.closest('[data-accion]');
         if (!btn || !selDataset.value) return;
         panelRes.style.display = 'none';

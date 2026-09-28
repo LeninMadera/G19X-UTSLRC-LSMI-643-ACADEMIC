@@ -6,7 +6,11 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://127.0.0.1:8000" }
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" },
+    { "key": "dataset_id", "value": "8" },
+    { "key": "user_id", "value": "9" },
+    { "key": "policy_id", "value": "5" },
+    { "key": "lineage_id", "value": "1" }
   ],
   "item": [
     {
@@ -48,15 +52,30 @@
           "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=list&search=ventas&categoria=Finanzas", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "list" }, { "key": "search", "value": "ventas" }, { "key": "categoria", "value": "Finanzas" }] } }
         },
         { "name": "Detalle dataset (id=1)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=detail&id=1", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "detail" }, { "key": "id", "value": "1" }] } } },
-        {
+{
           "name": "Crear dataset",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Catalogo de productos 2025\", \"descripcion\": \"Listado maestros de productos para la empresa.\", \"categoria\": \"Operaciones\", \"origen\": \"SAP\", \"owner_id\": 4, \"activo\": 1 }" } }
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Catalogo de productos 2025\", \"descripcion\": \"Listado maestros de productos para la empresa.\", \"categoria\": \"Operaciones\", \"origen\": \"Base de datos\", \"owner_id\": 3, \"activo\": 1 }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Crear dataset exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.id).to.be.above(0);",
+                  "    pm.collectionVariables.set('dataset_id', String(d.data.id));",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Actualizar dataset (id=8)",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=update&id=8", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "update" }, { "key": "id", "value": "8" }] }, "body": { "mode": "raw", "raw": "{ \"descripcion\": \"Listado maestro de productos con clasificacion IA.\" }" } }
+          "name": "Actualizar dataset (id={{dataset_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{dataset_id}}\", \"nombre\": \"Catalogo de productos 2025\", \"descripcion\": \"Listado maestro de productos con clasificacion IA.\", \"categoria\": \"Operaciones\", \"origen\": \"Base de datos\", \"owner_id\": 3, \"activo\": 1 }" } }
         },
-        { "name": "Eliminar dataset (id=8)", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=delete&id=8", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "delete" }, { "key": "id", "value": "8" }] } } }
+        { "name": "Eliminar dataset (id={{dataset_id}})", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{dataset_id}}\" }" } } }
       ]
     },
     {
@@ -67,42 +86,154 @@
           "name": "Registrar medicion",
           "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/quality.php?action=register", "host": ["{{baseUrl}}"], "path": ["api", "quality.php"], "query": [{ "key": "action", "value": "register" }] }, "body": { "mode": "raw", "raw": "{\n  \"dataset_id\": 1,\n  \"completitud\": 92.0,\n  \"exactitud\": 88.5,\n  \"consistencia\": 95.0,\n  \"vigencia\": 90.0,\n  \"unicidad\": 97.5\n}" } }
         },
-        { "name": "Eliminar medicion (id=8)", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/quality.php?action=delete&id=8", "host": ["{{baseUrl}}"], "path": ["api", "quality.php"], "query": [{ "key": "action", "value": "delete" }, { "key": "id", "value": "8" }] } } }
+        { "name": "Eliminar medicion (id=8)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/quality.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "quality.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": 8 }" } } }
       ]
     },
     {
       "name": "Politicas",
       "item": [
         { "name": "Listar politicas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/policies.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "list" }] } } },
-        {
+{
           "name": "Crear politica",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"titulo\": \"Retencion minima de ventas\", \"descripcion\": \"Los datos de ventas deben conservarse 5 anios.\", \"tipo\": \"retencion\", \"estado\": \"activa\" }" } }
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"titulo\": \"Retencion minima de ventas\", \"descripcion\": \"Los datos de ventas deben conservarse 5 anios.\", \"tipo\": \"retencion\", \"estado\": \"activa\" }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Crear politica exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.id).to.be.above(0);",
+                  "    pm.collectionVariables.set('policy_id', String(d.data.id));",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Asignar politica a datasets",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=assign&id=5", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "assign" }, { "key": "id", "value": "5" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_ids\": [1, 2] }" } }
+          "name": "Asignar politica a dataset",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=assign", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "assign" }] }, "body": { "mode": "raw", "raw": "{ \"policy_id\": \"{{policy_id}}\", \"dataset_id\": \"{{dataset_id}}\" }" } }
         },
         {
-          "name": "Desasignar politicas",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=unassign&id=5", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "unassign" }, { "key": "id", "value": "5" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_ids\": [1, 2] }" } }
+          "name": "Desasignar politica",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=unassign", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "unassign" }] }, "body": { "mode": "raw", "raw": "{ \"policy_id\": \"{{policy_id}}\", \"dataset_id\": \"{{dataset_id}}\" }" } }
         },
-        { "name": "Eliminar politica (id=5)", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/policies.php?action=delete&id=5", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "delete" }, { "key": "id", "value": "5" }] } } }
+        { "name": "Eliminar politica (id={{policy_id}})", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/policies.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{policy_id}}\" }" } } }
+      ]
+    },
+    {
+      "name": "Linaje",
+      "item": [
+        {
+          "name": "Listar relaciones de linaje",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/lineage.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "lineage.php"], "query": [{ "key": "action", "value": "list" }] } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Listar linaje exitoso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.relaciones).to.be.an('array');",
+                  "    pm.expect(d.data.tipos.length).to.eql(6);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "Listar relaciones de un dataset (id={{dataset_id}})", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/lineage.php?action=list&dataset_id={{dataset_id}}", "host": ["{{baseUrl}}"], "path": ["api", "lineage.php"], "query": [{ "key": "action", "value": "list" }, { "key": "dataset_id", "value": "{{dataset_id}}" }] } } },
+        {
+          "name": "Crear relacion de linaje",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/lineage.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "lineage.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"origen_id\": \"{{dataset_id}}\", \"destino_id\": 1, \"tipo\": \"alimenta\", \"descripcion\": \"Relacion de prueba creada desde Postman.\" }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Crear relacion de linaje exitoso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.id).to.be.above(0);",
+                  "    pm.collectionVariables.set('lineage_id', String(d.data.id));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar relacion (id={{lineage_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/lineage.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "lineage.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{lineage_id}}\", \"tipo\": \"transforma\", \"descripcion\": \"Tipo y descripcion actualizados desde Postman.\" }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Actualizar relacion de linaje exitoso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar relacion (id={{lineage_id}})",
+          "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/lineage.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "lineage.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{lineage_id}}\" }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Eliminar relacion de linaje exitoso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
       ]
     },
     {
       "name": "Usuarios (admin)",
       "item": [
         { "name": "Listar usuarios", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/users.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "list" }] } } },
-        { "name": "Listar roles", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/users.php?action=roles", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "roles" }] } } },
+        { "name": "Usuario por id (get, id=2)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/users.php?action=get&id=2", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "get" }, { "key": "id", "value": "2" }] } } },
         {
           "name": "Crear usuario",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/users.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Nuevo Analista\", \"email\": \"nuevo@example.com\", \"password\": \"Prueba123!\", \"rol\": \"analyst\" }" } }
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/users.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Nuevo Analista\", \"email\": \"nuevo@example.com\", \"password\": \"Prueba123!\", \"rol_id\": 4, \"activo\": 1 }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Crear usuario exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.id).to.be.above(0);",
+                  "    pm.collectionVariables.set('user_id', String(d.data.id));",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Actualizar usuario (id=8)",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/users.php?action=update&id=8", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "update" }, { "key": "id", "value": "8" }] }, "body": { "mode": "raw", "raw": "{ \"activo\": 0 }" } }
+          "name": "Actualizar usuario (id={{user_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/users.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{user_id}}\", \"nombre\": \"Nuevo Analista\", \"email\": \"nuevo@example.com\", \"password\": \"Prueba123!\", \"rol_id\": 4, \"activo\": 0 }" } }
         },
-        { "name": "Eliminar usuario (id=8)", "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/users.php?action=delete&id=8", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "delete" }, { "key": "id", "value": "8" }] } } }
+        { "name": "Eliminar usuario (id={{user_id}})", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/users.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{user_id}}\" }" } } }
       ]
     },
     {

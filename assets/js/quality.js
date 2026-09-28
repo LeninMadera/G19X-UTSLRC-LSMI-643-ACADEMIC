@@ -2,6 +2,8 @@
    Modulo de calidad de datos
    ============================================================ */
 
+/* global api, esc, APP_USER */
+
 document.addEventListener('DOMContentLoaded', () => {
     const selDataset = document.getElementById('sel-dataset');
     const panelHis   = document.getElementById('panel-historico');
@@ -12,16 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const formError  = document.getElementById('form-error');
 
     const rol = document.querySelector('.badge-role')?.textContent || '';
-    const puedeRegistrar = ['admin', 'steward', 'owner'].includes(rol);
     const puedeBorrar    = ['admin', 'steward'].includes(rol);
+    const userId         = (window.APP_USER && window.APP_USER.id) || null;
 
     const UMBRAL = 80;
-
-    function esc(t) {
-        const div = document.createElement('div');
-        div.textContent = t == null ? '' : String(t);
-        return div.innerHTML;
-    }
 
     function color(n) {
         return n >= 85 ? 'score-good' : n >= UMBRAL ? 'score-warn' : 'score-bad';
@@ -38,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!json.success) return;
         selDataset.innerHTML = '<option value="">Selecciona un dataset</option>';
         json.data.datasets.forEach(d => {
+            if (rol === 'owner' && Number(d.owner_id) !== Number(userId)) return;
             const opt = document.createElement('option');
             opt.value = d.id;
             opt.textContent = d.nombre + ' (' + d.categoria + ')';

@@ -210,7 +210,7 @@ function ia_detectar_anomalias(array $metrics): array
     $system = 'Eres un analista de calidad de datos. Dado el historial de mediciones '
         . '(porcentajes 0-100 de cinco dimensiones y el score global), detecta anomalias '
         . 'como caidas bruscas, valores por debajo del umbral o tendencias peligrosas. '
-        . 'Responde SOLO con JSON: {"anomalias":[{"descripcion":"...","severidad":"baja|media|alta|critica"}]} '
+        . 'Responde SOLO con JSON: {"anomalias":[{"descripcion":"...","severidad":"baja|media|alta|critica","recomendacion":"..."}]} '
         . 'Puede devolver un array vacio si no hay anomalias.';
     $user = json_encode($resumen, JSON_UNESCAPED_UNICODE);
 
@@ -224,8 +224,9 @@ function ia_detectar_anomalias(array $metrics): array
             $sev = 'media';
         }
         $resultado[] = [
-            'descripcion' => trim((string)($a['descripcion'] ?? '')),
-            'severidad'   => $sev,
+            'descripcion'    => trim((string)($a['descripcion'] ?? '')),
+            'severidad'      => $sev,
+            'recomendacion'  => trim((string)($a['recomendacion'] ?? '')),
         ];
     }
     return array_filter($resultado, fn($a) => $a['descripcion'] !== '');
@@ -244,8 +245,9 @@ function simular_anomalias(array $metrics): array
     // Score global bajo umbral en la ultima medicion (aplica con 1+ mediciones)
     if ((float)$ultima['score'] < 80) {
         $resultado[] = [
-            'descripcion' => 'El score global de calidad (' . $ultima['score'] . ') esta por debajo del umbral minimo de 80.',
-            'severidad'   => (float)$ultima['score'] < 60 ? 'critica' : 'alta',
+            'descripcion'    => 'El score global de calidad (' . $ultima['score'] . ') esta por debajo del umbral minimo de 80.',
+            'severidad'      => (float)$ultima['score'] < 60 ? 'critica' : 'alta',
+            'recomendacion'  => 'Investigar las causas de la baja en el score y corregir las dimensiones mas afectadas.',
         ];
     }
 
@@ -269,13 +271,15 @@ function simular_anomalias(array $metrics): array
         $delta = (float)$ultima[$dim] - (float)$anterior[$dim];
         if ($delta <= -10) {
             $resultado[] = [
-                'descripcion' => $nombres[$dim] . ' bajo ' . abs($delta) . ' puntos entre la ultima y la medicion anterior.',
-                'severidad'   => $delta <= -25 ? 'critica' : 'alta',
+                'descripcion'    => $nombres[$dim] . ' bajo ' . abs($delta) . ' puntos entre la ultima y la medicion anterior.',
+                'severidad'      => $delta <= -25 ? 'critica' : 'alta',
+                'recomendacion'  => 'Revisar la causa de la caida en ' . $nombres[$dim] . ' y restablecer los procesos de carga.',
             ];
         } elseif ($delta <= -5) {
             $resultado[] = [
-                'descripcion' => $nombres[$dim] . ' presento un descenso leve de ' . abs($delta) . ' puntos.',
-                'severidad'   => 'media',
+                'descripcion'    => $nombres[$dim] . ' presento un descenso leve de ' . abs($delta) . ' puntos.',
+                'severidad'      => 'media',
+                'recomendacion'  => 'Monitorear ' . $nombres[$dim] . ' en las proximas mediciones para confirmar la tendencia.',
             ];
         }
     }
@@ -319,18 +323,18 @@ function simular_resumen(array $ctx): string
 //  4) SUGERENCIAS DE MEJORA
 // ============================================================
 
-function ia_sugerencias(array $ultima): array
+function ia_sugerencias(?array $ultima): array
 {
+    if ($ultima === null || $ultima === []) {
+        return [];
+    }
     if (ai_simulado()) {
         return simular_sugerencias($ultima);
-    }
-    if ($ultima === null) {
-        return [];
     }
 
     $system = 'Eres un consultor de calidad de datos. Dada la ultima medicion (porcentajes 0-100), '
         . 'propone 1 a 3 acciones concretas de mejora priorizando las dimensiones mas bajas. '
-        . 'Responde SOLO con JSON: {"sugerencias":[{"recomendacion":"..."}]}';
+        . 'Responde SOLO con JSON: {"sugerencias":[{"descripcion":"...","recomendacion":"..."}]}';
     $user = json_encode($ultima, JSON_UNESCAPED_UNICODE);
 
     $res = ai_pedir_json($system, $user);
@@ -339,7 +343,10 @@ function ia_sugerencias(array $ultima): array
     foreach ($sugerencias as $s) {
         $texto = trim((string)($s['recomendacion'] ?? ''));
         if ($texto !== '') {
-            $resultado[] = ['recomendacion' => $texto];
+            $resultado[] = [
+                'descripcion'   => trim((string)($s['descripcion'] ?? 'Sugerencia de mejora')),
+                'recomendacion' => $texto,
+            ];
         }
     }
     return array_slice($resultado, 0, 3);
@@ -357,7 +364,10 @@ function simular_sugerencias(array $ultima): array
     ];
     foreach ($orden as $item) {
         if ((float)$ultima[$item['dim']] < 85) {
-            $sugerencias[] = ['recomendacion' => $item['label'] . ' baja (' . $ultima[$item['dim']] . '%): ' . $item['accion']];
+            $sugerencias[] = [
+                'descripcion'   => $item['label'] . ' por debajo del nivel recomendado (' . $ultima[$item['dim']] . '%).',
+                'recomendacion' => $item['label'] . ' baja (' . $ultima[$item['dim']] . '%): ' . $item['accion'],
+            ];
         }
     }
     return array_slice($sugerencias, 0, 3);

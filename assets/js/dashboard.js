@@ -2,6 +2,8 @@
    Dashboard: indicadores + graficos + notificaciones
    ============================================================ */
 
+/* global api, esc, fmtFecha, drawBars */
+
 document.addEventListener('DOMContentLoaded', () => {
     const kpis = {
         datasets: document.getElementById('dl-kpi-datasets'),
@@ -9,12 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
         alertas:  document.getElementById('dl-kpi-alertas'),
         politicas: document.getElementById('dl-kpi-politicas'),
     };
-
-    function esc(t) {
-        const div = document.createElement('div');
-        div.textContent = t == null ? '' : String(t);
-        return div.innerHTML;
-    }
 
     function nivelBadge(score) {
         if (score === null || score === undefined) {

@@ -34,23 +34,23 @@ INSERT INTO users (nombre, email, pass_hash, rol_id, activo) VALUES
 -- ------------------------------------------------------------
 --  Datasets del catalogo
 -- ------------------------------------------------------------
-INSERT INTO datasets (nombre, descripcion, categoria, origen, owner_id, categoria_ia, etiquetas_ia, activo) VALUES
-('Ventas mensuales 2024',     'Registro de ventas por sucursal y categoria de producto durante 2024.',       'Finanzas',     'SQL Server',   3, 'ventas', '["ventas","finanzas","comercial"]', 1),
-('Clientes CRM',              'Maestro de clientes con datos de contacto y segmentacion de mercado.',         'Clientes',     'CRM',          3, 'clientes', '["clientes","crm","segmentacion"]', 1),
-('Inventario de productos',   'Stock actual de productos por almacen, con costos y proveedores.',             'Operaciones',  'BD MySQL',     3, 'inventario', '["inventario","almacen","productos"]', 1),
-('Encuesta de satisfaccion',  'Resultados de encuestas de satisfaccion al cliente por trimestre.',            'Clientes',     'Archivo CSV', 4, 'clientes', '["satisfaccion","encuestas","atencion"]', 1);
+INSERT INTO datasets (nombre, descripcion, categoria, origen, owner_id, categoria_ia, etiquetas_ia, clasificacion, activo) VALUES
+('Ventas mensuales 2024',     'Registro de ventas por sucursal y categoria de producto durante 2024.',       'Finanzas',     'SQL Server',   3, 'ventas', '["ventas","finanzas","comercial"]', 'confidencial', 1),
+('Clientes CRM',              'Maestro de clientes con datos de contacto y segmentacion de mercado.',         'Clientes',     'CRM',          3, 'clientes', '["clientes","crm","segmentacion"]', 'confidencial', 1),
+('Inventario de productos',   'Stock actual de productos por almacen, con costos y proveedores.',             'Operaciones',  'Base de datos', 3, 'inventario', '["inventario","almacen","productos"]', 'interno', 1),
+('Encuesta de satisfaccion',  'Resultados de encuestas de satisfaccion al cliente por trimestre.',            'Clientes',     'CSV',          3, 'clientes', '["satisfaccion","encuestas","atencion"]', 'publico', 1);
 
 -- ------------------------------------------------------------
 --  Historial de metricas de calidad (varias mediciones por dataset)
 -- ------------------------------------------------------------
 INSERT INTO quality_metrics (dataset_id, completitud, exactitud, consistencia, vigencia, unicidad, score, user_id) VALUES
-(1, 95.00, 98.00, 92.00, 90.00, 97.00, 94.40, 2),
-(1, 93.00, 97.00, 91.00, 88.00, 95.00, 92.80, 2),
-(1, 90.00, 96.00, 89.00, 85.00, 93.00, 90.60, 3),
-(2, 98.00, 99.00, 97.00, 96.00, 95.00, 97.00, 2),
-(2, 97.00, 98.00, 96.00, 95.00, 94.00, 96.00, 2),
-(3, 88.00, 95.00, 90.00, 92.00, 89.00, 90.80, 2),
-(4, 76.00, 80.00, 85.00, 70.00, 82.00, 78.60, 2);
+(1, 95.00, 98.00, 92.00, 90.00, 97.00, 94.80, 2),
+(1, 93.00, 97.00, 91.00, 88.00, 95.00, 93.25, 2),
+(1, 90.00, 96.00, 89.00, 85.00, 93.00, 91.15, 3),
+(2, 98.00, 99.00, 97.00, 96.00, 95.00, 97.15, 2),
+(2, 97.00, 98.00, 96.00, 95.00, 94.00, 96.15, 2),
+(3, 88.00, 95.00, 90.00, 92.00, 89.00, 90.95, 2),
+(4, 76.00, 80.00, 85.00, 70.00, 82.00, 79.10, 2);
 
 -- ------------------------------------------------------------
 --  Politicas de gobierno
@@ -74,11 +74,27 @@ INSERT INTO policy_datasets (policy_id, dataset_id) VALUES
 (3, 4);
 
 -- ------------------------------------------------------------
+--  Relaciones de linaje entre datasets
+--  Solo aplica a instalaciones nuevas o ambientes de prueba:
+--  usa los IDs 1-4 de los datasets creados mas arriba.
+--
+--  La pareja (2 -> 1) aparece dos veces con tipo distinto, algo
+--  permitido por UNIQUE (origen_id, destino_id, tipo): el dataset
+--  1 se deriva del 2 y ademas el 2 lo alimenta.
+-- ------------------------------------------------------------
+INSERT INTO data_lineage (origen_id, destino_id, tipo, descripcion, creado_por) VALUES
+(2, 1, 'derivado_de', 'Las ventas mensuales se calculan cruzando los clientes del CRM con su historial de compras.', 2),
+(2, 1, 'alimenta',    'El maestro de clientes alimenta la segmentacion por sucursal del reporte de ventas.',      2),
+(3, 1, 'alimenta',    'El inventario por almacen alimenta las projections de venta por categoria.',              2),
+(2, 4, 'integra',     'La segmentacion de clientes se integra en la encuesta de satisfaccion por tipo de cliente.', 2),
+(4, 1, 'alimenta',    'Los resultados de satisfaccion alimentan el analisis de ventas por region.',              2);
+
+-- ------------------------------------------------------------
 --  Detecciones de IA de ejemplo (para el dashboard)
 -- ------------------------------------------------------------
 INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, recomendacion_ia, estado) VALUES
 (1, 'anomalia',    'alta',        'La dimension de vigencia bajo 5 puntos entre la ultima medicion y la anterior.', 'Revisar el proceso de actualizacion de datos del dataset.', 'pendiente'),
-(4, 'anomalia',    'critica',     'El score de calidad (78.6) esta por debajo del umbral minimo de 80.',            'Definir plan de completitud y vigencia de la encuesta.',    'pendiente'),
+(4, 'anomalia',    'critica',     'El score de calidad (79.1) esta por debajo del umbral minimo de 80.',            'Definir plan de completitud y vigencia de la encuesta.',    'pendiente'),
 (2, 'clasificacion', 'baja',      'Categoria sugerida: Clientes.', NULL,                                            'aplicada'),
 (3, 'sugerencia',  'media',       'La consistencia puede mejorar comparando inventario fisico vs sistema.',          'Programar conteos ciclicos y conciliacion semanal.',        'revisada');
 

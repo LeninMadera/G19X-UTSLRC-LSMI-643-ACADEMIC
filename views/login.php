@@ -13,7 +13,7 @@ if (isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar sesion | Gobierno de Datos IA</title>
-    <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/style.css">
+    <link rel="stylesheet" href="<?= e(APP_URL) ?>/assets/css/style.css">
 </head>
 <body class="login-body">
     <main class="login-card">
@@ -40,7 +40,7 @@ if (isset($_SESSION['user_id'])) {
         <p class="muted small center">Usuarios de prueba: admin@example.com / Admin123!</p>
     </main>
 
-    <script src="<?= APP_URL ?>/assets/js/app.js"></script>
+    <script src="<?= e(APP_URL) ?>/assets/js/app.js"></script>
     <script>
         window.APP_URL = "<?= e(APP_URL) ?>";
         document.getElementById('login-form').addEventListener('submit', async (e) => {

@@ -23,13 +23,15 @@ La aplicacion se construyo por etapas (E0 a E8) y cada etapa se probo de forma m
 ```
 gobierno-datos-ia/
 ├── api/               Endpoints REST (JSON): auth, users, datasets, quality,
-│                      policies, ai, reports
+│                      policies, lineage, ai, reports
 ├── config/            Carga de .env, constantes, conexion PDO
-├── includes/          Funciones (auth, rol, log, JSON) y servicio de IA
+├── includes/          Funciones (auth, rol, log, JSON), servicio de IA
+│                      y busqueda semantica (semantic_search.php)
 ├── views/             Paginas HTML (login, dashboard, usuarios, datasets,
-│                      calidad, politicas, IA, reportes)
+│                      calidad, politicas, linaje, IA, reportes)
 ├── assets/            CSS, JavaScript (vanilla, sin librerias)
-├── sql/               database.sql (estructura) y seed.sql (datos iniciales)
+├── sql/               database.sql (estructura), migration_lineage.sql
+│                      (migracion del modulo de linaje) y seed.sql
 ├── postman/           Coleccion y entorno de Postman
 ├── .env               Credenciales locales (NO se sube a GitHub)
 └── index.php          Punto de entrada (redirige al login/dashboard)
@@ -81,6 +83,7 @@ gobierno-datos-ia/
 | Datasets | CRUD todos | CRUD todos | CRUD solo los suyos | Solo lectura |
 | Calidad | Registra/elimina | Registra/elimina | Solo los suyos | Solo lectura |
 | Politicas | CRUD + asignacion | CRUD + asignacion | — | Solo lectura |
+| Linaje de datos | CRUD | CRUD | Solo entre sus datasets | Solo lectura |
 | Usuarios | CRUD | — | — | — |
 | IA (4 acciones) | Si | Si | Solo sus datasets | No |
 | Reportes / dashboard | Completo (bitacora) | Completo | Completo | Completo |
@@ -89,9 +92,10 @@ gobierno-datos-ia/
 ## Funciones por modulo
 
 - **Dashboard**: KPIs (datasets, calidad promedio, alertas pendientes, politicas activas), grafico de score por dataset en canvas puro, distribucion por categoria, alertas IA y actividad reciente.
-- **Datasets**: catalogo con busqueda y filtro, ficha de detalle (score, dimensiones, politicas asignadas, detectores de IA, etiquetas IA).
+- **Datasets**: catalogo con busqueda literal y **busqueda semantica asistida por IA**, filtro por categoria, ficha de detalle (score, dimensiones, politicas asignadas, detectores de IA, etiquetas IA).
 - **Calidad**: registros de mediciones por dataset, calculo de score ponderado (5 dimensiones) y alerta visual cuando el score baja de 80.
 - **Politicas**: CRUD de politicas (naming, retencion, acceso, clasificacion) y asignacion/desasignacion a datasets.
+- **Linaje de datos**: registro de relaciones `dataset origen -> dataset destino` con 6 tipos (`derivado_de`, `alimenta`, `integra`, `transforma`, `copia`, `version_de`). La ficha de cada dataset muestra de que datasets recibe y hacia que datasets envia informacion.
 - **IA**: clasificar dataset, detectar anomalias, resumen inteligente y sugerencias de mejora.
 - **Usuarios**: administracion de usuarios y roles (solo admin).
 - **Reportes**: estado de calidad por dataset, alertas/recomendaciones de IA y bitacora de actividad.
@@ -138,6 +142,59 @@ Acciones disponibles (con resultados guardados en la tabla `ai_detections` y/o `
 | `summary` | Genera un resumen en lenguaje natural del estado del dataset |
 | `suggest` | Propone acciones de mejora segun las dimensiones debiles |
 
+## Búsqueda semántica asistida por IA
+
+Permite encontrar datasets por significado y no solo por coincidencia literal de palabras. Vive en `includes/semantic_search.php` y se expone con `api/datasets.php?action=search`.
+
+### Cómo funciona
+
+Es una búsqueda **híbrida**, no un reemplazo de la búsqueda normal:
+
+1. **Expansión de la consulta**: la IA recibe el texto escrito por el usuario y devuelve términos relacionados (`{"terminos":[...],"categoria":"...","interpretacion":"..."}`).
+2. **Candidatas en SQL**: se busca cada término (el original más los expandidos) en `nombre`, `descripcion`, `etiquetas_ia`, `categoria`, `categoria_ia` y `origen`.
+3. **Ranking en PHP**: cada dataset recibe una puntuación ponderada por campo y se ordena por relevancia, con desempate por `fecha_actualizacion`.
+
+### Puntuación
+
+| Campo | Peso |  | Término | Multiplicador |
+|---|---|---|---|---|
+| `nombre` | 10 | | original (×1.0) | peso completo |
+| `etiquetas_ia` | 8 | | expandidos | ×0.6 |
+| `categoria` / `categoria_ia` | 6 | | frase original completa en el nombre | +15 |
+| `descripcion` | 4 | | | |
+| `origen` | 3 | | | |
+
+La API devuelve `puntos` (valor bruto, usado para ordenar), `relevancia` (0-100, se muestra en la tabla) y `motivos` (términos y campos que coincidieron, para que el usuario vea *por qué* aparece cada resultado).
+
+### Uso
+
+En el catálogo, **pulsar Enter o el botón "Buscar con IA"**. Escribir sigue usando la búsqueda literal con su retardo de 300 ms. El botón "Usar búsqueda normal" vuelve al listado literal.
+
+La búsqueda literal de `action=list` y `action=export` también se amplió a los mismos seis campos.
+
+### Modos y respaldo
+
+| Situación | Comportamiento |
+|---|---|
+| `AI_API_KEY` vacía | **Modo simulado**: diccionario local de sinónimos del dominio, la interfaz lo indica |
+| IA devuelve error, timeout o JSON inválido | `fallback`: se degrada a la búsqueda literal con el término original, sin error visible |
+| Sin resultados | Mensaje "Sin coincidencias para esta busqueda" |
+
+En ningún caso la búsqueda semántica deja al usuario sin resultados que la búsqueda literal habría encontrado.
+
+### Privacidad
+
+- Al proveedor externo **solo** sale el texto de la consulta (máximo 120 caracteres) y la lista de categorías válida, que es una constante de código. **Nunca** salen nombres, descripciones, etiquetas, propietarios ni otros metadatos del catálogo.
+- La **bitácora** registra únicamente datos operacionales: `modo`, `simulado`, `fallback` y `resultados`. No guarda ni la consulta ni los términos expandidos.
+- Las expansiones se cachean en `$_SESSION` para no repetir llamadas al proveedor: máximo **10 búsquedas por sesión**, con eliminación **FIFO** de la más antigua. Esa caché no se escribe en MySQL ni en la bitácora.
+- No requiere cambios en la base de datos.
+
+### Limitaciones
+
+- Es recuperación semántica **basada en términos expandidos**, no en embeddings: si un dataset no comparte ninguna palabra con esos términos, no aparece.
+- La base de datos usa `utf8mb4_unicode_ci`, así que el `LIKE` ya ignora mayúsculas y acentos; los términos se comparan normalizados (minúsculas y sin tildes).
+- La latencia de la llamada al proveedor es de 1-3 s, por eso solo se dispara de forma explícita.
+
 ## API REST
 
 Convencion: `api/<modulo>.php?action=<accion>`. Respuestas siempre en JSON:
@@ -151,11 +208,12 @@ Autenticacion por **cookie de sesion** (`GDIA_SESSION`): primero se llama al log
 | Modulo | Acciones |
 |---|---|
 | `auth.php` | `login`, `logout`, `session` |
-| `users.php` | `list`, `roles`, `create`, `update`, `delete` (admin) |
-| `datasets.php` | `list` (con `search`, `categoria`), `detail`, `create`, `update`, `delete` |
+| `users.php` | `list`, `get`, `create`, `update`, `delete` (admin) |
+| `datasets.php` | `list` (con `search`, `categoria`), `search` (busqueda semantica con `q`, `categoria`), `detail`, `create`, `update`, `delete` |
 | `quality.php` | `history`, `register`, `delete` |
-| `policies.php` | `list`, `detail`, `create`, `update`, `delete`, `assign`, `unassign` |
-| `ai.php` | `status`, `classify`, `anomalies`, `summary`, `suggest` |
+| `policies.php` | `list`, `get`, `create`, `update`, `delete`, `assign`, `unassign` |
+| `lineage.php` | `list` (con `dataset_id`), `get`, `create`, `update`, `delete` |
+| `ai.php` | `status`, `classify`, `anomalies`, `summary`, `suggest`, `resolve`, `confirm_classify` |
 | `reports.php` | `overview`, `alerts`, `logs` (solo admin) |
 
 Ejemplo con curl (o PowerShell):
@@ -165,6 +223,7 @@ POST /api/auth.php?action=login      {"email":"admin@example.com","password":"Ad
 GET  /api/datasets.php?action=detail&id=1
 POST /api/quality.php?action=register {"dataset_id":1,"completitud":92,"exactitud":88.5,...}
 POST /api/ai.php?action=classify      {"dataset_id":1}
+POST /api/lineage.php?action=create   {"origen_id":2,"destino_id":1,"tipo":"alimenta"}
 GET  /api/reports.php?action=overview
 ```
 
@@ -179,7 +238,9 @@ En `postman/` hay una coleccion lista para importar:
 
 ## Base de datos
 
-8 tablas: `roles`, `users`, `datasets`, `quality_metrics`, `policies`, `policy_datasets`, `ai_detections` y `activity_logs`, con llaves foraneas, restricciones `CHECK` e indice para busquedas. El detalle completo esta en `sql/database.sql`.
+9 tablas: `roles`, `users`, `datasets`, `quality_metrics`, `policies`, `policy_datasets`, `data_lineage`, `ai_detections` y `activity_logs`, con llaves foraneas, restricciones `CHECK` e indice para busquedas. El detalle completo esta en `sql/database.sql`.
+
+Si tu base de datos ya existe y solo le falta la tabla de linaje, ejecuta `sql/migration_lineage.sql`: crea unicamente `data_lineage` con sus constraints, sin datos y sin tocar ninguna tabla previa (es idempotente, se puede reejecutar). Los datos de ejemplo de linaje estan en `sql/seed.sql` y solo aplican a bases nuevas.
 
 ## Seguridad aplicada
 
@@ -194,7 +255,7 @@ En `postman/` hay una coleccion lista para importar:
 
 ## Pruebas realizadas
 
-Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7) y cierre de seguridad (8). La coleccion de Postman permite re-ejecutar la API completa manualmente.
+Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7), cierre de seguridad (8) y linaje de datos (9). La coleccion de Postman permite re-ejecutar la API completa manualmente.
 
 ## Nota sobre credenciales
 

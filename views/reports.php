@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'Reportes';
-$rol = currentRole();
 require_once __DIR__ . '/includes/header.php';
+$rol = currentRole();
 ?>
 <section class="panel">
     <div class="toolbar">
@@ -9,6 +9,7 @@ require_once __DIR__ . '/includes/header.php';
             <h2>Reportes</h2>
             <p class="muted small">Estado actual de la calidad de datos y bitacora del sistema.</p>
         </div>
+        <a href="<?= e(APP_URL); ?>/api/reports.php?action=export" class="btn btn-ghost">Exportar CSV</a>
         <button class="btn" id="rp-refresh">Actualizar</button>
     </div>
 </section>
@@ -62,6 +63,7 @@ require_once __DIR__ . '/includes/header.php';
                     <th>Tipo</th>
                     <th>Severidad</th>
                     <th>Descripcion</th>
+                    <th>Recomendacion</th>
                 </tr>
             </thead>
             <tbody id="rp-alertas"></tbody>

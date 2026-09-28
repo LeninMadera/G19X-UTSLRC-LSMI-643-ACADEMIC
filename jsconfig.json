@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "lib": ["es2020", "dom"],
+    "target": "es2020",
+    "checkJs": false,
+    "module": "none",
+    "allowJs": true,
+    "noImplicitAny": false,
+    "types": []
+  },
+  "include": ["assets/js/**/*.js"]
+}

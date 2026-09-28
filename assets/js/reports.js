@@ -2,14 +2,10 @@
    Reportes: estado de calidad, bitacora y alertas IA
    ============================================================ */
 
+/* global api, esc, fmtFecha */
+
 document.addEventListener('DOMContentLoaded', () => {
     const esAdmin = document.getElementById('rp-log') !== null;
-
-    function esc(t) {
-        const div = document.createElement('div');
-        div.textContent = t == null ? '' : String(t);
-        return div.innerHTML;
-    }
 
     function sevBadge(sev) {
         const clase = sev === 'baja' ? 'badge-active'
@@ -55,12 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     '<td>' + esc(a.dataset) + '</td>' +
                     '<td><span class="badge badge-pending">' + esc(a.tipo) + '</span></td>' +
                     '<td>' + sevBadge(a.severidad) + '</td>' +
-                    '<td>' + esc(a.descripcion_ia) + '</td>';
+                    '<td>' + esc(a.descripcion_ia || '') + '</td>' +
+                    '<td>' + esc(a.recomendacion_ia || '-') + '</td>';
                 tbody.appendChild(tr);
             });
             if ((al.data.alerts || []).length === 0) {
                 document.getElementById('rp-alertas').innerHTML =
-                    '<tr><td colspan="5" class="muted">Sin alertas registradas.</td></tr>';
+                    '<tr><td colspan="6" class="muted">Sin alertas registradas.</td></tr>';
             }
         }
 

@@ -5,17 +5,22 @@ require_once __DIR__ . '/includes/header.php';
 <section class="panel">
     <div class="toolbar">
         <h2>Catalogo de datasets</h2>
+        <a href="<?= e(APP_URL); ?>/api/datasets.php?action=export" class="btn btn-ghost">Exportar CSV</a>
         <?php if (in_array($current['rol'], ['admin', 'steward', 'owner'], true)): ?>
         <button id="btn-nuevo" class="btn btn-primary">Registrar dataset</button>
         <?php endif; ?>
     </div>
 
     <div class="toolbar">
-        <input type="search" id="buscar" placeholder="Buscar por nombre o descripcion...">
+        <input type="search" id="buscar" placeholder="Buscar por nombre, descripcion, categoria o etiqueta...">
+        <button type="button" id="btn-buscar-ia" class="btn btn-primary">Buscar con IA</button>
         <select id="filtro-categoria">
             <option value="">Todas las categorias</option>
         </select>
     </div>
+
+    <p class="muted small hidden" id="busqueda-ia-info"></p>
+    <div id="terminos-ia" class="tags hidden"></div>
 
     <div id="msg" class="alert hidden"></div>
 
@@ -26,6 +31,7 @@ require_once __DIR__ . '/includes/header.php';
                     <th>Nombre</th>
                     <th>Categoria</th>
                     <th>Origen</th>
+                    <th>Clasificacion</th>
                     <th>Data Owner</th>
                     <th>Estado</th>
                     <th>Score</th>
@@ -33,7 +39,7 @@ require_once __DIR__ . '/includes/header.php';
                 </tr>
             </thead>
             <tbody id="datasets-tbody">
-                <tr><td colspan="7" class="muted center">Cargando...</td></tr>
+                <tr><td colspan="8" class="muted center">Cargando...</td></tr>
             </tbody>
         </table>
     </div>
@@ -60,6 +66,15 @@ require_once __DIR__ . '/includes/header.php';
             <div class="field">
                 <label for="origen">Origen de datos</label>
                 <select id="origen" name="origen" required></select>
+            </div>
+            <div class="field">
+                <label for="clasificacion">Clasificacion</label>
+                <select id="clasificacion" name="clasificacion" required>
+                    <option value="publico">Publico</option>
+                    <option value="interno">Interno</option>
+                    <option value="confidencial">Confidencial</option>
+                    <option value="restringido">Restringido</option>
+                </select>
             </div>
             <div class="field" id="owner-field">
                 <label for="owner_id">Data Owner</label>

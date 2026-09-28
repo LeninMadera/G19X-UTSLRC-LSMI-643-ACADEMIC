@@ -2,6 +2,8 @@
    Gestion de usuarios (solo admin)
    ============================================================ */
 
+/* global api, esc */
+
 document.addEventListener('DOMContentLoaded', () => {
     const tbody       = document.getElementById('users-tbody');
     const msg         = document.getElementById('msg');
@@ -23,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const json = await api('/api/users.php?action=list');
         tbody.innerHTML = '';
         if (!json.success) {
-            tbody.innerHTML = '<tr><td colspan="7" class="muted center">' + json.message + '</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="muted center">' + esc(json.message) + '</td></tr>';
             return;
         }
         roles = json.data.roles;
@@ -47,12 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 '</td>';
             tbody.appendChild(tr);
         });
-    }
-
-    function esc(texto) {
-        const div = document.createElement('div');
-        div.textContent = texto == null ? '' : String(texto);
-        return div.innerHTML;
     }
 
     function llenarRoles(seleccionado) {

@@ -27,6 +27,7 @@ require_once __DIR__ . '/includes/header.php';
                 <h3>Estado</h3>
                 <p class="card-text" id="d-estado">--</p>
                 <p class="muted">Categoria IA: <span id="d-categoria-ia">--</span></p>
+                <button id="btn-confirmar-clasif" class="btn btn-sm hidden">Confirmar clasificacion IA</button>
             </div>
         </div>
 
@@ -35,6 +36,7 @@ require_once __DIR__ . '/includes/header.php';
             <table class="table detail-table">
                 <tr><th>Categoria</th><td id="d-categoria">--</td></tr>
                 <tr><th>Origen de datos</th><td id="d-origen">--</td></tr>
+                <tr><th>Clasificacion</th><td id="d-clasificacion">--</td></tr>
                 <tr><th>Data Owner</th><td id="d-owner">--</td></tr>
                 <tr><th>Descripcion</th><td id="d-descripcion">--</td></tr>
                 <tr><th>Creado</th><td id="d-creado">--</td></tr>
@@ -58,11 +60,29 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <div class="panel">
+            <h2>Linaje de datos</h2>
+            <p class="muted small">Recibe informacion de</p>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th>Dataset origen</th><th>Tipo</th><th>Descripcion</th></tr></thead>
+                    <tbody id="d-linaje-entrada"><tr><td colspan="3" class="muted center">Sin relaciones de entrada.</td></tr></tbody>
+                </table>
+            </div>
+            <p class="muted small">Envia informacion a</p>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th>Dataset destino</th><th>Tipo</th><th>Descripcion</th></tr></thead>
+                    <tbody id="d-linaje-salida"><tr><td colspan="3" class="muted center">Sin relaciones de salida.</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
             <h2>Analisis de IA reciente</h2>
             <div class="table-wrap">
                 <table class="table">
-                    <thead><tr><th>Tipo</th><th>Severidad</th><th>Hallazgo</th><th>Estado</th><th>Fecha</th></tr></thead>
-                    <tbody id="d-detections"><tr><td colspan="5" class="muted center">Sin analisis de IA.</td></tr></tbody>
+                    <thead><tr><th>Tipo</th><th>Severidad</th><th>Hallazgo</th><th>Recomendacion</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+                    <tbody id="d-detections"><tr><td colspan="7" class="muted center">Sin analisis de IA.</td></tr></tbody>
                 </table>
             </div>
         </div>
