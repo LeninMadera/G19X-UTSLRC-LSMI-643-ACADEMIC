@@ -2,7 +2,7 @@
 
 Proyecto universitario: plataforma web para **catalogar datos, medir su calidad y aplicar politicas de gobierno**, con asistencia de **Inteligencia Artificial** (clasificacion automatica, deteccion de anomalias, resumen y sugerencias de mejora).
 
-La aplicacion se construyo por etapas (E0 a E8) y cada etapa se probo de forma manual de extremo a extremo (E2E) contra la base de datos real.
+La aplicación se construyó por etapas hasta la Etapa 12, y cada una se probó de forma manual de extremo a extremo (E2E) contra la base de datos real.
 
 ## Stack y herramientas
 
@@ -13,7 +13,7 @@ La aplicacion se construyo por etapas (E0 a E8) y cada etapa se probo de forma m
 | MySQL 8 | Base de datos |
 | HTML5, CSS3, JavaScript vanilla | Interfaz |
 | API REST + JSON | Comunicacion front/back |
-| API de OpenAI | Funciones de IA (`AI_API_KEY`) |
+| API de chat compatible con OpenAI (OpenAI, Groq, ...) | Funciones de IA (`AI_BASE_URL`, `AI_MODEL`, `AI_API_KEY`) |
 | Git / GitHub | Control de versiones |
 | Postman | Pruebas de la API |
 | VS Code | Editor |
@@ -25,19 +25,29 @@ gobierno-datos-ia/
 ├── api/               Endpoints REST (JSON): auth, users, datasets, quality,
 │                      policies, compliance, lineage, monitoring,
 │                      integrations, ai, reports
-├── config/            Carga de .env, constantes, conexion PDO
-├── includes/          Funciones (auth, rol, log, JSON), servicio de IA,
-│                      monitoreo (monitoring_service.php) e integraciones
-│                      (integrations_service.php)
-├── views/             Paginas HTML (login, dashboard, usuarios, datasets,
-│                      calidad, politicas, cumplimiento, linaje, IA, reportes,
-│                      monitoreo, fuentes externas)
 ├── assets/            CSS, JavaScript (vanilla, sin librerias)
-├── sql/               database.sql (estructura), migration_lineage.sql
-│                      y migration_compliance.sql (migraciones por modulo)
-│                      y seed.sql
+├── cli/               Monitor por linea de comandos: monitor.php (--list,
+│                      --run-id) y monitor.bat (Programador de tareas de Windows)
+├── config/            Carga de .env, constantes, conexion PDO
+├── includes/          Funciones (auth, rol, log, JSON), servicio de IA
+│                      (ai_service.php), busqueda semantica
+│                      (semantic_search.php), monitoreo (monitoring_service.php)
+│                      e integraciones (integrations_service.php)
+├── views/             Paginas HTML (login, dashboard, usuarios, datasets,
+│                      detalle de dataset, calidad, politicas, cumplimiento,
+│                      linaje, IA, reportes, monitoreo, fuentes externas) e
+│                      includes/ con el header y el footer comunes
+├── sql/               database.sql (estructura), seed.sql (datos de ejemplo)
+│                      y las 4 migraciones por modulo: migration_lineage.sql,
+│                      migration_compliance.sql, migration_monitoring.sql y
+│                      migration_integrations.sql
 ├── postman/           Coleccion y entorno de Postman
+├── iniciar.bat        Inicio rapido en Windows: verifica PHP, levanta el
+│                      servidor y abre el navegador
+├── jsconfig.json      Ajustes del editor para JavaScript
 ├── .env.example       Plantilla de configuracion (SI se entrega, sin secretos)
+├── .gitignore         Exclusiones de Git (entre ellas, .env)
+├── README.md          Este documento
 └── index.php          Punto de entrada (redirige al login/dashboard)
 ```
 
@@ -64,7 +74,7 @@ gobierno-datos-ia/
    $pdo->exec(file_get_contents(__DIR__ . '/sql/seed.sql')); // datos iniciales
    ```
 
-3. Copia `.env.example` a `.env` y completa tus credenciales (MySQL, URL base y, opcionalmente, `APP_KEY` y la clave de OpenAI):
+3. Copia `.env.example` a `.env` y completa tus credenciales (MySQL, URL base y, opcionalmente, `APP_KEY` y la clave de tu proveedor de IA):
 
    ```
    Copy-Item .env.example .env      # Windows PowerShell
@@ -278,7 +288,7 @@ Autenticacion por **cookie de sesion** (`GDIA_SESSION`): primero se llama al log
 |---|---|
 | `auth.php` | `login`, `logout`, `session` |
 | `users.php` | `list`, `get`, `create`, `update`, `delete` (admin) |
-| `datasets.php` | `list` (con `search`, `categoria`), `search` (busqueda semantica con `q`, `categoria`), `detail`, `create`, `update`, `delete` |
+| `datasets.php` | `list` (con `search`, `categoria`), `search` (busqueda semantica con `q`, `categoria`), `detail`, `create`, `update`, `delete`, `export` |
 | `quality.php` | `history`, `register`, `delete` |
 | `policies.php` | `list`, `get`, `create`, `update`, `delete`, `assign`, `unassign` |
 | `compliance.php` | `list`, `get`, `create`, `update`, `delete`, `evaluate`, `dataset_status` |
@@ -286,7 +296,7 @@ Autenticacion por **cookie de sesion** (`GDIA_SESSION`): primero se llama al log
 | `integrations.php` | `list`, `get`, `historial`, `create`, `update`, `delete`, `probar`, `sincronizar`, `toggle` |
 | `lineage.php` | `list` (con `dataset_id`), `get`, `create`, `update`, `delete` |
 | `ai.php` | `status`, `classify`, `anomalies`, `summary`, `suggest`, `resolve`, `confirm_classify` |
-| `reports.php` | `overview`, `alerts`, `logs` (solo admin) |
+| `reports.php` | `overview`, `alerts`, `export` (todos los roles), `logs` (solo admin) |
 
 Ejemplo con curl (o PowerShell):
 
@@ -341,11 +351,11 @@ Los datos de ejemplo estan en `sql/seed.sql` y solo aplican a bases nuevas.
 - Bitacora de actividad de los movimientos del sistema
 - Proteccion SSRF en el modulo de fuentes externas (esquema, hosts locales, resolucion DNS y limite de tamano del cuerpo)
 
-Limitacion conocida de CSRF: **la sesion por si sola NO protege contra CSRF**. La plataforma no implementa token anti-CSRF en sus endpoints mutantes en esta etapa; es una limitacion documentada, no una garantia.
+Limitacion conocida de CSRF: **la sesion por si sola NO protege contra CSRF**. La plataforma no implementa token anti-CSRF en sus endpoints mutantes; es una limitacion documentada, no una garantia.
 
 ## Pruebas realizadas
 
-Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7), cierre de seguridad (8), linaje de datos (9), cumplimiento normativo (10), monitoreo continuo (11) y fuentes externas / integraciones (12). La coleccion de Postman permite re-ejecutar la API completa manualmente.
+Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7), cierre de seguridad (8), linaje de datos (9), cumplimiento normativo (10), monitoreo continuo (11) y fuentes externas / integraciones (12). La colección de Postman permite re-ejecutar manualmente los flujos principales de la API.
 
 ## Configuracion local y secretos
 
@@ -393,3 +403,4 @@ proyecto sin conocer tus secretos.
 - JavaScript y DOM (MDN): <https://developer.mozilla.org/>
 - Postman: <https://learning.postman.com/>
 - API de OpenAI: <https://platform.openai.com/docs/>
+- Groq (API compatible con OpenAI): <https://console.groq.com/docs>
