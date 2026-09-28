@@ -305,3 +305,65 @@ CREATE TABLE monitoring_runs (
     CONSTRAINT chk_mr_estado CHECK (estado IN ('ok', 'fallo')),
     INDEX idx_mr_dataset_fecha (dataset_id, fecha DESC)
 ) ENGINE = InnoDB;
+
+-- ------------------------------------------------------------
+--  external_sources
+--  Catalogo de fuentes externas consumidas por GET (REST/JSON).
+--  El modulo NO copia los datos externos a MySQL: solo valida la
+--  conexion y registra metadatos de cada sincronizacion.
+--  dataset_id es un vinculo OPCIONAL con el catalogo de datasets
+--  (se usa para aplicar la regla de propiedad del owner); al borrar
+--  el dataset el vinculo queda NULL (ON DELETE SET NULL).
+-- ------------------------------------------------------------
+CREATE TABLE external_sources (
+    id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre           VARCHAR(150)  NOT NULL,
+    descripcion      TEXT          NULL,
+    url              VARCHAR(500)  NOT NULL,
+    tipo             VARCHAR(20)   NOT NULL DEFAULT 'api',
+    dataset_id       INT UNSIGNED  NULL,
+    timeout_seg      TINYINT UNSIGNED NOT NULL DEFAULT 15,
+    activo           TINYINT(1)    NOT NULL DEFAULT 1,
+    ultimo_estado    VARCHAR(10)   NULL,        -- ok | error
+    ultima_ejecucion TIMESTAMP     NULL,
+    ultimo_resumen   VARCHAR(500)  NULL,
+    total_ejecuciones INT UNSIGNED NOT NULL DEFAULT 0,
+    creado_por       INT UNSIGNED  NULL,
+    fecha_creacion   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_es_dataset
+        FOREIGN KEY (dataset_id) REFERENCES datasets (id) ON DELETE SET NULL,
+    CONSTRAINT fk_es_creator
+        FOREIGN KEY (creado_por) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT chk_es_tipo CHECK (tipo IN ('api')),
+    CONSTRAINT chk_es_timeout CHECK (timeout_seg BETWEEN 1 AND 60),
+    CONSTRAINT chk_es_estado_ultima CHECK (ultimo_estado IN ('ok', 'error') OR ultimo_estado IS NULL),
+    INDEX idx_es_dataset (dataset_id)
+) ENGINE = InnoDB;
+
+-- ------------------------------------------------------------
+--  external_sync_runs
+--  Historial de ejecuciones contra la fuente externa.
+--  tipo_ejecucion: 'prueba' (Probar conexion, no toca el espejo de
+--  la fuente) | 'sync' (Sincronizar ahora, actualiza el espejo).
+--  metadatos guarda solo el resumen {"registros":N,"campos":[...]},
+--  NUNCA los registros externos completos.
+-- ------------------------------------------------------------
+CREATE TABLE external_sync_runs (
+    id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    source_id        INT UNSIGNED NOT NULL,
+    tipo_ejecucion   VARCHAR(10)  NOT NULL,
+    estado           VARCHAR(10)  NOT NULL,    -- ok | error
+    registros_leidos INT UNSIGNED NOT NULL DEFAULT 0,
+    metadatos        TEXT         NULL,
+    mensaje          VARCHAR(500) NULL,
+    duracion_ms      INT UNSIGNED NOT NULL DEFAULT 0,
+    ejecutado_por    INT UNSIGNED NULL,
+    fecha            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_esr_source
+        FOREIGN KEY (source_id) REFERENCES external_sources (id) ON DELETE CASCADE,
+    CONSTRAINT fk_esr_user
+        FOREIGN KEY (ejecutado_por) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT chk_esr_tipo CHECK (tipo_ejecucion IN ('prueba', 'sync')),
+    CONSTRAINT chk_esr_estado CHECK (estado IN ('ok', 'error')),
+    INDEX idx_esr_source_fecha (source_id, fecha DESC)
+) ENGINE = InnoDB;

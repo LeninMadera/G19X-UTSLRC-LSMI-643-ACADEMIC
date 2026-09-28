@@ -158,3 +158,20 @@ INSERT INTO monitoring_runs (config_id, dataset_id, causa, estado, score, anomal
 (1, 1, 'automatico', 'ok',    91.15, 1, 'Revalidacion de calidad completada; ultimo score 91.15; 1 anomalias nuevas.'),
 (1, 1, 'manual',     'ok',    91.15, 0, 'Revalidacion de calidad completada; ultimo score 91.15; 0 anomalias nuevas.'),
 (3, 4, 'automatico', 'ok',    79.10, 2, 'Revalidacion de calidad completada; ultimo score 79.10; 2 anomalias nuevas.');
+
+-- ------------------------------------------------------------
+--  Fuentes externas / Integraciones (ejemplos academicos)
+--  Ambas fuentes estan inactivas para mostrar el ciclo de
+--  activacion con el boton "Activar" del modulo.
+--
+--  NOTA IMPORTANTE: la URL del mock local (127.0.0.1) SOLO se
+--  podra probar con INTEGRACION_PERMITIR_LOCALHOST=true (ambiente
+--  de pruebas). La API publica de la demo depende de internet.
+-- ------------------------------------------------------------
+INSERT INTO external_sources (nombre, descripcion, url, tipo, dataset_id, timeout_seg, activo, creado_por) VALUES
+('Indicadores publicos (demo)', 'API REST publica de ejemplo para demostracion opcional: depende de internet y no es determinista. Para pruebas controladas usa un mock local.', 'https://api.restful-api.dev/objects', 'api', 4, 15, 0, 2),
+('Mock local de pruebas', 'Fuente de ejemplo para pruebas academicas: apunta a un servidor JSON local que devuelve el mismo contenido siempre. Requiere INTEGRACION_PERMITIR_LOCALHOST=true.', 'http://127.0.0.1:8760/datos', 'api', 1, 10, 0, 2);
+
+INSERT INTO external_sync_runs (source_id, tipo_ejecucion, estado, registros_leidos, metadatos, mensaje, duracion_ms, ejecutado_por) VALUES
+(1, 'sync',  'ok',    3, '{"registros":3,"campos":["id","name","data"]}', 'Sincronizacion exitosa: 3 registros leidos.', 120, 2),
+(2, 'prueba','ok',    2, '{"registros":2,"campos":["id","valor"]}',        'Conexion exitosa: 2 registros leidos.',     8,   2);

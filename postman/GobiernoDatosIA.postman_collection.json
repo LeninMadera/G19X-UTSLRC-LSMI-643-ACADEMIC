@@ -12,7 +12,8 @@
     { "key": "policy_id", "value": "5" },
     { "key": "control_id", "value": "6" },
     { "key": "lineage_id", "value": "1" },
-    { "key": "monitoring_id", "value": "1" }
+    { "key": "monitoring_id", "value": "1" },
+    { "key": "source_id", "value": "1" }
   ],
   "item": [
     {
@@ -389,6 +390,80 @@
               "script": {
                 "exec": [
                   "pm.test('Eliminar configuracion exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Integraciones",
+      "item": [
+        { "name": "Listar fuentes externas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "list" }] } } },
+        {
+          "name": "Crear fuente externa",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"API de indicadores\", \"descripcion\": \"Fuente externa de prueba creada desde Postman.\", \"url\": \"https://api.restful-api.dev/objects\", \"dataset_id\": \"{{dataset_id}}\", \"timeout\": 15, \"activo\": 1 }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Crear fuente externa exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.id).to.be.above(0);",
+                  "    pm.collectionVariables.set('source_id', String(d.data.id));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Probar conexion (id={{source_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=probar", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "probar" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{source_id}}\" }" } }
+        },
+        {
+          "name": "Sincronizar ahora (id={{source_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=sincronizar", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "sincronizar" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{source_id}}\" }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Sincronizar fuente externa exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.ok).to.eql(true);",
+                  "    pm.expect(d.data.registros).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "Historial de corridas (source_id={{source_id}})", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=historial&source_id={{source_id}}", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "historial" }, { "key": "source_id", "value": "{{source_id}}" }] } } },
+        {
+          "name": "Actualizar fuente (id={{source_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{source_id}}\", \"nombre\": \"API de indicadores (actualizada)\", \"descripcion\": \"Fuente externa actualizada desde Postman.\", \"url\": \"https://api.restful-api.dev/objects\", \"dataset_id\": \"{{dataset_id}}\", \"timeout\": 20, \"activo\": 1 }" } }
+        },
+        {
+          "name": "Desactivar fuente (id={{source_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=toggle", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "toggle" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{source_id}}\" }" } }
+        },
+        {
+          "name": "Eliminar fuente (id={{source_id}})",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{source_id}}\" }" } },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Eliminar fuente externa exitoso', function () {",
                   "    var d = pm.response.json();",
                   "    pm.expect(d.success).to.eql(true);",
                   "});"

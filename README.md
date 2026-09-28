@@ -23,12 +23,15 @@ La aplicacion se construyo por etapas (E0 a E8) y cada etapa se probo de forma m
 ```
 gobierno-datos-ia/
 ├── api/               Endpoints REST (JSON): auth, users, datasets, quality,
-│                      policies, compliance, lineage, ai, reports
+│                      policies, compliance, lineage, monitoring,
+│                      integrations, ai, reports
 ├── config/            Carga de .env, constantes, conexion PDO
-├── includes/          Funciones (auth, rol, log, JSON), servicio de IA
-│                      y busqueda semantica (semantic_search.php)
+├── includes/          Funciones (auth, rol, log, JSON), servicio de IA,
+│                      monitoreo (monitoring_service.php) e integraciones
+│                      (integrations_service.php)
 ├── views/             Paginas HTML (login, dashboard, usuarios, datasets,
-│                      calidad, politicas, cumplimiento, linaje, IA, reportes)
+│                      calidad, politicas, cumplimiento, linaje, IA, reportes,
+│                      monitoreo, fuentes externas)
 ├── assets/            CSS, JavaScript (vanilla, sin librerias)
 ├── sql/               database.sql (estructura), migration_lineage.sql
 │                      y migration_compliance.sql (migraciones por modulo)
@@ -86,6 +89,7 @@ gobierno-datos-ia/
 | Politicas | CRUD + asignacion | CRUD + asignacion | — | Solo lectura |
 | Cumplimiento | CRUD controles + evalua | CRUD controles + evalua | Evalua solo sus datasets | Solo lectura |
 | Linaje de datos | CRUD | CRUD | Solo entre sus datasets | Solo lectura |
+| Fuentes externas | CRUD + probar/sincronizar | CRUD + probar/sincronizar | Lee y probar/sincronizar en las de sus datasets | Solo lectura |
 | Usuarios | CRUD | — | — | — |
 | IA (4 acciones) | Si | Si | Solo sus datasets | No |
 | Reportes / dashboard | Completo (bitacora) | Completo | Completo | Completo |
@@ -99,6 +103,7 @@ gobierno-datos-ia/
 - **Politicas**: CRUD de politicas (naming, retencion, acceso, clasificacion) y asignacion/desasignacion a datasets.
 - **Cumplimiento**: catalogo de controles normativos (con norma/marco/categoria de referencia, severidad y politica vinculada) y evaluaciones por dataset (`cumple`, `no cumple`, `pendiente`, `no aplica`). Registro declarativo interno, **no es un dictamen legal**.
 - **Monitoreo**: configuraciones de revalidacion periodica de la calidad por dataset (una por dataset, frecuencia en minutos, activo/inactivo), ejecucion manual ("Monitorear ahora") y programada via CLI, historial de ejecuciones `ok/fallo` con score revalidado y anomalias nuevas, lock de concurrencia y 4 KPIs en el dashboard.
+- **Fuentes externas**: catalogo de fuentes REST/JSON consumidas por GET. Validacion de URL anti-SSRF (esquema, hosts locales y resolucion DNS), limite de tamano de la respuesta (1 MB por defecto), sin redirecciones, historial de `prueba`/`sync` con metadatos resumidos (total y campos), vinculo opcional con un dataset del catalogo, activar/desactivar con toggle y KPIs propios.
 - **Linaje de datos**: registro de relaciones `dataset origen -> dataset destino` con 6 tipos (`derivado_de`, `alimenta`, `integra`, `transforma`, `copia`, `version_de`). La ficha de cada dataset muestra de que datasets recibe y hacia que datasets envia informacion.
 - **IA**: clasificar dataset, detectar anomalias, resumen inteligente y sugerencias de mejora.
 - **Usuarios**: administracion de usuarios y roles (solo admin).
@@ -220,6 +225,33 @@ php cli\monitor.php --run-id=1
 php cli\monitor.php
 ```
 
+## Fuentes externas / Integraciones
+
+Modulo que consume APIs externas por **GET (REST/JSON)** y las vincula al gobierno de datos. **No copia los datos externos a MySQL**: cada corrida solo registra metadatos resumidos (total de registros y campos del primer objeto JSON) en `external_sync_runs` para demostrar la conexion, el formato y la trazabilidad.
+
+- **Fuentes** (`external_sources`): nombre, descripcion, URL, timeout por fuente (1-60 s), estado activo/inactivo, espejo de la ultima sincronizacion (patron de `monitoring_configs`) y **vinculo opcional** con un dataset del catalogo (`dataset_id`, FK con `ON DELETE SET NULL`).
+- **Operaciones**: **Probar conexion** (prueba GET sin tocar el espejo), **Sincronizar ahora** (GET + actualiza `ultimo_estado`, `ultima_ejecucion`, `ultimo_resumen` y `total_ejecuciones`), **Historial**, **Crear/Editar/Eliminar**, y **Activar/Desactivar** con `POST ...action=toggle` que se refleja de inmediato en la interfaz.
+- **Seguridad**:
+  - URL validada en create/update y en cada peticion: solo `http`/`https`, sin credenciales, sin redirecciones (`FOLLOWLOCATION=false`) y con timeout fijo de conexion.
+  - **Proteccion SSRF**: se rechazan hosts `localhost`/`.local` e IPs privadas/loopback/link-local literales; ademas el hostname **se resuelve por DNS antes de conectar** y si cualquiera de sus IPs no es publica se rechaza.
+  - Hosts locales/privados **unicamente** cuando `INTEGRACION_PERMITIR_LOCALHOST=true` (ambiente de pruebas con un mock local). Tamano maximo de respuesta controlado por `INTEGRACION_MAX_BYTES` (1 MB por defecto) usando un callback de escritura de cURL que **aborta la descarga** al superarlo.
+  - La bitacora registra solo datos operacionales (`source_id`, estado, total), nunca respuestas ni contenido sensible. No se almacenan credenciales de fuentes (solo APIs publicas sin auth).
+
+Bitacora: `integracion:crear`, `integracion:editar`, `integracion:eliminar`, `integracion:activar`, `integracion:desactivar`, `integracion:probar` y `integracion:sincronizar`.
+
+Configuracion en `.env`:
+
+```
+INTEGRACION_TIMEOUT=15
+INTEGRACION_CONNECT_TIMEOUT=5
+INTEGRACION_MAX_BYTES=1048576
+INTEGRACION_PERMITIR_LOCALHOST=false
+```
+
+`INTEGRACION_PERMITIR_LOCALHOST` tambien puede pasarse como variable de entorno real al iniciar el servidor (el harness de pruebas E2E lo hace asi, sin editar el `.env`).
+
+Datos de ejemplo del seed (academicos): una API publica de demo inactiva (depende de internet) y una fuente hacia un mock local `http://127.0.0.1:8760/datos` (requiere `INTEGRACION_PERMITIR_LOCALHOST=true`).
+
 ## API REST
 
 Convencion: `api/<modulo>.php?action=<accion>`. Respuestas siempre en JSON:
@@ -239,6 +271,7 @@ Autenticacion por **cookie de sesion** (`GDIA_SESSION`): primero se llama al log
 | `policies.php` | `list`, `get`, `create`, `update`, `delete`, `assign`, `unassign` |
 | `compliance.php` | `list`, `get`, `create`, `update`, `delete`, `evaluate`, `dataset_status` |
 | `monitoring.php` | `list`, `runs`, `create`, `update`, `toggle`, `run`, `delete` |
+| `integrations.php` | `list`, `get`, `historial`, `create`, `update`, `delete`, `probar`, `sincronizar`, `toggle` |
 | `lineage.php` | `list` (con `dataset_id`), `get`, `create`, `update`, `delete` |
 | `ai.php` | `status`, `classify`, `anomalies`, `summary`, `suggest`, `resolve`, `confirm_classify` |
 | `reports.php` | `overview`, `alerts`, `logs` (solo admin) |
@@ -256,6 +289,10 @@ POST /api/compliance.php?action=evaluate {"control_id":1,"dataset_id":2,"estado"
 GET  /api/compliance.php?action=dataset_status&dataset_id=2
 POST /api/monitoring.php?action=create   {"dataset_id":1,"frecuencia":1440}
 POST /api/monitoring.php?action=run      {"id":1}
+POST /api/integrations.php?action=create   {"nombre":"API indicadores","url":"https://api.restful-api.dev/objects","dataset_id":4,"timeout":15,"activo":1}
+POST /api/integrations.php?action=probar   {"id":1}
+POST /api/integrations.php?action=sincronizar {"id":1}
+POST /api/integrations.php?action=toggle   {"id":1}
 GET  /api/reports.php?action=overview
 ```
 
@@ -270,12 +307,13 @@ En `postman/` hay una coleccion lista para importar:
 
 ## Base de datos
 
-13 tablas: `roles`, `users`, `datasets`, `quality_metrics`, `policies`, `policy_datasets`, `data_lineage`, `compliance_controls`, `compliance_evaluations`, `monitoring_configs`, `monitoring_runs`, `ai_detections` y `activity_logs`, con llaves foraneas, restricciones `CHECK` e indices para busquedas. El detalle completo esta en `sql/database.sql`.
+15 tablas: `roles`, `users`, `datasets`, `quality_metrics`, `policies`, `policy_datasets`, `data_lineage`, `compliance_controls`, `compliance_evaluations`, `monitoring_configs`, `monitoring_runs`, `external_sources`, `external_sync_runs`, `ai_detections` y `activity_logs`, con llaves foraneas, restricciones `CHECK` e indices para busquedas. El detalle completo esta en `sql/database.sql`.
 
 Si tu base de datos ya existe y solo le falta un modulo, ejecuta la migracion correspondiente, que crea unicamente sus tablas con sus constraints, sin datos y sin tocar ninguna tabla previa (idempotente, se puede reejecutar):
 - `sql/migration_lineage.sql`: crea `data_lineage`.
 - `sql/migration_compliance.sql`: crea `compliance_controls` y `compliance_evaluations`.
 - `sql/migration_monitoring.sql`: crea `monitoring_configs` y `monitoring_runs`.
+- `sql/migration_integrations.sql`: crea `external_sources` y `external_sync_runs`.
 
 Los datos de ejemplo estan en `sql/seed.sql` y solo aplican a bases nuevas.
 
@@ -289,10 +327,13 @@ Los datos de ejemplo estan en `sql/seed.sql` y solo aplican a bases nuevas.
 - Cabeceras de seguridad (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`) y cookies `HttpOnly` + `SameSite`
 - Errores de produccion ocultos (`APP_DEBUG=0`); el JS tolera fallos de red sin romper la interfaz
 - Bitacora de actividad de los movimientos del sistema
+- Proteccion SSRF en el modulo de fuentes externas (esquema, hosts locales, resolucion DNS y limite de tamano del cuerpo)
+
+Limitacion conocida de CSRF: **la sesion por si sola NO protege contra CSRF**. La plataforma no implementa token anti-CSRF en sus endpoints mutantes en esta etapa; es una limitacion documentada, no una garantia.
 
 ## Pruebas realizadas
 
-Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7), cierre de seguridad (8), linaje de datos (9), cumplimiento normativo (10) y monitoreo continuo (11). La coleccion de Postman permite re-ejecutar la API completa manualmente.
+Cada etapa se verifico con pruebas E2E sobre la BD real: autenticacion (Etapa 1), usuarios (2), datasets (3), calidad (4), politicas (5), IA en modo simulado (6), reportes/dashboard (7), cierre de seguridad (8), linaje de datos (9), cumplimiento normativo (10), monitoreo continuo (11) y fuentes externas / integraciones (12). La coleccion de Postman permite re-ejecutar la API completa manualmente.
 
 ## Nota sobre credenciales
 

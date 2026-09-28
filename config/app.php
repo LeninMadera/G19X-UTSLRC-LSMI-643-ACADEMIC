@@ -49,6 +49,17 @@ define('AI_BASE_URL', $env['AI_BASE_URL'] ?? 'https://api.openai.com/v1');
 define('APP_URL', $env['APP_URL'] ?? 'http://localhost/gobierno-datos-ia');
 define('APP_KEY', $env['APP_KEY'] ?? '');
 
+// Integracion con fuentes externas (consumo REST/JSON via cURL).
+// INTEGRACION_PERMITIR_LOCALHOST habilita hosts locales/privados SOLO
+// para el ambiente de pruebas con un mock local. Orden de precedencia:
+// variable de entorno real -> .env -> default (asi el harness de E2E
+// puede activarlo sin editar .env).
+$permitirLocalhost = $env['INTEGRACION_PERMITIR_LOCALHOST'] ?? getenv('INTEGRACION_PERMITIR_LOCALHOST') ?: '';
+define('INTEGRACION_TIMEOUT', (int)($env['INTEGRACION_TIMEOUT'] ?? 15));
+define('INTEGRACION_CONNECT_TIMEOUT', (int)($env['INTEGRACION_CONNECT_TIMEOUT'] ?? 5));
+define('INTEGRACION_MAX_BYTES', (int)($env['INTEGRACION_MAX_BYTES'] ?? 1048576));
+define('INTEGRACION_PERMITIR_LOCALHOST', $permitirLocalhost !== '' && filter_var($permitirLocalhost, FILTER_VALIDATE_BOOLEAN));
+
 // Modo depuracion: 0 oculta errores en produccion, 1 solo en desarrollo
 define('APP_DEBUG', ($env['APP_DEBUG'] ?? '0') === '1');
 
