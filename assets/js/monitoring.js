@@ -128,12 +128,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // El boton de toggle cambia de texto segun el estado vigente.
             const accionToggle = c.activo == 1 ? 'Desactivar' : 'Activar';
 
+            // Los botones van dentro de .actions-stack: es solo maquetacion
+            // (flex-wrap) para que la celda no se corte ni se salga del panel.
+            // Los atributos data-* y el resto de la accion no cambian.
             const acciones = puedeEditar ? (
-                '<button class="btn btn-ghost btn-sm" data-run="' + c.id + '">Monitorear ahora</button> ' +
-                '<button class="btn btn-ghost btn-sm" data-edit="' + c.id + '">Editar</button> ' +
-                '<button class="btn btn-ghost btn-sm" data-toggle="' + c.id + '">' + accionToggle + '</button> ' +
-                '<button class="btn btn-ghost btn-sm" data-hist="' + c.id + '">Historial</button> ' +
-                '<button class="btn btn-danger btn-sm" data-del="' + c.id + '">Eliminar</button>'
+                '<div class="actions-stack">' +
+                '<button class="btn btn-ghost btn-sm" data-run="' + c.id + '">Monitorear ahora</button>' +
+                '<button class="btn btn-ghost btn-sm" data-edit="' + c.id + '">Editar</button>' +
+                '<button class="btn btn-ghost btn-sm" data-toggle="' + c.id + '">' + accionToggle + '</button>' +
+                '<button class="btn btn-ghost btn-sm" data-hist="' + c.id + '">Historial</button>' +
+                '<button class="btn btn-danger btn-sm" data-del="' + c.id + '">Eliminar</button>' +
+                '</div>'
             ) : '-';
 
             const anomalias = Number(c.anomalias_ultimas || 0);
@@ -151,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<td>' + badgeResultado(c.estado_ultima) + '</td>' +
                 '<td class="col-num">' + celdaScore(c.score_ultimo) + '</td>' +
                 '<td class="col-num">' + celdaAnomalias + '</td>' +
-                '<td class="actions-cell">' + acciones + '</td>';
+                '<td class="actions-cell actions-cell-stack col-acciones">' + acciones + '</td>';
             tbody.appendChild(tr);
         });
 

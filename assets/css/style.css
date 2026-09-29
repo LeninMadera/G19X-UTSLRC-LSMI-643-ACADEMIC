@@ -132,73 +132,188 @@ code {
 
 /* ------------------------------------------------------------
    3. Login
+   Entrada de plataforma: en escritorio son dos columnas dentro de
+   una sola pieza (panel de identidad + formulario) en vez de una
+   tarjeta blanca suelta. Por debajo de 900px las columnas se
+   apilan y el panel de identidad se compacta en cabecera.
    ------------------------------------------------------------ */
 .login-body {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    /* Fondo azul en dos capas: un halo superior muy suave da profundidad
-       sin recurrir a brillos exagerados. */
+    /* Fondo azul en tres capas: dos halos suave y una base en diagonal.
+       Da profundidad sin recurrir a brillos ni animaciones. */
     background:
-        radial-gradient(62% 42% at 50% 0%, rgba(96, 165, 250, 0.22), transparent 70%),
-        linear-gradient(135deg, var(--sidebar-bg) 0%, var(--primary-dark) 62%, var(--primary) 100%);
-    padding: 1.5rem 1.25rem;
+        radial-gradient(58% 42% at 10% 6%, rgba(96, 165, 250, 0.26), transparent 68%),
+        radial-gradient(52% 46% at 92% 100%, rgba(29, 78, 216, 0.55), transparent 70%),
+        linear-gradient(148deg, #0b1220 0%, #16305c 48%, #1d4ed8 100%);
+    padding: 2rem 1.5rem;
 }
 
-.login-card {
-    position: relative;
-    background: var(--surface);
+.login-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.06fr) minmax(340px, 0.94fr);
     width: 100%;
-    max-width: 420px;
-    padding: 2.6rem 2.3rem 1.9rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    /* La franja de marca se dibuja sobre el borde superior de la tarjeta. */
+    max-width: 1040px;
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    /* Sombra en dos planos: la difusa separa del fondo, la corta marca el borde. */
+    box-shadow:
+        0 30px 70px rgba(8, 15, 30, 0.45),
+        0 2px 6px rgba(8, 15, 30, 0.18);
     overflow: hidden;
 }
 
-.login-card::before {
+/* --- Panel de identidad --- */
+.login-aside {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 2.2rem;
+    padding: 2.7rem 2.5rem;
+    color: #dbe7ff;
+    /* El degradado se mantiene en la banda oscura (el azul claro no llega a
+       4.5:1 con texto pequeno); la profundidad la dan los halos. */
+    background: linear-gradient(158deg, #1e3a8a 0%, #1d4ed8 58%, #2a5fd0 100%);
+    /* Rejilla muy tenue: textura sin imagenes ni librerias. */
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+        linear-gradient(158deg, #1e3a8a 0%, #1d4ed8 58%, #2a5fd0 100%);
+    background-size: 34px 34px, 34px 34px, 100% 100%;
+}
+
+/* Halo superior: hace que el degradado no se lea plano. */
+.login-aside::after {
     content: "";
     position: absolute;
     inset: 0 0 auto;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 55%, #60a5fa 100%);
+    height: 220px;
+    background: radial-gradient(80% 100% at 20% 0%, rgba(255, 255, 255, 0.14), transparent 72%);
+    pointer-events: none;
 }
 
-/* --- Identidad --- */
-.login-brand { text-align: center; margin-bottom: 1.45rem; }
+.login-aside > * { position: relative; z-index: 1; }
 
-/* Solo se agranda la insignia del login: la base sigue siendo la misma
-   que usa la barra lateral, para que la marca se lea igual en toda la app. */
+.login-brand { display: flex; align-items: center; gap: 0.95rem; }
+
+/* La insignia mantiene la base de la barra lateral: la marca se lee
+   igual en toda la app, solo que aqui con sombra propia. */
 .login-brand .logo-badge {
-    width: 54px;
-    height: 54px;
-    margin: 0 auto 0.95rem;
-    font-size: 1.15rem;
-    border-radius: 13px;
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+    width: 52px;
+    height: 52px;
+    margin: 0;
+    font-size: 1.12rem;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+    color: var(--primary-dark);
+    box-shadow: 0 6px 18px rgba(4, 12, 32, 0.35);
 }
+
+.login-brand-txt { min-width: 0; }
 
 .login-brand h1 {
-    font-size: 1.45rem;
+    color: #fff;
+    font-size: 1.7rem;
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
     line-height: 1.2;
 }
 
 .login-tagline {
-    font-size: 0.83rem;
-    line-height: 1.5;
-    color: var(--text-3);
-    /* El ancho maximo evita lineas demasiado largas en pantallas grandes. */
-    max-width: 28ch;
-    margin: 0.45rem auto 0;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.92);
+    margin-top: 0.25rem;
 }
 
-/* Separador entre la identidad y el formulario. */
-.login-rule { height: 1px; border: 0; background: var(--border); margin-bottom: 1.35rem; }
+/* --- Lista de capacidades --- */
+.login-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.05rem;
+}
+
+.login-features li { display: flex; align-items: flex-start; gap: 0.8rem; }
+
+.login-feature-ico {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #fff;
+}
+.login-feature-ico .ico { width: 17px; height: 17px; }
+
+.login-features strong {
+    display: block;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 650;
+    line-height: 1.35;
+}
+.login-features span:not(.login-feature-ico) {
+    display: block;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.92);
+    margin-top: 0.15rem;
+}
+
+.login-aside-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+.login-aside-foot .ico { width: 15px; height: 15px; color: #cfe0ff; flex: none; }
+
+/* --- Panel del formulario --- */
+.login-form-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2.7rem 2.5rem 2.2rem;
+    background: var(--surface);
+}
+
+.login-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary);
+}
+
+.login-title {
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-top: 0.35rem;
+}
+
+.login-intro {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-3);
+    margin-top: 0.5rem;
+}
+
+/* Separador entre la cabecera del formulario y los campos. */
+.login-rule { height: 1px; border: 0; background: var(--border); margin: 1.4rem 0 1.5rem; }
 
 /* --- Controles con icono --- */
 .login-control { position: relative; }
@@ -218,30 +333,30 @@ code {
 /* El icono se ilumina al escribir dentro: refuerza el foco sin generar ruido. */
 .login-control:focus-within > .ico { color: var(--primary); }
 
-/* Se ancla bajo .login-card a proposito: el bloque generico .field input
+/* Se ancla a .login-form-side a proposito: el bloque generico .field input
    aparece mas abajo en la hoja y, con la misma especificidad, se llevaria
    el padding y el alto de estos campos. */
-.login-card .login-control input {
-    padding: 0.62rem 0.8rem 0.62rem 2.4rem;
+.login-form-side .login-control input {
+    padding: 0.68rem 0.8rem 0.68rem 2.4rem;
     font-size: 0.9rem;
 }
 
 /* --- Aviso de credenciales incorrectas. El bloque llega a la pagina sin
        clase de tono desde el markup, asi que el error se pinta aqui y no
        depende de que el script se acuerde de anadirla. --- */
-.login-card .alert { margin-bottom: 1rem; }
+.login-form-side .alert { margin-bottom: 1rem; }
 .login-error { align-items: center; }
 .login-error .ico { width: 17px; height: 17px; }
 
 /* --- Enviar --- */
 .login-submit {
     margin-top: 0.35rem;
-    padding: 0.7rem 1rem;
+    padding: 0.75rem 1rem;
     font-size: 0.92rem;
     font-weight: 600;
-    box-shadow: 0 5px 14px rgba(37, 99, 235, 0.24);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.26);
 }
-.login-submit:hover { box-shadow: 0 7px 18px rgba(37, 99, 235, 0.3); }
+.login-submit:hover { box-shadow: 0 8px 20px rgba(37, 99, 235, 0.32); }
 .login-submit:disabled,
 .login-submit:disabled:hover { box-shadow: none; }
 
@@ -250,18 +365,66 @@ code {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
     gap: 0.4rem 0.45rem;
-    margin-top: 1.4rem;
+    margin-top: 1.5rem;
     padding-top: 1.1rem;
     border-top: 1px solid var(--border);
     font-size: 0.78rem;
     line-height: 1.5;
     color: var(--text-3);
-    text-align: center;
+    text-align: left;
 }
 .login-foot .ico { width: 15px; height: 15px; color: var(--border-2); }
-.login-foot span { max-width: 30ch; }
+.login-foot span { max-width: 34ch; }
+
+/* --- Login responsive (1440 / 1280 / 1024 / 768 / 390x844) ---
+   Por debajo de 900px las dos columnas se apilan: el panel de identidad
+   pasa a ser una cabecera compacta y el formulario queda a ancho
+   completo. Nada se recorta ni desborda a la pagina. */
+@media (max-width: 900px) {
+    .login-body { padding: 1.5rem 1rem; align-items: flex-start; }
+
+    .login-shell {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 520px;
+        border-radius: 16px;
+    }
+
+    .login-aside {
+        gap: 1.4rem;
+        padding: 1.6rem 1.6rem 1.4rem;
+        background-size: 28px 28px, 28px 28px, 100% 100%;
+    }
+    .login-aside::after { height: 150px; }
+
+    .login-brand h1 { font-size: 1.4rem; }
+    .login-tagline { font-size: 0.79rem; }
+    .login-brand .logo-badge { width: 44px; height: 44px; font-size: 1rem; border-radius: 12px; }
+
+    /* La lista de capacidades deja de ocupar altura: en una sola columna
+       manda el formulario, que es la tarea de esta pantalla. */
+    .login-features { display: none; }
+
+    .login-aside-foot {
+        padding-top: 0;
+        border-top: 0;
+        font-size: 0.75rem;
+    }
+
+    .login-form-side { padding: 1.7rem 1.6rem 1.5rem; }
+    /* La marca sigue presidiendo la pantalla: el titulo del panel cede un
+       escalon para que la jerarquia se lea en el primer vistazo. */
+    .login-title { font-size: 1.3rem; }
+    .login-intro { margin-top: 0.4rem; }
+    .login-rule { margin: 1.2rem 0 1.25rem; }
+}
+
+@media (max-width: 560px) {
+    .login-body { padding: 1.1rem 0.9rem; }
+    .login-aside { padding: 1.3rem 1.2rem 1.15rem; }
+    .login-form-side { padding: 1.4rem 1.2rem 1.25rem; }
+    .login-foot { margin-top: 1.25rem; }
+}
 
 .logo-badge {
     width: 46px;
@@ -779,9 +942,52 @@ table.table {
     background: var(--surface);
 }
 
-/* Columna de acciones: antes sin estilo en 7 modulos */
+/* Columna de acciones: antes sin estilo en 7 modulos.
+   Por defecto los botones van en una sola linea, como hasta ahora. */
 .actions-cell { white-space: nowrap; text-align: right; }
 .actions-cell .btn + .btn { margin-left: 0.3rem; }
+
+/* --- Acciones repartidas (monitoring e integrations) ---
+   Estas dos vistas envuelven los botones en .actions-stack. Con flex-wrap
+   la celda ya no obliga a la tabla a medir la suma de todos los botones,
+   que es lo que empujaba la columna fuera del panel y dejaba las acciones
+   fuera de vista. Ahora se reparten en varias lineas dentro de la celda,
+   con separacion constante y sin margenes sueltos. */
+.actions-stack {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.3rem;
+}
+/* El selector lleva .actions-cell delante para ganar al margen suelto de
+   la regla base y al ajuste por breakpoint. */
+.actions-cell .actions-stack .btn,
+.actions-cell .actions-stack .btn + .btn { margin: 0; }
+
+/* Ancho minimo de la columna de acciones: caben dos botones por linea
+   ("Monitorear ahora" + "Editar" o "Probar conexion" + "Sincronizar")
+   sin que ninguno se parta. Cuando la tabla da mas sitio, la celda crece
+   y los botones se quedan en una o dos lineas. */
+.actions-cell-stack { min-width: 255px; vertical-align: middle; }
+
+/* La columna de acciones queda anclada al borde derecho de .table-wrap:
+   si la tabla es mas ancha que el panel, se desplaza el contenido y los
+   botones siguen a la vista en vez de quedar escondidos a la derecha.
+   Es puramente visual: no cambia el orden de las columnas ni las acciones. */
+.col-acciones {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+}
+.table thead .col-acciones {
+    z-index: 2;
+    background: var(--surface-2);
+    border-left: 1px solid var(--border-2);
+}
+.table tbody tr:hover .col-acciones { background: var(--surface-2); }
 
 /* Tabla de pares etiqueta/valor del detalle de dataset.
    table-layout fijo + anchos minimos: sin esto la tabla se dimensiona al
@@ -1341,9 +1547,4 @@ input[type="radio"] { accent-color: var(--primary); }
 
     .modal .actions { flex-direction: column-reverse; }
     .modal .actions .btn { width: 100%; }
-
-    /* Login en movil: menos aire lateral para que los campos no queden
-       estrechos, sin tocar la composicion de escritorio. */
-    .login-body { padding: 1.1rem 0.9rem; }
-    .login-card { padding: 2.1rem 1.4rem 1.6rem; }
 }

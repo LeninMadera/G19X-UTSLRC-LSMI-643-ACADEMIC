@@ -74,14 +74,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         estado.sources.forEach(s => {
             const gestiona = s.puede_gestionar === true || s.puede_gestionar == 1;
+            // Los botones van dentro de .actions-stack: es solo maquetacion
+            // (flex-wrap) para que la celda no se corte ni se salga del panel.
+            // Los atributos data-* y el resto de la accion no cambian.
             const acciones = gestiona ? (
-                '<button class="btn btn-ghost btn-sm" data-probar="' + s.id + '">Probar conexion</button> ' +
-                '<button class="btn btn-ghost btn-sm" data-sync="' + s.id + '">Sincronizar</button> ' +
-                '<button class="btn btn-ghost btn-sm" data-edit="' + s.id + '">Editar</button> ' +
+                '<div class="actions-stack">' +
+                '<button class="btn btn-ghost btn-sm" data-probar="' + s.id + '">Probar conexion</button>' +
+                '<button class="btn btn-ghost btn-sm" data-sync="' + s.id + '">Sincronizar</button>' +
+                '<button class="btn btn-ghost btn-sm" data-edit="' + s.id + '">Editar</button>' +
                 '<button class="btn btn-ghost btn-sm" data-toggle="' + s.id + '">' +
-                    (s.activo == 1 ? 'Desactivar' : 'Activar') + '</button> ' +
-                '<button class="btn btn-ghost btn-sm" data-hist="' + s.id + '">Historial</button> ' +
-                '<button class="btn btn-danger btn-sm" data-del="' + s.id + '">Eliminar</button>'
+                    (s.activo == 1 ? 'Desactivar' : 'Activar') + '</button>' +
+                '<button class="btn btn-ghost btn-sm" data-hist="' + s.id + '">Historial</button>' +
+                '<button class="btn btn-danger btn-sm" data-del="' + s.id + '">Eliminar</button>' +
+                '</div>'
             ) : '-';
 
             const tr = document.createElement('tr');
@@ -94,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<td>' + badgeResultado(s.ultimo_estado) + '</td>' +
                 '<td class="col-date">' + (s.ultima_ejecucion ? fmtFecha(s.ultima_ejecucion) : '<span class="muted">-</span>') + '</td>' +
                 '<td class="col-num">' + s.corridas + '</td>' +
-                '<td class="actions-cell">' + acciones + '</td>';
+                '<td class="actions-cell actions-cell-stack col-acciones">' + acciones + '</td>';
             tbody.appendChild(tr);
         });
 

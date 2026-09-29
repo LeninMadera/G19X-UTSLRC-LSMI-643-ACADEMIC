@@ -17,7 +17,7 @@ if (isset($_SESSION['user_id'])) {
 </head>
 <body class="login-body">
 
-<!-- Sprite local: solo los cuatro simbolos que usa esta pantalla,
+<!-- Sprite local: solo los simbolos que usa esta pantalla,
      copiados del sprite general de views/includes/header.php. El login
      no incluye la cabecera, asi que no puede reutilizarlo por <use>. -->
 <svg class="ico-sprite" aria-hidden="true" focusable="false"><defs>
@@ -35,47 +35,99 @@ if (isset($_SESSION['user_id'])) {
     <symbol id="i-file" viewBox="0 0 24 24">
         <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/>
     </symbol>
+    <symbol id="i-db" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="6" rx="8" ry="3"/>
+        <path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>
+    </symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24">
+        <path d="M3 12h4l3-7 4 14 3-7h4"/>
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/>
+    </symbol>
 </defs></svg>
 
-    <main class="login-card">
-        <div class="login-brand">
-            <div class="logo-badge">IA</div>
-            <h1>Gobierno de Datos</h1>
-            <p class="login-tagline">Plataforma de gobierno de datos con Inteligencia Artificial</p>
-        </div>
+    <main class="login-shell">
 
-        <hr class="login-rule">
-
-        <form id="login-form" autocomplete="off">
-            <div class="field">
-                <label for="email">Correo electrónico</label>
-                <div class="login-control">
-                    <svg class="ico" aria-hidden="true"><use href="#i-globe"></use></svg>
-                    <input type="email" id="email" name="email" placeholder="tu@correo.com"
-                           autocomplete="username" autocapitalize="none" spellcheck="false" required>
+        <!-- Panel de identidad: da contexto de plataforma antes del formulario -->
+        <section class="login-aside">
+            <div class="login-brand">
+                <div class="logo-badge">IA</div>
+                <div class="login-brand-txt">
+                    <h1>Gobierno de Datos</h1>
+                    <p class="login-tagline">Plataforma de gobierno de datos con Inteligencia Artificial</p>
                 </div>
             </div>
-            <div class="field">
-                <label for="password">Contraseña</label>
-                <div class="login-control">
-                    <svg class="ico" aria-hidden="true"><use href="#i-shield"></use></svg>
-                    <input type="password" id="password" name="password" placeholder="Tu contraseña"
-                           autocomplete="current-password" required>
-                </div>
-            </div>
-            <div id="login-error" class="alert alert-error login-error hidden" role="alert">
-                <svg class="ico" aria-hidden="true"><use href="#i-alert"></use></svg>
-                <span></span>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block login-submit" id="btn-login">
-                Iniciar sesión
-            </button>
-        </form>
 
-        <p class="login-foot">
-            <svg class="ico" aria-hidden="true"><use href="#i-file"></use></svg>
-            <span>Las cuentas de prueba estan documentadas en el README del proyecto.</span>
-        </p>
+            <ul class="login-features">
+                <li>
+                    <span class="login-feature-ico"><svg class="ico" aria-hidden="true"><use href="#i-db"></use></svg></span>
+                    <div>
+                        <strong>Catalogacion centralizada</strong>
+                        <span>Datasets, mediciones de calidad y linaje en un solo lugar.</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="login-feature-ico"><svg class="ico" aria-hidden="true"><use href="#i-activity"></use></svg></span>
+                    <div>
+                        <strong>Deteccion de anomalias con IA</strong>
+                        <span>Revalidacion periodica del score de cada dataset.</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="login-feature-ico"><svg class="ico" aria-hidden="true"><use href="#i-shield"></use></svg></span>
+                    <div>
+                        <strong>Politicas y cumplimiento</strong>
+                        <span>Controles normativos evaluados por dataset.</span>
+                    </div>
+                </li>
+            </ul>
+
+            <p class="login-aside-foot">
+                <svg class="ico" aria-hidden="true"><use href="#i-check"></use></svg>
+                <span>Acceso restringido a usuarios autorizados de la plataforma.</span>
+            </p>
+        </section>
+
+        <!-- Panel del formulario -->
+        <section class="login-form-side">
+            <p class="login-eyebrow">Acceso a la plataforma</p>
+            <h2 class="login-title">Iniciar sesión</h2>
+            <p class="login-intro">Introduce tus credenciales para entrar al panel de gobierno de datos.</p>
+
+            <hr class="login-rule">
+
+            <form id="login-form" autocomplete="off">
+                <div class="field">
+                    <label for="email">Correo electrónico</label>
+                    <div class="login-control">
+                        <svg class="ico" aria-hidden="true"><use href="#i-globe"></use></svg>
+                        <input type="email" id="email" name="email" placeholder="tu@correo.com"
+                               autocomplete="username" autocapitalize="none" spellcheck="false" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="password">Contraseña</label>
+                    <div class="login-control">
+                        <svg class="ico" aria-hidden="true"><use href="#i-shield"></use></svg>
+                        <input type="password" id="password" name="password" placeholder="Tu contraseña"
+                               autocomplete="current-password" required>
+                    </div>
+                </div>
+                <div id="login-error" class="alert alert-error login-error hidden" role="alert">
+                    <svg class="ico" aria-hidden="true"><use href="#i-alert"></use></svg>
+                    <span></span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block login-submit" id="btn-login">
+                    Iniciar sesión
+                </button>
+            </form>
+
+            <p class="login-foot">
+                <svg class="ico" aria-hidden="true"><use href="#i-file"></use></svg>
+                <span>Las cuentas de prueba estan documentadas en el README del proyecto.</span>
+            </p>
+        </section>
     </main>
 
     <script>
