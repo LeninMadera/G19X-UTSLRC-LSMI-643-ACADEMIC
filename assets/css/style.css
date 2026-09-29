@@ -138,36 +138,130 @@ code {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
-    padding: 1.25rem;
+    /* Fondo azul en dos capas: un halo superior muy suave da profundidad
+       sin recurrir a brillos exagerados. */
+    background:
+        radial-gradient(62% 42% at 50% 0%, rgba(96, 165, 250, 0.22), transparent 70%),
+        linear-gradient(135deg, var(--sidebar-bg) 0%, var(--primary-dark) 62%, var(--primary) 100%);
+    padding: 1.5rem 1.25rem;
 }
 
 .login-card {
+    position: relative;
     background: var(--surface);
     width: 100%;
-    max-width: 404px;
-    padding: 2.4rem 2.2rem;
+    max-width: 420px;
+    padding: 2.6rem 2.3rem 1.9rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
+    /* La franja de marca se dibuja sobre el borde superior de la tarjeta. */
+    overflow: hidden;
 }
 
-.login-logo { text-align: center; margin-bottom: 1.6rem; }
-.login-logo h1 { font-size: 1.4rem; font-weight: 700; margin: 0.7rem 0 0.25rem; }
-.login-logo p { font-size: 0.85rem; }
+.login-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 55%, #60a5fa 100%);
+}
 
-/* Aviso de credenciales incorrectas. El bloque llega a la pagina sin
-   clase de tono desde el markup, asi que el error se pinta aqui y no
-   depende de que el script se acuerde de anadirla. */
+/* --- Identidad --- */
+.login-brand { text-align: center; margin-bottom: 1.45rem; }
+
+/* Solo se agranda la insignia del login: la base sigue siendo la misma
+   que usa la barra lateral, para que la marca se lea igual en toda la app. */
+.login-brand .logo-badge {
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 0.95rem;
+    font-size: 1.15rem;
+    border-radius: 13px;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+}
+
+.login-brand h1 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+}
+
+.login-tagline {
+    font-size: 0.83rem;
+    line-height: 1.5;
+    color: var(--text-3);
+    /* El ancho maximo evita lineas demasiado largas en pantallas grandes. */
+    max-width: 28ch;
+    margin: 0.45rem auto 0;
+}
+
+/* Separador entre la identidad y el formulario. */
+.login-rule { height: 1px; border: 0; background: var(--border); margin-bottom: 1.35rem; }
+
+/* --- Controles con icono --- */
+.login-control { position: relative; }
+
+.login-control > .ico {
+    position: absolute;
+    top: 50%;
+    left: 0.8rem;
+    width: 17px;
+    height: 17px;
+    transform: translateY(-50%);
+    color: var(--text-3);
+    pointer-events: none;
+    transition: color var(--t-fast);
+}
+
+/* El icono se ilumina al escribir dentro: refuerza el foco sin generar ruido. */
+.login-control:focus-within > .ico { color: var(--primary); }
+
+/* Se ancla bajo .login-card a proposito: el bloque generico .field input
+   aparece mas abajo en la hoja y, con la misma especificidad, se llevaria
+   el padding y el alto de estos campos. */
+.login-card .login-control input {
+    padding: 0.62rem 0.8rem 0.62rem 2.4rem;
+    font-size: 0.9rem;
+}
+
+/* --- Aviso de credenciales incorrectas. El bloque llega a la pagina sin
+       clase de tono desde el markup, asi que el error se pinta aqui y no
+       depende de que el script se acuerde de anadirla. --- */
 .login-card .alert { margin-bottom: 1rem; }
+.login-error { align-items: center; }
+.login-error .ico { width: 17px; height: 17px; }
+
+/* --- Enviar --- */
+.login-submit {
+    margin-top: 0.35rem;
+    padding: 0.7rem 1rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    box-shadow: 0 5px 14px rgba(37, 99, 235, 0.24);
+}
+.login-submit:hover { box-shadow: 0 7px 18px rgba(37, 99, 235, 0.3); }
+.login-submit:disabled,
+.login-submit:disabled:hover { box-shadow: none; }
+
+/* --- Nota del README --- */
 .login-foot {
-    margin-top: 1.25rem;
-    padding-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem 0.45rem;
+    margin-top: 1.4rem;
+    padding-top: 1.1rem;
     border-top: 1px solid var(--border);
     font-size: 0.78rem;
-    text-align: center;
+    line-height: 1.5;
     color: var(--text-3);
+    text-align: center;
 }
+.login-foot .ico { width: 15px; height: 15px; color: var(--border-2); }
+.login-foot span { max-width: 30ch; }
 
 .logo-badge {
     width: 46px;
@@ -609,14 +703,7 @@ code {
 /* Tono del icono segun el significado del indicador */
 .kpi-ico.is-ok      { background: var(--ok-soft);      border-color: var(--ok-line);      color: var(--ok); }
 .kpi-ico.is-warn    { background: var(--warn-soft);    border-color: var(--warn-line);    color: var(--warn); }
-.kpi-ico    .is-error { background: var(--danger-soft); border-color: var(--danger-line); color: var(--danger); }
-
-    /* El chip de resumen puede llevar texto largo ("62% de cumplimiento
-       con 3 controles criticos o de alta"). En movil la cabecera de
-       seccion lo baja a su propia linea y deja que el texto se parta,
-       en vez de ensanchar el panel y obligar a scroll horizontal. */
-    .section-head { flex-wrap: wrap; }
-    .pill-summary { white-space: normal; }
+.kpi-ico.is-error   { background: var(--danger-soft);  border-color: var(--danger-line);  color: var(--danger); }
 .kpi-ico.is-neutral { background: var(--neutral-soft); border-color: var(--neutral-line); color: var(--neutral); }
 .kpi-ico.is-info    { background: var(--info-soft);    border-color: var(--info-line);    color: var(--info); }
 
@@ -1220,6 +1307,13 @@ input[type="radio"] { accent-color: var(--primary); }
 
     .cards,
     .cards-kpis { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+    /* El chip de resumen puede llevar texto largo ("62% de cumplimiento
+       con 3 controles criticos o de alta"). Aqui la cabecera de seccion
+       lo baja a su propia linea y deja que el texto se parta, en vez de
+       ensanchar el panel y obligar a scroll horizontal. */
+    .section-head { flex-wrap: wrap; }
+    .pill-summary { white-space: normal; }
 }
 
 @media (max-width: 560px) {
@@ -1247,4 +1341,9 @@ input[type="radio"] { accent-color: var(--primary); }
 
     .modal .actions { flex-direction: column-reverse; }
     .modal .actions .btn { width: 100%; }
+
+    /* Login en movil: menos aire lateral para que los campos no queden
+       estrechos, sin tocar la composicion de escritorio. */
+    .login-body { padding: 1.1rem 0.9rem; }
+    .login-card { padding: 2.1rem 1.4rem 1.6rem; }
 }
