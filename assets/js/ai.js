@@ -24,6 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => msg.classList.add('hidden'), 4000);
     }
 
+    /* La severidad de una anomalia se pinta por gravedad real: alta y
+       critica son error, media pide atencion y baja es informativa. */
+    function TONO_ANOMALIA(sev) {
+        return ['alta', 'critica'].includes(sev) ? 'error' : sev === 'media' ? 'warn' : 'info';
+    }
+
     function renderResultado(accion, json) {
         const d = json.data || {};
         resultado.innerHTML = '';
@@ -49,8 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ul = document.createElement('ul');
                 list.forEach(a => {
                     const li = document.createElement('li');
-                    li.innerHTML = '<span class="badge badge-' +
-                        (['alta', 'critica'].includes(a.severidad) ? 'inactive' : a.severidad === 'media' ? 'pending' : 'active') +
+                    li.innerHTML = '<span class="badge badge-' + TONO_ANOMALIA(a.severidad) +
                         '">' + esc(a.severidad) + '</span> ' + esc(a.descripcion);
                     ul.appendChild(li);
                 });

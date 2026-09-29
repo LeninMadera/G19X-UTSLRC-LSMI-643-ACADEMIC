@@ -10,7 +10,7 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
     </div>
 
-    <div id="msg" class="alert hidden"></div>
+    <div id="msg" class="alert hidden" role="status"></div>
 
     <div class="table-wrap">
         <table class="table">
@@ -33,7 +33,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal formulario politica -->
 <div id="modal-policy" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="policy-title">
         <h3 id="policy-title">Nueva politica</h3>
         <form id="policy-form" autocomplete="off">
             <input type="hidden" id="policy-id" name="id" value="0">
@@ -56,7 +56,7 @@ require_once __DIR__ . '/includes/header.php';
                     <option value="inactiva">inactiva</option>
                 </select>
             </div>
-            <div id="policy-form-error" class="alert alert-error hidden"></div>
+            <div id="policy-form-error" class="alert alert-error hidden" role="alert"></div>
             <div class="actions">
                 <button type="button" class="btn btn-ghost" data-close="modal-policy">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>
@@ -67,12 +67,12 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal asignacion de datasets -->
 <div id="modal-assign" class="modal-backdrop hidden">
-    <div class="modal">
-        <h3>Asignar datasets a la politica: <span id="assign-title"></span></h3>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="assign-titulo">
+        <h3 id="assign-titulo">Asignar datasets a la politica: <span id="assign-title"></span></h3>
         <div id="assign-datasets" class="assign-list">
             <p class="muted">Cargando...</p>
         </div>
-        <div id="assign-error" class="alert alert-error hidden"></div>
+        <div id="assign-error" class="alert alert-error hidden" role="alert"></div>
         <div class="actions">
             <button type="button" class="btn btn-ghost" data-close="modal-assign">Cerrar</button>
             <button id="btn-guardar-asignacion" class="btn btn-primary">Guardar asignacion</button>

@@ -41,7 +41,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
 
-    <div id="msg" class="alert hidden"></div>
+    <div id="msg" class="alert hidden" role="status"></div>
 
     <div class="section-head">
         <span class="section-label">Fuentes registradas</span>
@@ -80,7 +80,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal formulario de fuente -->
 <div id="modal-fuente" class="modal-backdrop hidden">
-    <div class="modal modal-xl">
+    <div class="modal modal-xl" role="dialog" aria-modal="true" aria-labelledby="fuente-title">
         <h3 id="fuente-title">Nueva fuente</h3>
         <form id="fuente-form" autocomplete="off">
             <input type="hidden" id="fuente-id" name="id" value="0">
@@ -114,7 +114,7 @@ require_once __DIR__ . '/includes/header.php';
                     <option value="0">inactivo</option>
                 </select>
             </div>
-            <div id="fuente-form-error" class="alert alert-error hidden"></div>
+            <div id="fuente-form-error" class="alert alert-error hidden" role="alert"></div>
             <div class="actions">
                 <button type="button" class="btn btn-ghost" data-close="modal-fuente">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>
@@ -125,9 +125,9 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal historial de ejecuciones -->
 <div id="modal-hist" class="modal-backdrop hidden">
-    <div class="modal modal-xl">
+    <div class="modal modal-xl" role="dialog" aria-modal="true" aria-labelledby="hist-titulo">
         <div class="toolbar">
-            <h3>Historial: <span id="hist-title"></span></h3>
+            <h3 id="hist-titulo">Historial: <span id="hist-title"></span></h3>
             <button type="button" class="btn btn-ghost btn-sm" data-close="modal-hist">Cerrar</button>
         </div>
         <div class="table-wrap">

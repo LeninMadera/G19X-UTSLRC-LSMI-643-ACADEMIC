@@ -2,7 +2,7 @@
    Catalogo de datasets
    ============================================================ */
 
-/* global api, esc, APP_USER */
+/* global api, esc, abrirModal, cerrarModal, APP_USER */
 
 document.addEventListener('DOMContentLoaded', () => {
     const tbody      = document.getElementById('datasets-tbody');
@@ -16,13 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const form       = document.getElementById('dataset-form');
     const formError  = document.getElementById('form-error');
     const btnNuevo   = document.getElementById('btn-nuevo');
-    const btnCancel  = document.getElementById('btn-cancelar');
 
     const datos = {
         categorias: [], origenes: [], owners: [], editar: null
     };
     const ORIGENES = ['Base de datos', 'Archivo', 'API', 'CRM', 'SQL Server', 'CSV', 'Otro'];
-    const CLASIF_BADGE = { publico: 'active', interno: 'pending', confidencial: 'inactive', restringido: 'inactive' };
+    /* Tono por sensibilidad, no por nombre: publico es informativo,
+       interno pide atencion y confidencial/restringido son los unicos
+       que se pintan como error. Mismo criterio que la ficha del dataset. */
+    const CLASIF_BADGE = { publico: 'info', interno: 'warn', confidencial: 'error', restringido: 'error' };
     let rol = document.querySelector('.badge-role')?.textContent || '';
     let userId = (window.APP_USER && window.APP_USER.id) || null;
     // true mientras la tabla muestre resultados de busqueda semantica
@@ -94,14 +96,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<td><a href="dataset_detail.php?id=' + d.id + '">' + esc(d.nombre) + '</a>' + extra + '</td>' +
                 '<td>' + esc(d.categoria) + '</td>' +
                 '<td>' + esc(d.origen) + '</td>' +
-                '<td><span class="badge badge-' + (CLASIF_BADGE[clasificacion] || 'active') + '">' + esc(clasificacion) + '</span></td>' +
+                '<td><span class="badge badge-' + (CLASIF_BADGE[clasificacion] || 'info') + '">' + esc(clasificacion) + '</span></td>' +
                 '<td>' + esc(d.owner_name) + '</td>' +
-                '<td><span class="badge badge-' + (d.activo == 1 ? 'active' : 'inactive') + '">' +
-                    (d.activo == 1 ? 'activo' : 'inactivo') + '</span></td>' +
+                '<td>' + (d.activo == 1
+                    ? '<span class="badge badge-ok">activo</span>'
+                    : '<span class="badge badge-neutral">inactivo</span>') + '</td>' +
                 '<td class="score-badge ' + cls + '">' + score + '</td>' +
-                '<td><a class="btn btn-ghost btn-sm" href="dataset_detail.php?id=' + d.id + '">Ver</a> ' +
-                    (puedeEditar ? '<button class="btn btn-ghost btn-sm" data-edit="' + d.id + '">Editar</button> ' : '') +
-                    '<button class="btn btn-danger btn-sm hidden" data-del="' + d.id + '">Eliminar</button></td>';
+                '<td class="actions-cell">' +
+                    '<a class="btn btn-ghost btn-sm" href="dataset_detail.php?id=' + d.id + '">Ver</a>' +
+                    (puedeEditar ? ' <button class="btn btn-ghost btn-sm" data-edit="' + d.id + '">Editar</button>' : '') +
+                    '<button class="btn btn-danger btn-sm hidden" data-del="' + d.id + '">Eliminar</button>' +
+                '</td>';
             tbody.appendChild(tr);
 
             // Botones segun rol: eliminar solo admin/steward
@@ -216,7 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
         pintarFilas(json.data.datasets, true);
     }
 
-    function abrirModal(dataset) {
+    // Se llama abrirForm y no abrirModal para no tapar la funcion
+    // centralizada de app.js, que se usa al final para mostrar el modal.
+    function abrirForm(dataset) {
         form.reset();
         formError.classList.add('hidden');
         renderCategoriaSelect();
@@ -252,14 +259,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             document.getElementById('owner-field').classList.remove('hidden');
         }
-        backdrop.classList.remove('hidden');
+        abrirModal(backdrop);
     }
 
-    if (btnNuevo) btnNuevo.addEventListener('click', () => abrirModal(null));
-    btnCancel.addEventListener('click', () => backdrop.classList.add('hidden'));
-    backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop) backdrop.classList.add('hidden');
-    });
+    if (btnNuevo) btnNuevo.addEventListener('click', () => abrirForm(null));
+
+    // Cancelar y el clic en el fondo los resuelve el delegado de app.js
+    // (el boton lleva data-close="modal-backdrop").
 
     tbody.addEventListener('click', async (e) => {
         const btnEdit = e.target.closest('[data-edit]');
@@ -267,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnEdit) {
             const json = await api('/api/datasets.php?action=detail&id=' + btnEdit.dataset.edit);
-            if (json.success) abrirModal(json.data);
+            if (json.success) abrirForm(json.data);
         }
         if (btnDel) {
             if (!confirm('¿Eliminar este dataset y su historial?')) return;
@@ -287,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const json = await api('/api/datasets.php?action=' + action, data);
         if (json.success) {
-            backdrop.classList.add('hidden');
+            cerrarModal(backdrop);
             mostrarMsg(json.message, 'success');
             cargar();
         } else {
@@ -324,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const json = await api('/api/datasets.php?action=detail&id=' + editParam);
             if (json.success) {
                 await cargar();
-                abrirModal(json.data);
+                abrirForm(json.data);
             }
         })();
     } else {

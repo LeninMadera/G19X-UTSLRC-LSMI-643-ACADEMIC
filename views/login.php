@@ -26,23 +26,27 @@ if (isset($_SESSION['user_id'])) {
         <form id="login-form" autocomplete="off">
             <div class="field">
                 <label for="email">Correo electronico</label>
-                <input type="email" id="email" name="email" placeholder="tu@correo.com" required>
+                <input type="email" id="email" name="email" placeholder="tu@correo.com"
+                       autocomplete="username" autocapitalize="none" spellcheck="false" required>
             </div>
             <div class="field">
                 <label for="password">Contrasena</label>
-                <input type="password" id="password" name="password" placeholder="••••••••" required>
+                <input type="password" id="password" name="password" placeholder="Tu contrasena"
+                       autocomplete="current-password" required>
             </div>
-            <div id="login-error" class="alert hidden" role="alert"></div>
+            <div id="login-error" class="alert alert-error hidden" role="alert"></div>
             <button type="submit" class="btn btn-primary btn-block" id="btn-login">
                 Iniciar sesion
             </button>
         </form>
-        <p class="muted small center">Usuarios de prueba: admin@example.com / Admin123!</p>
+        <p class="login-foot">Las cuentas de prueba estan documentadas en el README del proyecto.</p>
     </main>
 
-    <script src="<?= e(APP_URL) ?>/assets/js/app.js"></script>
     <script>
         window.APP_URL = "<?= e(APP_URL) ?>";
+    </script>
+    <script src="<?= e(APP_URL) ?>/assets/js/app.js"></script>
+    <script>
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn   = document.getElementById('btn-login');

@@ -2,7 +2,7 @@
    Politicas de gobierno de datos
    ============================================================ */
 
-/* global api, esc */
+/* global api, esc, abrirModal, cerrarModal */
 
 document.addEventListener('DOMContentLoaded', () => {
     const tbody      = document.getElementById('policies-tbody');
@@ -24,6 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
         msg.textContent = texto;
         msg.className = 'alert alert-' + tipo;
         setTimeout(() => msg.classList.add('hidden'), 4000);
+    }
+
+    /* Badge de estado por significado: "activa" es el estado normal de
+       una politica y "inactiva" no es un error, asi que va en neutro. */
+    function badgeEstado(est) {
+        return '<span class="badge badge-' + (est === 'activa' ? 'ok' : 'neutral') + '">'
+            + esc(est) + '</span>';
     }
 
     async function cargar() {
@@ -49,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tr.innerHTML =
                 '<td>' + esc(p.titulo) + '</td>' +
                 '<td>' + esc(p.tipo) + '</td>' +
-                '<td><span class="badge badge-' + (p.estado === 'activa' ? 'active' : 'inactive') + '">' + esc(p.estado) + '</span></td>' +
+                '<td>' + badgeEstado(p.estado) + '</td>' +
                 '<td>' + p.datasets_asignados + '</td>' +
                 '<td>' + esc(p.creado_por || '-') + '</td>' +
                 '<td class="actions-cell">' + acciones + '</td>';
@@ -69,7 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function abrirModal(policy) {
+    // Se llama abrirForm y no abrirModal para no tapar la funcion
+    // centralizada de app.js, que se usa al final para mostrar el modal.
+    function abrirForm(policy) {
         form.reset();
         formError.classList.add('hidden');
         llenarTipos(policy ? policy.tipo : null);
@@ -84,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('policy-title').textContent = 'Nueva politica';
             document.getElementById('estado').value = 'activa';
         }
-        modPolicy.classList.remove('hidden');
+        abrirModal(modPolicy);
     }
 
     function abrirAsignacion(policy) {
@@ -115,21 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
             label.appendChild(span);
             cont.appendChild(label);
         });
-        modAssign.classList.remove('hidden');
+        abrirModal(modAssign);
     }
 
-    if (btnNueva) btnNueva.addEventListener('click', () => abrirModal(null));
+    if (btnNueva) btnNueva.addEventListener('click', () => abrirForm(null));
 
-    document.querySelectorAll('[data-close]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById(btn.dataset.close).classList.add('hidden');
-        });
-    });
-    [modPolicy, modAssign].forEach(m => {
-        m.addEventListener('click', (e) => {
-            if (e.target === m) m.classList.add('hidden');
-        });
-    });
+    // El cierre (data-close, clic en el fondo, Escape, foco, trampa de
+    // Tab y scroll de fondo) lo resuelve el delegado de app.js.
 
     tbody.addEventListener('click', async (e) => {
         const btnEdit   = e.target.closest('[data-edit]');
@@ -138,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnEdit) {
             const p = estado.policies.find(x => String(x.id) === btnEdit.dataset.edit);
-            if (p) abrirModal(p);
+            if (p) abrirForm(p);
         }
         if (btnAssign) {
             const p = estado.policies.find(x => String(x.id) === btnAssign.dataset.assign);
@@ -161,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const json = await api('/api/policies.php?action=' + action, data);
         if (json.success) {
-            modPolicy.classList.add('hidden');
+            cerrarModal(modPolicy);
             mostrarMsg(json.message, 'success');
             cargar();
         } else {
@@ -191,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('assign-error').textContent = errores.join(' ');
             document.getElementById('assign-error').classList.remove('hidden');
         } else {
-            modAssign.classList.add('hidden');
+            cerrarModal(modAssign);
             mostrarMsg('Asignacion actualizada.', 'success');
             cargar();
         }

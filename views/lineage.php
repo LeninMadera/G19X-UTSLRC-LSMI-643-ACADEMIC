@@ -8,7 +8,7 @@ require_once __DIR__ . '/includes/header.php';
             <h2>Linaje de datos</h2>
             <p class="muted small">De que dataset proviene cada dataset y con cuales esta relacionado.</p>
         </div>
-        <select id="sel-dataset">
+        <select id="sel-dataset" aria-label="Filtrar relaciones por dataset">
             <option value="">Todos los datasets</option>
         </select>
         <?php if (in_array($current['rol'], ['admin', 'steward', 'owner'], true)): ?>
@@ -16,7 +16,7 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
     </div>
 
-    <div id="msg" class="alert hidden"></div>
+    <div id="msg" class="alert hidden" role="status"></div>
 
     <div class="table-wrap">
         <table class="table">
@@ -41,7 +41,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal formulario relacion -->
 <div id="modal-lineage" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lineage-title">
         <h3 id="lineage-title">Nueva relacion de linaje</h3>
         <form id="lineage-form" autocomplete="off">
             <input type="hidden" id="lineage-id" name="id" value="0">
@@ -61,7 +61,7 @@ require_once __DIR__ . '/includes/header.php';
                 <label for="descripcion">Descripcion (opcional)</label>
                 <textarea id="descripcion" name="descripcion" rows="3" maxlength="500"></textarea>
             </div>
-            <div id="lineage-form-error" class="alert alert-error hidden"></div>
+            <div id="lineage-form-error" class="alert alert-error hidden" role="alert"></div>
             <div class="actions">
                 <button type="button" class="btn btn-ghost" data-close="modal-lineage">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>

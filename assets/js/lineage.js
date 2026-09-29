@@ -2,7 +2,7 @@
    Modulo de linaje de datos
    ============================================================ */
 
-/* global api, esc, fmtFecha, APP_USER */
+/* global api, esc, fmtFecha, abrirModal, cerrarModal, APP_USER */
 
 document.addEventListener('DOMContentLoaded', () => {
     const tbody     = document.getElementById('lineage-tbody');
@@ -63,7 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function abrirModal(relacion) {
+    // Se llama abrirForm y no abrirModal para no tapar la funcion
+    // centralizada de app.js, que se usa al final para mostrar el modal.
+    function abrirForm(relacion) {
         form.reset();
         formError.classList.add('hidden');
         llenarTipos(relacion ? relacion.tipo : null);
@@ -83,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selOrigen.disabled = false;
             selDestino.disabled = false;
         }
-        modLineage.classList.remove('hidden');
+        abrirModal(modLineage);
     }
 
     async function cargar() {
@@ -132,16 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
             '<button class="btn btn-danger btn-sm" data-del="' + r.id + '">Eliminar</button>';
     }
 
-    if (btnNueva) btnNueva.addEventListener('click', () => abrirModal(null));
+    if (btnNueva) btnNueva.addEventListener('click', () => abrirForm(null));
 
-    document.querySelectorAll('[data-close]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById(btn.dataset.close).classList.add('hidden');
-        });
-    });
-    modLineage.addEventListener('click', (e) => {
-        if (e.target === modLineage) modLineage.classList.add('hidden');
-    });
+    // El cierre (data-close, clic en el fondo, Escape, foco, trampa de
+    // Tab y scroll de fondo) lo resuelve el delegado de app.js.
 
     selFiltro.addEventListener('change', cargar);
 
@@ -151,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnEdit) {
             const r = estado.relaciones.find(x => String(x.id) === btnEdit.dataset.edit);
-            if (r) abrirModal(r);
+            if (r) abrirForm(r);
         }
         if (btnDel) {
             if (!confirm('¿Eliminar esta relacion de linaje?')) return;
@@ -179,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const json = await api('/api/lineage.php?action=' + action, data);
         if (json.success) {
-            modLineage.classList.add('hidden');
+            cerrarModal(modLineage);
             mostrarMsg(json.message, 'success');
             cargar();
         } else {

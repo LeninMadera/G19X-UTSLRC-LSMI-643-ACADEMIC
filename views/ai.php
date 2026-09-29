@@ -8,11 +8,11 @@ require_once __DIR__ . '/includes/header.php';
             <h2>Asistente de Inteligencia Artificial</h2>
             <p class="muted small" id="ai-mode">Verificando disponibilidad del servicio de IA...</p>
         </div>
-        <select id="sel-dataset">
+        <select id="sel-dataset" aria-label="Seleccionar dataset a analizar">
             <option value="">Selecciona un dataset</option>
         </select>
     </div>
-    <div id="msg" class="alert hidden"></div>
+    <div id="msg" class="alert hidden" role="status"></div>
 </section>
 
 <section class="panel" id="panel-acciones" style="display:none">

@@ -2,7 +2,7 @@
    Fuentes externas / Integraciones: fuentes y sincronizaciones
    ============================================================ */
 
-/* global api, esc, fmtFecha */
+/* global api, esc, fmtFecha, abrirModal, cerrarModal */
 
 document.addEventListener('DOMContentLoaded', () => {
     const tbody      = document.getElementById('sources-tbody');
@@ -136,14 +136,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             document.getElementById('fuente-title').textContent = 'Nueva fuente';
         }
-        modFuente.classList.remove('hidden');
+        abrirModal(modFuente);
     }
 
     async function abrirHistorial(id) {
         const s = estado.sources.find(x => String(x.id) === String(id));
         document.getElementById('hist-title').textContent = s ? s.nombre : '# ' + id;
         histTbody.innerHTML = '<tr><td colspan="6" class="muted center">Cargando...</td></tr>';
-        modHist.classList.remove('hidden');
+        abrirModal(modHist);
 
         const json = await api('/api/integrations.php?action=historial&source_id=' + id, {}, 'GET');
         histTbody.innerHTML = '';
@@ -192,16 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnNueva) btnNueva.addEventListener('click', () => abrirForm(null));
 
-    document.querySelectorAll('[data-close]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById(btn.dataset.close).classList.add('hidden');
-        });
-    });
-    [modFuente, modHist].forEach(m => {
-        m.addEventListener('click', (e) => {
-            if (e.target === m) m.classList.add('hidden');
-        });
-    });
+    // El cierre (data-close, clic en el fondo, Escape, foco, trampa de
+    // Tab y scroll de fondo) lo resuelve el delegado de app.js.
 
     tbody.addEventListener('click', async (e) => {
         const btnProbar = e.target.closest('[data-probar]');
@@ -277,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const json = await api('/api/integrations.php?action=' + (esCrear ? 'create' : 'update'), data);
         if (json.success) {
-            modFuente.classList.add('hidden');
+            cerrarModal(modFuente);
             mostrarMsg(json.message, 'success');
             cargar();
         } else {

@@ -143,10 +143,24 @@ if ($initials === '') {
         <path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.2 1.2"/>
         <path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.2-1.2"/>
     </symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/>
+    </symbol>
 </defs></svg>
 
+<!--
+    Cajon lateral movil.
+    #nav-toggle es el control real de teclado: esta oculto con la
+    tecnica de clip (sigue siendo enfocable) y es hermano anterior a
+    .app, que es lo que permite que todo el estado visual se resuelva
+    en CSS con #nav-toggle:checked ~ .app .sidebar.
+    El <label> que lo pulsa vive en el topbar, dentro de .app.
+-->
+<input type="checkbox" id="nav-toggle" class="nav-toggle-box">
+<label class="nav-scrim" for="nav-toggle" aria-hidden="true"></label>
+
 <div class="app">
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
         <div class="logo-badge">IA</div>
         <div class="sidebar-brand-txt">
@@ -154,7 +168,7 @@ if ($initials === '') {
             <span>Plataforma con IA</span>
         </div>
     </div>
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav" aria-label="Navegacion principal">
         <?php foreach ($navItems as $item): ?>
             <?php if (!empty($item['group'])): ?>
                 <div class="nav-group"><?= e($item['group']) ?></div>
@@ -173,7 +187,11 @@ if ($initials === '') {
 </aside>
 <main class="content">
     <header class="topbar">
-        <div>
+        <div class="topbar-left">
+            <label class="nav-toggle" for="nav-toggle">
+                <svg class="ico" aria-hidden="true"><use href="#i-menu"></use></svg>
+                <span class="sr-only">Menu de navegacion</span>
+            </label>
             <div class="topbar-title"><?= e($titleText) ?></div>
         </div>
         <div class="topbar-user">

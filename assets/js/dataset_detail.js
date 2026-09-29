@@ -2,7 +2,7 @@
    Detalle de un dataset (ficha)
    ============================================================ */
 
-/* global api, esc, fmtFecha, APP_URL, APP_USER */
+/* global api, esc, fmtFecha, abrirModal, cerrarModal, APP_URL, APP_USER */
 
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('eval-control').value = '';
             document.getElementById('eval-estado').value = 'cumple';
         }
-        compModal.classList.remove('hidden');
+        abrirModal(compModal);
     }
 
     document.getElementById('btn-agregar-eval').addEventListener('click', () => abrirEval(null));
@@ -355,14 +355,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) abrirEval(btn.dataset.cedit);
     });
 
-    document.querySelectorAll('[data-close]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById(btn.dataset.close).classList.add('hidden');
-        });
-    });
-    compModal.addEventListener('click', (e) => {
-        if (e.target === compModal) compModal.classList.add('hidden');
-    });
+    // El cierre (data-close, clic en el fondo, Escape, foco, trampa de
+    // Tab y scroll de fondo) lo resuelve el delegado de app.js.
 
     compForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -382,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
         msg.textContent = json.message;
         msg.classList.remove('hidden');
         if (json.success) {
-            compModal.classList.add('hidden');
+            cerrarModal(compModal);
             await cargar();
         } else {
             compError.textContent = json.message;

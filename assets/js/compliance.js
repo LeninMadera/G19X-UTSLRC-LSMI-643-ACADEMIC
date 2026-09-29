@@ -2,7 +2,7 @@
    Cumplimiento normativo: controles y evaluaciones
    ============================================================ */
 
-/* global api, esc */
+/* global api, esc, abrirModal, cerrarModal */
 
 document.addEventListener('DOMContentLoaded', () => {
     const tbody      = document.getElementById('controls-tbody');
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('estado').value = 'activo';
             document.getElementById('policy_id').value = '';
         }
-        modControl.classList.remove('hidden');
+        abrirModal(modControl);
     }
 
     function abrirEval(control) {
@@ -179,21 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('eval-title').textContent = esc(control.nombre);
         document.getElementById('eval-control').value = control.id;
         document.getElementById('eval-estado').value = 'cumple';
-        modEval.classList.remove('hidden');
+        abrirModal(modEval);
     }
 
     if (btnNuevo) btnNuevo.addEventListener('click', () => abrirControl(null));
 
-    document.querySelectorAll('[data-close]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById(btn.dataset.close).classList.add('hidden');
-        });
-    });
-    [modControl, modEval].forEach(m => {
-        m.addEventListener('click', (e) => {
-            if (e.target === m) m.classList.add('hidden');
-        });
-    });
+    // El cierre (data-close, clic en el fondo, Escape, foco, trampa de
+    // Tab y scroll de fondo) lo resuelve el delegado de app.js.
 
     tbody.addEventListener('click', async (e) => {
         const btnEdit = e.target.closest('[data-edit]');
@@ -225,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const json = await api('/api/compliance.php?action=' + action, data);
         if (json.success) {
-            modControl.classList.add('hidden');
+            cerrarModal(modControl);
             mostrarMsg(json.message, 'success');
             cargar();
         } else {
@@ -238,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const json = await api('/api/compliance.php?action=evaluate', new FormData(formEval));
         if (json.success) {
-            modEval.classList.add('hidden');
+            cerrarModal(modEval);
             mostrarMsg(json.message, 'success');
             cargar();
         } else {

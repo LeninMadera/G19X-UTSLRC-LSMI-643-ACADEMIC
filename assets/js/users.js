@@ -2,7 +2,7 @@
    Gestion de usuarios (solo admin)
    ============================================================ */
 
-/* global api, esc */
+/* global api, esc, abrirModal, cerrarModal */
 
 document.addEventListener('DOMContentLoaded', () => {
     const tbody       = document.getElementById('users-tbody');
@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const form        = document.getElementById('user-form');
     const formError   = document.getElementById('form-error');
     const btnNuevo    = document.getElementById('btn-nuevo');
-    const btnCancelar = document.getElementById('btn-cancelar');
 
     let roles = [];
 
@@ -19,6 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
         msg.textContent = texto;
         msg.className = 'alert alert-' + tipo;
         setTimeout(() => msg.classList.add('hidden'), 4000);
+    }
+
+    /* Activo es el estado normal; inactivo es informativo, no un error. */
+    function badgeEstado(activo) {
+        return '<span class="badge badge-' + (activo == 1 ? 'ok' : 'neutral') + '">'
+            + (activo == 1 ? 'activo' : 'inactivo') + '</span>';
     }
 
     async function cargarUsuarios() {
@@ -40,8 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<td>' + esc(u.nombre) + '</td>' +
                 '<td>' + esc(u.email) + '</td>' +
                 '<td>' + esc(u.rol) + '</td>' +
-                '<td><span class="badge badge-' + (u.activo == 1 ? 'active' : 'inactive') + '">' +
-                    (u.activo == 1 ? 'activo' : 'inactivo') + '</span></td>' +
+                '<td>' + badgeEstado(u.activo) + '</td>' +
                 '<td>' + esc(u.fecha_creacion) + '</td>' +
                 '<td class="actions-cell">' +
                     '<button class="btn btn-ghost btn-sm" data-edit="' + u.id + '">Editar</button> ' +
@@ -61,7 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function abrirModal(usuario) {
+    // Se llama abrirForm y no abrirModal para no tapar la funcion
+    // centralizada de app.js, que se usa al final para mostrar el modal.
+    function abrirForm(usuario) {
         form.reset();
         formError.classList.add('hidden');
         document.getElementById('rol_id').innerHTML = '';
@@ -72,22 +78,19 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('nombre').value    = usuario.nombre;
             document.getElementById('email').value     = usuario.email;
             document.getElementById('password').value  = '';
-            document.getElementById('password').placeholder = 'Dejar vacio para no cambiar';
             document.getElementById('activo').checked  = usuario.activo == 1;
             llenarRoles(usuario.rol_id);
         } else {
             document.getElementById('modal-title').textContent = 'Nuevo usuario';
-            document.getElementById('password').placeholder = '••••••••';
             llenarRoles(null);
         }
-        backdrop.classList.remove('hidden');
+        abrirModal(backdrop);
     }
 
-    btnNuevo.addEventListener('click', () => abrirModal(null));
-    btnCancelar.addEventListener('click', () => backdrop.classList.add('hidden'));
-    backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop) backdrop.classList.add('hidden');
-    });
+    btnNuevo.addEventListener('click', () => abrirForm(null));
+
+    // Cancelar y el clic en el fondo los resuelve el delegado de app.js
+    // (el boton lleva data-close="modal-backdrop").
 
     tbody.addEventListener('click', async (e) => {
         const btnEdit = e.target.closest('[data-edit]');
@@ -95,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnEdit) {
             const json = await api('/api/users.php?action=get&id=' + btnEdit.dataset.edit);
-            if (json.success) abrirModal(json.data);
+            if (json.success) abrirForm(json.data);
         }
         if (btnDel) {
             if (!confirm('¿Eliminar este usuario? Esta accion no se puede deshacer.')) return;
@@ -117,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const json = await api('/api/users.php?action=' + action, data);
 
         if (json.success) {
-            backdrop.classList.add('hidden');
+            cerrarModal(backdrop);
             mostrarMsg(json.message, 'success');
             cargarUsuarios();
         } else {

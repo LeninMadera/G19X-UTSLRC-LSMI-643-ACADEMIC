@@ -12,17 +12,17 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 
     <div class="toolbar">
-        <input type="search" id="buscar" placeholder="Buscar por nombre, descripcion, categoria o etiqueta...">
+        <input type="search" id="buscar" placeholder="Buscar por nombre, descripcion, categoria o etiqueta..." aria-label="Buscar datasets">
         <button type="button" id="btn-buscar-ia" class="btn btn-primary">Buscar con IA</button>
-        <select id="filtro-categoria">
+        <select id="filtro-categoria" aria-label="Filtrar por categoria">
             <option value="">Todas las categorias</option>
         </select>
     </div>
 
-    <p class="muted small hidden" id="busqueda-ia-info"></p>
+    <p class="muted small hidden" id="busqueda-ia-info" role="status"></p>
     <div id="terminos-ia" class="tags hidden"></div>
 
-    <div id="msg" class="alert hidden"></div>
+    <div id="msg" class="alert hidden" role="status"></div>
 
     <div class="table-wrap">
         <table class="table">
@@ -47,7 +47,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal de formulario -->
 <div id="modal-backdrop" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <h3 id="modal-title">Registrar dataset</h3>
         <form id="dataset-form" autocomplete="off">
             <input type="hidden" id="dataset-id" name="id" value="0">
@@ -84,9 +84,9 @@ require_once __DIR__ . '/includes/header.php';
                 <input type="checkbox" id="activo" name="activo" value="1" checked>
                 <label for="activo">Dataset activo</label>
             </div>
-            <div id="form-error" class="alert alert-error hidden"></div>
+            <div id="form-error" class="alert alert-error hidden" role="alert"></div>
             <div class="actions">
-                <button type="button" id="btn-cancelar" class="btn btn-ghost">Cancelar</button>
+                <button type="button" id="btn-cancelar" class="btn btn-ghost" data-close="modal-backdrop">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>
             </div>
         </form>

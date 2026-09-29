@@ -48,7 +48,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
 
-    <div id="msg" class="alert hidden"></div>
+    <div id="msg" class="alert hidden" role="status"></div>
 
     <div class="section-head">
         <span class="section-label">Configuraciones</span>
@@ -86,7 +86,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal formulario configuracion -->
 <div id="modal-config" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="config-title">
         <h3 id="config-title">Nueva configuracion</h3>
         <form id="config-form" autocomplete="off">
             <input type="hidden" id="config-id" name="id" value="0">
@@ -107,7 +107,7 @@ require_once __DIR__ . '/includes/header.php';
                     <option value="0">inactivo</option>
                 </select>
             </div>
-            <div id="config-form-error" class="alert alert-error hidden"></div>
+            <div id="config-form-error" class="alert alert-error hidden" role="alert"></div>
             <div class="actions">
                 <button type="button" class="btn btn-ghost" data-close="modal-config">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>
@@ -118,9 +118,9 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal historial de ejecuciones -->
 <div id="modal-runs" class="modal-backdrop hidden">
-    <div class="modal modal-xl">
+    <div class="modal modal-xl" role="dialog" aria-modal="true" aria-labelledby="runs-titulo">
         <div class="toolbar">
-            <h3>Historial: <span id="runs-title"></span></h3>
+            <h3 id="runs-titulo">Historial: <span id="runs-title"></span></h3>
             <button type="button" class="btn btn-ghost btn-sm" data-close="modal-runs">Cerrar</button>
         </div>
         <div class="table-wrap">

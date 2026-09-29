@@ -50,21 +50,21 @@ require_once __DIR__ . '/includes/header.php';
 
     <div class="filter-bar">
         <span class="block-label">Filtros</span>
-        <select id="filtro-severidad">
+        <select id="filtro-severidad" aria-label="Filtrar por severidad">
             <option value="">Todas las severidades</option>
             <option value="baja">Baja</option>
             <option value="media">Media</option>
             <option value="alta">Alta</option>
             <option value="critica">Critica</option>
         </select>
-        <select id="filtro-estado">
+        <select id="filtro-estado" aria-label="Filtrar por estado">
             <option value="">Todos los estados</option>
             <option value="activo">Activo</option>
             <option value="inactivo">Inactivo</option>
         </select>
     </div>
 
-    <div id="msg" class="alert hidden"></div>
+    <div id="msg" class="alert hidden" role="status"></div>
 
     <div class="section-head">
         <span class="section-label">Controles registrados</span>
@@ -96,7 +96,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal formulario control -->
 <div id="modal-control" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="control-title">
         <h3 id="control-title">Nuevo control</h3>
         <form id="control-form" autocomplete="off">
             <input type="hidden" id="control-id" name="id" value="0">
@@ -132,7 +132,7 @@ require_once __DIR__ . '/includes/header.php';
                 <label for="policy_id">Politica vinculada (opcional)</label>
                 <select id="policy_id" name="policy_id"></select>
             </div>
-            <div id="control-form-error" class="alert alert-error hidden"></div>
+            <div id="control-form-error" class="alert alert-error hidden" role="alert"></div>
             <div class="actions">
                 <button type="button" class="btn btn-ghost" data-close="modal-control">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>
@@ -143,8 +143,8 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal evaluacion -->
 <div id="modal-eval" class="modal-backdrop hidden">
-    <div class="modal">
-        <h3>Evaluar control: <span id="eval-title"></span></h3>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="eval-titulo">
+        <h3 id="eval-titulo">Evaluar control: <span id="eval-title"></span></h3>
         <form id="eval-form" autocomplete="off">
             <input type="hidden" id="eval-control" name="control_id" value="0">
             <div class="field">
@@ -168,7 +168,7 @@ require_once __DIR__ . '/includes/header.php';
                 <label for="eval-evidencia">Evidencia (URL / identificador)</label>
                 <input type="text" id="eval-evidencia" name="evidencia" maxlength="255" placeholder="Ej: SOP-RET-001">
             </div>
-            <div id="eval-form-error" class="alert alert-error hidden"></div>
+            <div id="eval-form-error" class="alert alert-error hidden" role="alert"></div>
             <div class="actions">
                 <button type="button" class="btn btn-ghost" data-close="modal-eval">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>

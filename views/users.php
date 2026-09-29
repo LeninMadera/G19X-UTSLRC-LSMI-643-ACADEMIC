@@ -14,7 +14,7 @@ if ($current['rol'] !== 'admin') {
         <button id="btn-nuevo" class="btn btn-primary">Nuevo usuario</button>
     </div>
 
-    <div id="msg" class="alert hidden"></div>
+    <div id="msg" class="alert hidden" role="status"></div>
 
     <div class="table-wrap">
         <table class="table">
@@ -38,21 +38,22 @@ if ($current['rol'] !== 'admin') {
 
 <!-- Modal de formulario (crear / editar) -->
 <div id="modal-backdrop" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <h3 id="modal-title">Nuevo usuario</h3>
         <form id="user-form" autocomplete="off">
             <input type="hidden" id="user-id" name="id" value="0">
             <div class="field">
                 <label for="nombre">Nombre</label>
-                <input type="text" id="nombre" name="nombre" maxlength="80" required>
+                <input type="text" id="nombre" name="nombre" maxlength="80" autocomplete="name" required>
             </div>
             <div class="field">
                 <label for="email">Correo electronico</label>
-                <input type="email" id="email" name="email" maxlength="120" required>
+                <input type="email" id="email" name="email" maxlength="120" autocomplete="off" required>
             </div>
             <div class="field">
-                <label for="password">Contrasena <span class="muted small">(min 8; vacia = no cambia)</span></label>
-                <input type="password" id="password" name="password" placeholder="••••••••">
+                <label for="password">Contrasena</label>
+                <input type="password" id="password" name="password" autocomplete="new-password">
+                <span class="field-hint">Minimo 8 caracteres. Dejarla vacia no cambia la contrasena actual.</span>
             </div>
             <div class="field">
                 <label for="rol_id">Rol</label>
@@ -62,9 +63,9 @@ if ($current['rol'] !== 'admin') {
                 <input type="checkbox" id="activo" name="activo" value="1" checked>
                 <label for="activo">Usuario activo</label>
             </div>
-            <div id="form-error" class="alert alert-error hidden"></div>
+            <div id="form-error" class="alert alert-error hidden" role="alert"></div>
             <div class="actions">
-                <button type="button" id="btn-cancelar" class="btn btn-ghost">Cancelar</button>
+                <button type="button" id="btn-cancelar" class="btn btn-ghost" data-close="modal-backdrop">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>
             </div>
         </form>

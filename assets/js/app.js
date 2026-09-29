@@ -52,10 +52,177 @@ function esc(t) {
 document.addEventListener('click', async (e) => {
     if (e.target.closest('#btn-logout')) {
         e.preventDefault();
-        const json = await api('/api/auth.php?action=logout');
+        await api('/api/auth.php?action=logout');
         window.location.href = window.APP_URL + '/views/login.php';
     }
 });
+
+// ------------------------------------------------------------
+//   Gestion de modales
+//   Los 12 modales de views/ comparten la misma estructura: un
+//   .modal-backdrop que envuelve a un .modal. Aqui se centraliza
+//   lo que antes cada vista repetia por su cuenta: la apertura, el
+//   cierre, el bloqueo del scroll de fondo, la trampa de foco, la
+//   tecla Escape y la devolucion del foco al elemento que abrio.
+//
+//   Uso desde los modulos:
+//     abrirModal(document.getElementById('modal-x'))
+//     cerrarModal(document.getElementById('modal-x'))
+//   El cierre por boton (data-close="id-modal") y por clic en el
+//   fondo ya no lo conecta cada vista: lo resuelve el delegado de
+//   abajo. Ningun modulo debe volver a tocar .hidden a mano.
+// ------------------------------------------------------------
+
+const FOCUSABLE = [
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled]):not([type="hidden"])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+// Elemento que tenia el foco antes de abrir cada modal, para devolverlo al cerrar.
+const modalFocoPrevio = new WeakMap();
+
+// Elementos que el usuario puede alcanzar con el teclado ahora mismo.
+function enfocatables(caja) {
+    return Array.prototype.slice
+        .call(caja.querySelectorAll(FOCUSABLE))
+        .filter((el) => el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement);
+}
+
+// El modal abierto mas reciente; es el que responde a Escape y al foco.
+function modalSuperior() {
+    const abiertos = document.querySelectorAll('.modal-backdrop:not(.hidden)');
+    return abiertos.length ? abiertos[abiertos.length - 1] : null;
+}
+
+function abrirModal(modal) {
+    if (!modal) return;
+    if (modal.classList.contains('hidden')) {
+        modalFocoPrevio.set(modal, document.activeElement);
+    } else {
+        // Reabrir sobre otro registro no debe devolver el foco a un boton viejo.
+        modalFocoPrevio.delete(modal);
+    }
+
+    modal.classList.remove('hidden');
+    document.body.classList.add('modal-abierto');
+
+    const caja = modal.querySelector('.modal') || modal;
+    if (!caja.hasAttribute('tabindex')) caja.setAttribute('tabindex', '-1');
+
+    const primero = enfocatables(caja)[0];
+    (primero || caja).focus();
+}
+
+function cerrarModal(modal) {
+    if (!modal || modal.classList.contains('hidden')) return;
+    modal.classList.add('hidden');
+    if (!document.querySelector('.modal-backdrop:not(.hidden)')) {
+        document.body.classList.remove('modal-abierto');
+    }
+    const previo = modalFocoPrevio.get(modal);
+    if (previo && document.contains(previo)) previo.focus();
+    modalFocoPrevio.delete(modal);
+}
+
+// Cierre delegado: cualquier boton con data-close="id-modal" y cualquier
+// click sobre el fondo oscurecido. Sustituye a los 8 bloques duplicados
+// que cada vista tenia conectados a mano.
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-close]');
+    if (btn) {
+        const modal = document.getElementById(btn.dataset.close);
+        if (modal) {
+            e.preventDefault();
+            cerrarModal(modal);
+        }
+        return;
+    }
+    if (e.target.classList && e.target.classList.contains('modal-backdrop')) {
+        cerrarModal(e.target);
+    }
+});
+
+// Escape cierra y Tab queda atrapado dentro del modal abierto.
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (cerrarCajon()) return;
+        const modal = modalSuperior();
+        if (!modal) return;
+        e.preventDefault();
+        cerrarModal(modal);
+        return;
+    }
+    if (e.key !== 'Tab') return;
+
+    const modal = modalSuperior();
+    if (!modal) return;
+    const caja = modal.querySelector('.modal') || modal;
+
+    const items = enfocatables(caja);
+    if (items.length === 0) {
+        e.preventDefault();
+        caja.focus();
+        return;
+    }
+
+    const primero = items[0];
+    const ultimo = items[items.length - 1];
+    const dentro = caja.contains(document.activeElement);
+
+    if (e.shiftKey && (!dentro || document.activeElement === primero)) {
+        e.preventDefault();
+        ultimo.focus();
+    } else if (!e.shiftKey && document.activeElement === ultimo) {
+        e.preventDefault();
+        primero.focus();
+    }
+});
+
+// ------------------------------------------------------------
+//   Cajon lateral movil
+//   La apertura y el cierre son CSS puro (#nav-toggle:checked ~ .app
+//   .sidebar). Aqui solo se sincroniza lo que CSS no puede: el
+//   bloqueo del scroll de fondo y la tecla Escape. En escritorio el
+//   checkbox esta oculto y no hace nada.
+//   El estado abierto/cerrado ya lo anuncia el propio checkbox, que
+//   es el control de teclado (Tab hasta el y Espacio para togglear).
+// ------------------------------------------------------------
+const navToggle = document.getElementById('nav-toggle');
+
+function cajonAbierto() {
+    return !!(navToggle && navToggle.checked);
+}
+
+function cerrarCajon() {
+    if (!cajonAbierto()) return false;
+    navToggle.checked = false;
+    sincronizarCajon();
+    // El foco vuelve al interruptor, que es el control que lo abrio.
+    navToggle.focus();
+    return true;
+}
+
+function sincronizarCajon() {
+    document.body.classList.toggle('nav-abierto', cajonAbierto());
+}
+
+if (navToggle) {
+    navToggle.addEventListener('change', sincronizarCajon);
+    sincronizarCajon();
+
+    // Al volver a escritorio el cajon se desmonta solo: se desmarca
+    // para que al volver a movil no aparezca abierto sin pedirlo.
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 820 && cajonAbierto()) {
+            navToggle.checked = false;
+            sincronizarCajon();
+        }
+    });
+}
 
 // Grafico de barras con Canvas en blanco (sin librerias).
 // items: [{ label, value }] con value numerico >= 0.

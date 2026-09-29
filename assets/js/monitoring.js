@@ -2,7 +2,7 @@
    Monitoreo continuo: configuraciones y ejecuciones de calidad
    ============================================================ */
 
-/* global api, esc, fmtFecha */
+/* global api, esc, fmtFecha, abrirModal, cerrarModal */
 
 document.addEventListener('DOMContentLoaded', () => {
     const tbody     = document.getElementById('configs-tbody');
@@ -179,14 +179,14 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('config-id').value = 0;
             if (datasetField) datasetField.classList.remove('hidden');
         }
-        modConfig.classList.remove('hidden');
+        abrirModal(modConfig);
     }
 
     async function abrirHistorial(id) {
         const c = estado.configs.find(x => String(x.id) === String(id));
         document.getElementById('runs-title').textContent = c ? c.dataset : '# ' + id;
         runsTbody.innerHTML = '<tr><td colspan="6" class="muted center">Cargando...</td></tr>';
-        modRuns.classList.remove('hidden');
+        abrirModal(modRuns);
 
         const json = await api('/api/monitoring.php?action=runs&config_id=' + id, {}, 'GET');
         runsTbody.innerHTML = '';
@@ -215,16 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnNueva) btnNueva.addEventListener('click', () => abrirForm(null));
 
-    document.querySelectorAll('[data-close]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById(btn.dataset.close).classList.add('hidden');
-        });
-    });
-    [modConfig, modRuns].forEach(m => {
-        m.addEventListener('click', (e) => {
-            if (e.target === m) m.classList.add('hidden');
-        });
-    });
+    // El cierre (data-close, clic en el fondo, Escape, foco, trampa de
+    // Tab y scroll de fondo) lo resuelve el delegado de app.js.
 
     tbody.addEventListener('click', async (e) => {
         const btnRun   = e.target.closest('[data-run]');
@@ -303,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const json = await api('/api/monitoring.php?action=' + (esCrear ? 'create' : 'update'), data);
         if (json.success) {
-            modConfig.classList.add('hidden');
+            cerrarModal(modConfig);
             mostrarMsg(json.message, 'success');
             cargar();
         } else {

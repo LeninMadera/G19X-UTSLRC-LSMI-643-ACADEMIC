@@ -13,7 +13,7 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 </div>
 
-<div id="msg" class="alert hidden"></div>
+<div id="msg" class="alert hidden" role="status"></div>
 
 <div id="cargando" class="panel">
     <p class="muted center">Cargando detalle del dataset...</p>
@@ -166,7 +166,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal evaluacion de control en este dataset -->
 <div id="modal-eval" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="eval-title">
         <h3 id="eval-title">Evaluar control</h3>
         <form id="eval-form" autocomplete="off">
             <input type="hidden" id="eval-control" name="control_id" value="0">
@@ -191,7 +191,7 @@ require_once __DIR__ . '/includes/header.php';
                 <label for="eval-evidencia">Evidencia (URL / identificador)</label>
                 <input type="text" id="eval-evidencia" name="evidencia" maxlength="255" placeholder="Ej: SOP-RET-001">
             </div>
-            <div id="eval-form-error" class="alert alert-error hidden"></div>
+            <div id="eval-form-error" class="alert alert-error hidden" role="alert"></div>
             <div class="actions">
                 <button type="button" class="btn btn-ghost" data-close="modal-eval">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>
