@@ -106,12 +106,13 @@ gobierno-datos-ia/
 
 | Modulo | admin | steward | owner | analyst |
 |---|---|---|---|---|
-| Datasets | CRUD todos | CRUD todos | CRUD solo los suyos | Solo lectura |
-| Calidad | Registra/elimina | Registra/elimina | Solo los suyos | Solo lectura |
+| Datasets | CRUD todos | CRUD todos | Crea y edita solo los suyos | Solo lectura |
+| Calidad | Registra/elimina | Registra/elimina | Registra solo en los suyos (no elimina) | Solo lectura |
 | Politicas | CRUD + asignacion | CRUD + asignacion | — | Solo lectura |
 | Cumplimiento | CRUD controles + evalua | CRUD controles + evalua | Evalua solo sus datasets | Solo lectura |
 | Linaje de datos | CRUD | CRUD | Solo entre sus datasets | Solo lectura |
-| Fuentes externas | CRUD + probar/sincronizar | CRUD + probar/sincronizar | Lee y probar/sincronizar en las de sus datasets | Solo lectura |
+| Monitoreo | Lectura y gestion completa | Lectura y gestion completa | Configura y ejecuta solo sus datasets | Solo lectura |
+| Fuentes externas | CRUD + probar/sincronizar | CRUD + probar/sincronizar | Lee, activa/desactiva, prueba y sincroniza las de sus datasets | Solo lectura |
 | Usuarios | CRUD | — | — | — |
 | IA (4 acciones) | Si | Si | Solo sus datasets | No |
 | Reportes / dashboard | Completo (bitacora) | Completo | Completo | Completo |
