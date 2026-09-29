@@ -1,12 +1,24 @@
 <?php
 // Vista exclusiva de administradores
 $pageTitle = 'Usuarios';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/functions.php';
 
-if ($current['rol'] !== 'admin') {
+/*
+ * La autorizacion se comprueba ANTES de incluir header.php. Si se hiciera
+ * despues, PHP ya habria enviado las cabeceras al emitir el HTML de la
+ * cabecera y el header('Location') fallaria en silencio, dejando al usuario
+ * una pagina parcial en lugar de la redireccion.
+ */
+if (currentUser() === null) {
+    header('Location: ' . APP_URL . '/views/login.php');
+    exit;
+}
+if (currentRole() !== 'admin') {
     header('Location: ' . APP_URL . '/views/dashboard.php');
     exit;
 }
+
+require_once __DIR__ . '/includes/header.php';
 ?>
 <section class="panel">
     <div class="toolbar">

@@ -28,6 +28,24 @@ function obtenerRoles(): array
     return db()->query('SELECT id, nombre FROM roles ORDER BY id')->fetchAll();
 }
 
+/** Devuelve el id del rol administrador. */
+function adminRoleId(): int
+{
+    $stmt = db()->prepare("SELECT id FROM roles WHERE nombre = 'admin' LIMIT 1");
+    $stmt->execute();
+    return (int)($stmt->fetchColumn() ?: 0);
+}
+
+/** Cuenta los administradores activos, opcionalmente excluyendo a uno. */
+function countarAdminsActivos(int $excluirId = 0): int
+{
+    $stmt = db()->prepare(
+        'SELECT COUNT(*) FROM users WHERE rol_id = :rol AND activo = 1 AND id <> :excluir'
+    );
+    $stmt->execute(['rol' => adminRoleId(), 'excluir' => $excluirId]);
+    return (int)$stmt->fetchColumn();
+}
+
 switch ($action) {
 
     case 'list':
@@ -132,10 +150,29 @@ switch ($action) {
             respondJson(false, null, 'Ya existe otro usuario con ese correo.');
         }
 
-        $stmt = db()->prepare('SELECT id FROM users WHERE id = :id LIMIT 1');
+        $stmt = db()->prepare('SELECT id, rol_id, activo FROM users WHERE id = :id LIMIT 1');
         $stmt->execute(['id' => $id]);
-        if ($stmt->fetch() === false) {
+        $actual = $stmt->fetch();
+        if ($actual === false) {
             respondJson(false, null, 'Usuario no encontrado.', 404);
+        }
+
+        /*
+         * Sin estas dos guardas un administrador puede dejar el sistema sin
+         * ningun administrador activo y nadie podria volver a entrar a
+         * administrarlo: la cuenta desactivada ya no puede autenticarse y el
+         * resto de roles recibe 403 en este endpoint.
+         */
+        $rolAdmin    = adminRoleId();
+        $activoActual = (int)$actual['activo'] === 1;
+        $esAdmin     = (int)$actual['rol_id'] === $rolAdmin;
+        $seDesactiva = $activoActual && $activo === 0;
+
+        if ($seDesactiva && $id === (int)currentUser()['id']) {
+            respondJson(false, null, 'No puedes desactivar tu propia cuenta.');
+        }
+        if ($seDesactiva && $esAdmin && countarAdminsActivos($id) === 0) {
+            respondJson(false, null, 'No se puede desactivar: debe quedar al menos un administrador activo.', 409);
         }
 
         try {

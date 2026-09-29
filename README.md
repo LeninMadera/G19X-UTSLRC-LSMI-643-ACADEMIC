@@ -273,6 +273,8 @@ INTEGRACION_PERMITIR_LOCALHOST=false
 
 `INTEGRACION_PERMITIR_LOCALHOST` tambien puede pasarse como variable de entorno real al iniciar el servidor (el harness de pruebas E2E lo hace asi, sin editar el `.env`).
 
+> **ADVERTENCIA:** `INTEGRACION_PERMITIR_LOCALHOST=true` desactiva por completo la validacion anti-SSRF (esquema, hosts locales, IPs privadas y resolucion DNS). Debe usarse **unicamente en desarrollo o pruebas con un mock local**; nunca en un despliegue real.
+
 Datos de ejemplo del seed (academicos): una API publica de demo inactiva (depende de internet) y una fuente hacia un mock local `http://127.0.0.1:8760/datos` (requiere `INTEGRACION_PERMITIR_LOCALHOST=true`).
 
 ## API REST
