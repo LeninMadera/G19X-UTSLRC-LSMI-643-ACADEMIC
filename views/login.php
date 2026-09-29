@@ -123,10 +123,6 @@ if (isset($_SESSION['user_id'])) {
                 </button>
             </form>
 
-            <p class="login-foot">
-                <svg class="ico" aria-hidden="true"><use href="#i-file"></use></svg>
-                <span>Las cuentas de prueba estan documentadas en el README del proyecto.</span>
-            </p>
         </section>
     </main>
 
