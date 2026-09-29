@@ -83,9 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             const severidad = String(a.severidad || '').toLowerCase();
             const clase = TONO_SEVERIDAD[severidad] || 'neutral';
+            // Mismo <wbr> que en la lista de actividad: aqui "dataset" y la
+            // fecha tampoco Tenian punto de corte entre si.
             li.innerHTML = '<span class="badge badge-' + clase + '">' + esc(a.severidad) + '</span> '
                 + esc(a.dataset) +
-                '<span class="meta">' + fmtFecha(a.fecha) + '</span>' +
+                '<wbr><span class="meta">' + fmtFecha(a.fecha) + '</span>' +
                 '<div class="desc">' + esc(a.descripcion_ia) + '</div>';
             listAl.appendChild(li);
         });
@@ -97,9 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
         listAct.innerHTML = '';
         (d.actividad || []).forEach(a => {
             const li = document.createElement('li');
+            // <wbr> antes de cada .meta: da puntos de corte sin ocupa ancho.
+            // Sin el, accion+usuario+fecha quedan pegados en una sola hilera
+            // indivisible y el panel no baja del min-content en movil.
             li.innerHTML = '<strong>' + esc(a.accion) + '</strong>'
-                + '<span class="meta">' + esc(a.usuario || 'sistema') + '</span>'
-                + '<span class="meta">' + fmtFecha(a.fecha) + '</span>'
+                + '<wbr><span class="meta">' + esc(a.usuario || 'sistema') + '</span>'
+                + '<wbr><span class="meta">' + fmtFecha(a.fecha) + '</span>'
                 + (a.detalle ? '<div class="desc">' + esc(a.detalle) + '</div>' : '');
             listAct.appendChild(li);
         });
