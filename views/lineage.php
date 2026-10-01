@@ -8,12 +8,14 @@ require_once __DIR__ . '/includes/header.php';
             <h2>Linaje de datos</h2>
             <p class="muted small">De que dataset proviene cada dataset y con cuales esta relacionado.</p>
         </div>
-        <select id="sel-dataset" aria-label="Filtrar relaciones por dataset">
-            <option value="">Todos los datasets</option>
-        </select>
-        <?php if (in_array($current['rol'], ['admin', 'steward', 'owner'], true)): ?>
-        <button id="btn-nueva" class="btn btn-primary">Nueva relacion</button>
-        <?php endif; ?>
+        <div class="toolbar-actions">
+            <select id="sel-dataset" aria-label="Filtrar relaciones por dataset">
+                <option value="">Todos los datasets</option>
+            </select>
+            <?php if (in_array($current['rol'], ['admin', 'steward', 'owner'], true)): ?>
+            <button id="btn-nueva" class="btn btn-primary">Nueva relacion</button>
+            <?php endif; ?>
+        </div>
     </div>
 
     <div id="msg" class="alert hidden" role="status"></div>
@@ -29,7 +31,7 @@ require_once __DIR__ . '/includes/header.php';
                     <th>Descripcion</th>
                     <th>Registrado por</th>
                     <th>Fecha</th>
-                    <th>Acciones</th>
+                    <th class="col-acciones">Acciones</th>
                 </tr>
             </thead>
             <tbody id="lineage-tbody">
@@ -52,6 +54,7 @@ require_once __DIR__ . '/includes/header.php';
             <div class="field">
                 <label for="destino_id">Dataset destino</label>
                 <select id="destino_id" name="destino_id" required></select>
+                <span class="field-hint hidden" id="lineage-inmutable">El origen y el destino no se modifican al editar.</span>
             </div>
             <div class="field">
                 <label for="tipo">Tipo de relacion</label>

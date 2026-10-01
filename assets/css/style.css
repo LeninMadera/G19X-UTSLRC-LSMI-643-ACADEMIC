@@ -1368,6 +1368,10 @@ input[type="radio"] { accent-color: var(--primary); }
     margin-bottom: 1rem;
 }
 .page-head h2 { margin: 0; font-size: 1.05rem; font-weight: 650; letter-spacing: -0.01em; }
+/* Identidad de la pagina: boton de vuelta + titulo, agrupados a la
+   izquierda para que las acciones se queden en el extremo derecho. */
+.page-head-id { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.page-head-id h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .page-head-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
 
 /* Bloque plegable: reemplaza el parrafo tecnico siempre visible */
@@ -1527,7 +1531,11 @@ input[type="radio"] { accent-color: var(--primary); }
     .panel { padding: 1.1rem; }
     .modal-backdrop { padding: 0.75rem; }
     .modal { padding: 1.15rem; max-height: calc(100vh - 1.5rem); max-height: calc(100dvh - 1.5rem); }
-    .toolbar input[type="search"] { min-width: 0; width: 100%; }
+    /* .toolbar pasa a columna, y entonces flex-basis deja de medir ancho y
+       pasa a medir altura: el "flex: 1 1 220px" de la regla de escritorio
+       estiraba el buscador a 220px de alto. Se anula con flex-basis:auto para
+       que recupere la altura natural del input y siga ocupando el 100%. */
+    .toolbar input[type="search"] { flex-basis: auto; min-width: 0; width: 100%; }
     .toolbar { flex-direction: column; align-items: stretch; }
     .toolbar select { width: 100%; }
     .filter-bar { flex-direction: column; align-items: stretch; }

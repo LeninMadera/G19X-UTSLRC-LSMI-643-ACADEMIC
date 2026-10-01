@@ -232,13 +232,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnRun) {
             btnRun.disabled = true;
-            const json = await api('/api/monitoring.php?action=run', { id: Number(btnRun.dataset.run) });
-            if (json.success && json.data && json.data.resumen) {
-                mostrarMsg(String(json.data.resumen).slice(0, 220), 'success');
-            } else {
-                mostrarMsg(json.message, json.success ? 'success' : 'error');
+            try {
+                const json = await api('/api/monitoring.php?action=run', { id: Number(btnRun.dataset.run) });
+                if (json.success && json.data && json.data.resumen) {
+                    mostrarMsg(String(json.data.resumen).slice(0, 220), 'success');
+                } else {
+                    mostrarMsg(json.message, json.success ? 'success' : 'error');
+                }
+                if (json.success) cargar();
+            } finally {
+                // Si la ejecucion falla, cargar() no llega a re-renderizar la
+                // tabla, asi que el boton tiene que rehabilitarse aqui o se
+                // queda deshabilitado en el DOM hasta recargar la pagina.
+                btnRun.disabled = false;
             }
-            if (json.success) cargar();
         }
         if (btnEdit) {
             const c = estado.configs.find(x => String(x.id) === btnEdit.dataset.edit);

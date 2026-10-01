@@ -28,6 +28,7 @@ $rolPuedeUsarIA = in_array($current['rol'], ['admin', 'steward', 'owner'], true)
         </div>
     </div>
 
+    <?php if ($rolPuedeUsarIA): ?>
     <div class="ai-scope">
         <div class="ai-scope-txt">
             <span class="block-label">Dataset seleccionado</span>
@@ -38,8 +39,7 @@ $rolPuedeUsarIA = in_array($current['rol'], ['admin', 'steward', 'owner'], true)
         </select>
     </div>
 
-    <?php if ($rolPuedeUsarIA): ?>
-    <p class="ai-hint">
+    <p class="ai-hint" id="ai-hint">
         <svg class="ico" aria-hidden="true"><use href="#i-alert"></use></svg>
         <span>Elige un dataset arriba para habilitar las acciones de IA.</span>
     </p>

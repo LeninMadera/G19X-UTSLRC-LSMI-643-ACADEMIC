@@ -80,10 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
             selDestino.value = relacion.destino_id;
             selOrigen.disabled = true;
             selDestino.disabled = true;
+            // El cursor de "no permitido" parece un problema de permisos cuando
+            // en realidad es que el campo no es editable en este modo.
+            document.getElementById('lineage-inmutable').classList.remove('hidden');
         } else {
             document.getElementById('lineage-title').textContent = 'Nueva relacion de linaje';
             selOrigen.disabled = false;
             selDestino.disabled = false;
+            document.getElementById('lineage-inmutable').classList.add('hidden');
         }
         abrirModal(modLineage);
     }
@@ -123,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<td>' + esc(r.descripcion || '-') + '</td>' +
                 '<td>' + esc(r.creado_por_nombre || '-') + '</td>' +
                 '<td>' + esc(fmtFecha(r.fecha_creacion)) + '</td>' +
-                '<td class="actions-cell">' + acciones(r) + '</td>';
+                '<td class="actions-cell col-acciones">' + acciones(r) + '</td>';
             tbody.appendChild(tr);
         });
     }

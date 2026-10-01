@@ -2,7 +2,7 @@
    Detalle de un dataset (ficha)
    ============================================================ */
 
-/* global api, esc, fmtFecha, abrirModal, cerrarModal, APP_URL, APP_USER */
+/* global api, esc, fmtFecha, abrirModal, cerrarModal, APP_URL, APP_USER, TONO_SEVERIDAD */
 
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
@@ -25,15 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
     async function cargar() {
         const json = await api('/api/datasets.php?action=detail&id=' + id);
         if (!json.success) {
-            cargando.textContent = json.message;
-            cargando.classList.remove('muted');
+            // textContent borraba el <p class="muted center"> de #cargando y
+            // dejaba el error como texto plano, sin color ni centrado.
+            cargando.innerHTML = '<p class="alert alert-error">' + esc(json.message) + '</p>';
             return;
         }
         cargarConData(json.data);
         cargarCompliance();
     }
 
-    const TONO_SEVERIDAD = { alta: 'error', media: 'warn', baja: 'ok' };
     const TONO_CLASIFICACION = { publico: 'info', interno: 'warn', confidencial: 'error', restringido: 'error' };
     const TONO_EVAL = { cumple: 'ok', no_cumple: 'error', pendiente: 'warn', no_aplica: 'neutral' };
     const TONO_DETECCION = { pendiente: 'warn', revisada: 'info', aplicada: 'ok', descartada: 'neutral' };
@@ -50,6 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function cargarConData(d) {
         const q = d.ultima_calidad;
 
+        // El nombre es el titulo de la pagina: antes solo aparecia dentro de una
+        // tarjeta KPI, en un tamano menor que el score contiguo.
+        document.getElementById('d-titulo').textContent = d.nombre;
         document.getElementById('d-nombre').textContent = d.nombre;
         document.getElementById('d-categoria').textContent = d.categoria;
         document.getElementById('d-categoria-ia').textContent = d.categoria_ia || 'no sugerida';
@@ -150,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<td class="col-soft">' + esc(a.recomendacion_ia || '-') + '</td>' +
                 '<td><span class="badge badge-' + (TONO_DETECCION[a.estado] || 'neutral') + '">' + esc(a.estado) + '</span></td>' +
                 '<td class="col-date">' + fmtFecha(a.fecha) + '</td>' +
-                '<td class="actions-cell">' + acciones + '</td>';
+                '<td class="actions-cell col-acciones">' + acciones + '</td>';
             tbodyA.appendChild(tr);
         });
 
@@ -308,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<td class="col-soft">' + esc(ev.evidencia || '-') + '</td>' +
                 '<td class="col-soft">' + esc(ev.evaluador || '-') + '</td>' +
                 '<td class="col-date">' + fmtFecha(ev.fecha) + '</td>' +
-                '<td class="actions-cell">' + acciones + '</td>';
+                '<td class="actions-cell col-acciones">' + acciones + '</td>';
             tbodyC.appendChild(tr);
         });
     }

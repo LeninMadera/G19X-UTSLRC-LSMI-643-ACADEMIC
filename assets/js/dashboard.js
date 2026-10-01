@@ -2,7 +2,7 @@
    Dashboard: indicadores + graficos + notificaciones
    ============================================================ */
 
-/* global api, esc, fmtFecha, drawBars */
+/* global api, esc, fmtFecha, drawBars, TONO_SEVERIDAD */
 
 document.addEventListener('DOMContentLoaded', () => {
     const kpis = {
@@ -11,9 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
         alertas:  document.getElementById('dl-kpi-alertas'),
         politicas: document.getElementById('dl-kpi-politicas'),
     };
-
-    /* Classes de badge segun significado: ok / warn / error / neutral. */
-    const TONO_SEVERIDAD = { alta: 'error', media: 'warn', baja: 'ok' };
 
     async function cargar() {
         const json = await api('/api/reports.php?action=overview', {}, 'GET');

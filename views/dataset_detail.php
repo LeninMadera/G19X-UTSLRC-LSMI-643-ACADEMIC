@@ -3,14 +3,17 @@ $pageTitle = 'Detalle de dataset';
 require_once __DIR__ . '/includes/header.php';
 ?>
 <div class="page-head">
-    <a href="<?= e(APP_URL) ?>/views/datasets.php" class="btn btn-ghost">
-        <svg class="ico" aria-hidden="true"><use href="#i-back"></use></svg>
-        Volver al catalogo
-    </a>
-    <div class="page-head-actions">
-        <button id="btn-confirmar-clasif" class="btn hidden">Confirmar clasificacion IA</button>
-        <button id="btn-editar" class="btn btn-primary hidden">Editar dataset</button>
-    </div>
+        <div class="page-head-id">
+            <a href="<?= e(APP_URL) ?>/views/datasets.php" class="btn btn-ghost">
+                <svg class="ico" aria-hidden="true"><use href="#i-back"></use></svg>
+                Volver al catalogo
+            </a>
+            <h2 id="d-titulo">Cargando...</h2>
+        </div>
+        <div class="page-head-actions">
+            <button id="btn-confirmar-clasif" class="btn hidden">Confirmar clasificacion IA</button>
+            <button id="btn-editar" class="btn btn-primary hidden">Editar dataset</button>
+        </div>
 </div>
 
 <div id="msg" class="alert hidden" role="status"></div>
@@ -125,7 +128,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
         <div class="table-wrap">
             <table class="table">
-                <thead><tr><th>Control</th><th>Referencia</th><th>Severidad</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th><th>Evaluador</th><th>Fecha</th><th>Acciones</th></tr></thead>
+                <thead><tr><th>Control</th><th>Referencia</th><th>Severidad</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th><th>Evaluador</th><th>Fecha</th><th class="col-acciones">Acciones</th></tr></thead>
                 <tbody id="d-compliance"><tr><td colspan="9" class="muted center">Cargando...</td></tr></tbody>
             </table>
         </div>
@@ -156,7 +159,7 @@ require_once __DIR__ . '/includes/header.php';
         <div class="disclosure-body">
             <div class="table-wrap">
                 <table class="table">
-                    <thead><tr><th>Tipo</th><th>Severidad</th><th>Hallazgo</th><th>Recomendacion</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>Tipo</th><th>Severidad</th><th>Hallazgo</th><th>Recomendacion</th><th>Estado</th><th>Fecha</th><th class="col-acciones">Acciones</th></tr></thead>
                     <tbody id="d-detections"><tr><td colspan="7" class="muted center">Sin analisis de IA.</td></tr></tbody>
                 </table>
             </div>

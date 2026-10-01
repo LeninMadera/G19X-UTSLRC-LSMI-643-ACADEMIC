@@ -25,7 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
        interno pide atencion y confidencial/restringido son los unicos
        que se pintan como error. Mismo criterio que la ficha del dataset. */
     const CLASIF_BADGE = { publico: 'info', interno: 'warn', confidencial: 'error', restringido: 'error' };
-    let rol = document.querySelector('.badge-role')?.textContent || '';
+    // El rol se lee de APP_USER (expuesto en views/includes/header.php), no
+    // del texto del badge: ese texto depende del DOM y se rompe en cuanto
+    // cambia el rotulo o se inserta otro elemento con esa clase.
+    let rol = (window.APP_USER && window.APP_USER.rol) || '';
     let userId = (window.APP_USER && window.APP_USER.id) || null;
     // true mientras la tabla muestre resultados de busqueda semantica
     let modoIA = false;
@@ -76,7 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const cls = d.ultimo_score == null ? '' :
                 (d.ultimo_score >= 85 ? 'score-good' : d.ultimo_score >= 70 ? 'score-warn' : 'score-bad');
             const esPropio = userId && Number(d.owner_id) === Number(userId);
-            const puedeEditar = !(rol === 'owner' && !esPropio);
+            // Coincide con api/datasets.php: solo admin, steward y owner
+            // (este ultimo unicamente sobre sus propios datasets). El analyst
+            // no puede editar, asi que el boton no debe existir: antes se
+            // mostraba y la API respondia 403 al guardar.
+            const puedeEditar = ['admin', 'steward'].includes(rol)
+                || (rol === 'owner' && esPropio);
             const clasificacion = d.clasificacion || 'publico';
 
             // Extras de la busqueda semantica: relevancia y motivos del match
@@ -102,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? '<span class="badge badge-ok">activo</span>'
                     : '<span class="badge badge-neutral">inactivo</span>') + '</td>' +
                 '<td class="score-badge ' + cls + '">' + score + '</td>' +
-                '<td class="actions-cell">' +
+                '<td class="actions-cell col-acciones">' +
                     '<a class="btn btn-ghost btn-sm" href="dataset_detail.php?id=' + d.id + '">Ver</a>' +
                     (puedeEditar ? ' <button class="btn btn-ghost btn-sm" data-edit="' + d.id + '">Editar</button>' : '') +
                     '<button class="btn btn-danger btn-sm hidden" data-del="' + d.id + '">Eliminar</button>' +

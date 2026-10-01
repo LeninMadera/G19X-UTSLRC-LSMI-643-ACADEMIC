@@ -10,7 +10,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
         <div class="toolbar-actions">
             <span class="pill-summary" id="dl-pendientes"></span>
-            <button class="btn" id="dl-refresh">Actualizar</button>
+            <button class="btn btn-ghost" id="dl-refresh">Actualizar</button>
         </div>
     </div>
 </section>

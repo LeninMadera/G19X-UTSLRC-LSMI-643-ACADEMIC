@@ -2,7 +2,7 @@
    Cumplimiento normativo: controles y evaluaciones
    ============================================================ */
 
-/* global api, esc, abrirModal, cerrarModal */
+/* global api, esc, abrirModal, cerrarModal, TONO_SEVERIDAD */
 
 document.addEventListener('DOMContentLoaded', () => {
     const tbody      = document.getElementById('controls-tbody');
@@ -29,8 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
         msg.className = 'alert alert-' + tipo;
         setTimeout(() => msg.classList.add('hidden'), 4000);
     }
-
-    const TONO_SEVERIDAD = { alta: 'error', media: 'warn', baja: 'neutral' };
 
     function badgeSeveridad(sev) {
         const clave = String(sev || '').toLowerCase();
@@ -140,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<td class="col-soft">' + esc(c.policy_titulo || '-') + '</td>' +
                 '<td class="col-num">' + c.evaluaciones + '</td>' +
                 '<td class="col-soft">' + esc(c.creado_por || '-') + '</td>' +
-                '<td class="actions-cell">' + acciones + '</td>';
+                '<td class="actions-cell col-acciones">' + acciones + '</td>';
             tbody.appendChild(tr);
         });
         document.getElementById('comp-tabla-info').textContent =

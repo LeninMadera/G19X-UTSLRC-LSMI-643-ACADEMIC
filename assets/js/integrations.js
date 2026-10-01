@@ -209,12 +209,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnDel    = e.target.closest('[data-del]');
 
         if (btnProbar || btnSync) {
-            const id = Number((btnProbar || btnSync).dataset[btnProbar ? 'probar' : 'sync']);
-            btnProbar ? btnProbar.disabled = true : btnSync.disabled = true;
-            const accion = btnProbar ? 'probar' : 'sincronizar';
-            const json = await api('/api/integrations.php?action=' + accion, { id: id });
-            mostrarMsg(String(json.message || (json.data && json.data.mensaje) || '').slice(0, 220), json.success ? 'success' : 'error');
-            if (json.success) cargar();
+            const btn = btnProbar || btnSync;
+            const id = Number(btn.dataset[btnProbar ? 'probar' : 'sync']);
+            btn.disabled = true;
+            try {
+                const accion = btnProbar ? 'probar' : 'sincronizar';
+                const json = await api('/api/integrations.php?action=' + accion, { id: id });
+                mostrarMsg(String(json.message || (json.data && json.data.mensaje) || '').slice(0, 220), json.success ? 'success' : 'error');
+                if (json.success) cargar();
+            } finally {
+                // Igual que en "Monitorear ahora": si falla, la tabla no se
+                // re-renderiza y el boton quedaria muerto en el DOM.
+                btn.disabled = false;
+            }
         }
         if (btnEdit) {
             const s = estado.sources.find(x => String(x.id) === btnEdit.dataset.edit);

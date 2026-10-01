@@ -5,10 +5,12 @@ require_once __DIR__ . '/includes/header.php';
 <section class="panel">
     <div class="toolbar">
         <h2>Catalogo de datasets</h2>
-        <a href="<?= e(APP_URL); ?>/api/datasets.php?action=export" class="btn btn-ghost">Exportar CSV</a>
-        <?php if (in_array($current['rol'], ['admin', 'steward', 'owner'], true)): ?>
-        <button id="btn-nuevo" class="btn btn-primary">Registrar dataset</button>
-        <?php endif; ?>
+        <div class="toolbar-actions">
+            <a href="<?= e(APP_URL); ?>/api/datasets.php?action=export" class="btn btn-ghost">Exportar CSV</a>
+            <?php if (in_array($current['rol'], ['admin', 'steward', 'owner'], true)): ?>
+            <button id="btn-nuevo" class="btn btn-primary">Registrar dataset</button>
+            <?php endif; ?>
+        </div>
     </div>
 
     <div class="toolbar">
@@ -35,7 +37,7 @@ require_once __DIR__ . '/includes/header.php';
                     <th>Data Owner</th>
                     <th>Estado</th>
                     <th>Score</th>
-                    <th>Acciones</th>
+                    <th class="col-acciones">Acciones</th>
                 </tr>
             </thead>
             <tbody id="datasets-tbody">

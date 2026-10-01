@@ -80,7 +80,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Modal formulario de fuente -->
 <div id="modal-fuente" class="modal-backdrop hidden">
-    <div class="modal modal-xl" role="dialog" aria-modal="true" aria-labelledby="fuente-title">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fuente-title">
         <h3 id="fuente-title">Nueva fuente</h3>
         <form id="fuente-form" autocomplete="off">
             <input type="hidden" id="fuente-id" name="id" value="0">

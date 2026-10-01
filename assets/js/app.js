@@ -58,6 +58,22 @@ document.addEventListener('click', async (e) => {
 });
 
 // ------------------------------------------------------------
+//   Semantica visual compartida
+//   Un solo lugar decide que tono corresponde a cada severidad.
+//   Antes cada vista traia su propia copia y divergieron entre si:
+//   'critica' caia en gris porque nadie la contemplaba, y 'baja'
+//   salia verde en unas pantallas y gris en otras para la misma
+//   palabra. app.js se carga antes que el script de cada vista
+//   (views/includes/footer.php), asi que esta disponible para todas.
+// ------------------------------------------------------------
+const TONO_SEVERIDAD = {
+    critica: 'error',
+    alta:    'error',
+    media:   'warn',
+    baja:    'neutral',
+};
+
+// ------------------------------------------------------------
 //   Gestion de modales
 //   Los 12 modales de views/ comparten la misma estructura: un
 //   .modal-backdrop que envuelve a un .modal. Aqui se centraliza
@@ -208,19 +224,40 @@ function cerrarCajon() {
 
 function sincronizarCajon() {
     document.body.classList.toggle('nav-abierto', cajonAbierto());
+
+    // translateX no saca el sidebar del recorrido del teclado: con el cajon
+    // cerrado el foco entraba en enlaces que estan fuera de pantalla y sin
+    // indicador visible. inert lo resuelve, asi que no hace falta aria-hidden
+    // (que ademas avisaria en conflicto si el foco siguiera dentro).
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    const oculto = window.innerWidth <= 820 && !cajonAbierto();
+
+    // Antes de volverlo inaccesible hay que sacar el foco: si el elemento
+    // activo esta dentro, inert lo dejaria huerfano y el usuario no veria
+    // donde esta. Se devuelve al interruptor, el control que abre el cajon.
+    if (oculto && sidebar.contains(document.activeElement)) {
+        if (navToggle) navToggle.focus();
+        else document.body.focus();
+    }
+
+    sidebar.toggleAttribute('inert', oculto);
 }
 
 if (navToggle) {
     navToggle.addEventListener('change', sincronizarCajon);
     sincronizarCajon();
 
-    // Al volver a escritorio el cajon se desmonta solo: se desmarca
-    // para que al volver a movil no aparezca abierto sin pedirlo.
+    // Al cambiar de ancho hay que resincronizar siempre: al pasar a escritorio
+    // el sidebar vuelve a ser visible y hay que quitarle el inert; al volver
+    // a movil hay que volver a ponerselo. Y el cajon se desmonta solo, para
+    // que al regresar a movil no aparezca abierto sin pedirlo.
     window.addEventListener('resize', () => {
         if (window.innerWidth > 820 && cajonAbierto()) {
             navToggle.checked = false;
-            sincronizarCajon();
         }
+        sincronizarCajon();
     });
 }
 

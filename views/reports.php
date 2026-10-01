@@ -11,7 +11,7 @@ $rol = currentRole();
         </div>
         <div class="toolbar-actions">
             <a href="<?= e(APP_URL); ?>/api/reports.php?action=export" class="btn btn-ghost">Exportar CSV</a>
-            <button class="btn" id="rp-refresh">Actualizar</button>
+            <button class="btn btn-ghost" id="rp-refresh">Actualizar</button>
         </div>
     </div>
 </section>
@@ -29,7 +29,7 @@ $rol = currentRole();
                     <th>Nivel</th>
                 </tr>
             </thead>
-            <tbody id="rp-tabla"></tbody>
+            <tbody id="rp-tabla"><tr><td colspan="5" class="muted center">Cargando...</td></tr></tbody>
         </table>
     </div>
     <p class="table-note" id="rp-tabla-info"></p>
@@ -48,7 +48,7 @@ $rol = currentRole();
                     <th>Detalle</th>
                 </tr>
             </thead>
-            <tbody id="rp-log"></tbody>
+            <tbody id="rp-log"><tr><td colspan="4" class="muted center">Cargando...</td></tr></tbody>
         </table>
     </div>
     <p class="table-note" id="rp-log-info"></p>
@@ -69,7 +69,7 @@ $rol = currentRole();
                     <th class="col-wide">Recomendacion</th>
                 </tr>
             </thead>
-            <tbody id="rp-alertas"></tbody>
+            <tbody id="rp-alertas"><tr><td colspan="6" class="muted center">Cargando...</td></tr></tbody>
         </table>
     </div>
     <p class="table-note" id="rp-alertas-info"></p>

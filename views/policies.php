@@ -21,7 +21,7 @@ require_once __DIR__ . '/includes/header.php';
                     <th>Estado</th>
                     <th>Datasets</th>
                     <th>Creado por</th>
-                    <th>Acciones</th>
+                    <th class="col-acciones">Acciones</th>
                 </tr>
             </thead>
             <tbody id="policies-tbody">

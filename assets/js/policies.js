@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<td>' + badgeEstado(p.estado) + '</td>' +
                 '<td>' + p.datasets_asignados + '</td>' +
                 '<td>' + esc(p.creado_por || '-') + '</td>' +
-                '<td class="actions-cell">' + acciones + '</td>';
+                '<td class="actions-cell col-acciones">' + acciones + '</td>';
             tbody.appendChild(tr);
         });
     }

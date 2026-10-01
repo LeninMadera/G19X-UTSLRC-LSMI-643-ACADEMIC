@@ -17,10 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const puedeBorrar    = ['admin', 'steward'].includes(rol);
     const userId         = (window.APP_USER && window.APP_USER.id) || null;
 
-    const UMBRAL = 80;
+    // El color sigue la leyenda del dashboard (85+ excelente / 70-84
+    // aceptable / <70 por mejorar). Antes se comparaba contra 80 y un
+    // score de 75 salia rojo aqui y ambar en el resto de la aplicacion.
+    // El badge "bajo umbral" no sale de esta constante sino del backend
+    // (m.bajo_umbral), que usa su propio criterio.
+    const UMBRAL_COLOR = 70;
 
     function color(n) {
-        return n >= 85 ? 'score-good' : n >= UMBRAL ? 'score-warn' : 'score-bad';
+        return n >= 85 ? 'score-good' : n >= UMBRAL_COLOR ? 'score-warn' : 'score-bad';
     }
 
     function mostrarMsg(texto, tipo = 'success') {

@@ -38,7 +38,7 @@ require_once __DIR__ . '/includes/header.php';
                     <th>Rol</th>
                     <th>Estado</th>
                     <th>Creado</th>
-                    <th>Acciones</th>
+                    <th class="col-acciones">Acciones</th>
                 </tr>
             </thead>
             <tbody id="users-tbody">

@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<td>' + esc(u.rol) + '</td>' +
                 '<td>' + badgeEstado(u.activo) + '</td>' +
                 '<td>' + esc(u.fecha_creacion) + '</td>' +
-                '<td class="actions-cell">' +
+                '<td class="actions-cell col-acciones">' +
                     '<button class="btn btn-ghost btn-sm" data-edit="' + u.id + '">Editar</button> ' +
                     '<button class="btn btn-danger btn-sm" data-del="' + u.id + '">Eliminar</button>' +
                 '</td>';

@@ -106,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function cargarDatasets() {
+        if (!selDataset) return;
         const json = await api('/api/datasets.php?action=list');
         if (!json.success) return;
         selDataset.innerHTML = '<option value="">Selecciona un dataset</option>';
@@ -157,15 +158,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    selDataset.addEventListener('change', () => {
-        if (!puedeUsar) return;
-        panelAcc.style.display = selDataset.value ? 'block' : 'none';
-        panelRes.style.display = 'none';
-    });
+    // El selector y el aviso solo se renderizan para los roles que pueden usar
+    // las acciones de IA: sin esta guarda, null.addEventListener abortaba el
+    // script y el chip de estado se quedaba en "Verificando...".
+    if (selDataset) {
+        selDataset.addEventListener('change', () => {
+            // El aviso "Elige un dataset arriba..." solo tiene sentido mientras
+            // no haya ninguno elegido: antes no se ocultaba, asi que quedaba
+            // una instruccion falsa encima de las acciones ya habilitadas.
+            // Se usa la clase .hidden y no el atributo hidden: .ai-hint declara
+            // display:flex, que anula el display:none por defecto del
+            // atributo. .hidden es display:none !important y es la
+            // convencion que ya usan el resto de vistas.
+            const hint = document.getElementById('ai-hint');
+            if (hint) hint.classList.toggle('hidden', !!selDataset.value);
+
+            panelAcc.style.display = selDataset.value ? 'block' : 'none';
+            panelRes.style.display = 'none';
+        });
+    }
 
     panelAcc.addEventListener('click', async (e) => {
         const btn = e.target.closest('[data-accion]');
-        if (!btn || !selDataset.value) return;
+        if (!btn || !selDataset || !selDataset.value) return;
         panelRes.style.display = 'none';
 
         const accion = btn.dataset.accion;

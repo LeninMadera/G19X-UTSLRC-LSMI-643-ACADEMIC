@@ -2,13 +2,10 @@
    Reportes: estado de calidad, bitacora y alertas IA
    ============================================================ */
 
-/* global api, esc, fmtFecha */
+/* global api, esc, fmtFecha, TONO_SEVERIDAD */
 
 document.addEventListener('DOMContentLoaded', () => {
     const esAdmin = document.getElementById('rp-log') !== null;
-
-    /* Classes de badge segun significado: ok / warn / error / neutral. */
-    const TONO_SEVERIDAD = { alta: 'error', media: 'warn', baja: 'ok' };
 
     function sevBadge(sev) {
         const clase = TONO_SEVERIDAD[String(sev || '').toLowerCase()] || 'neutral';
