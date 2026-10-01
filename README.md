@@ -4,6 +4,28 @@ Proyecto universitario: plataforma web para **catalogar datos, medir su calidad 
 
 La aplicación se construyó por etapas hasta la Etapa 12, y cada una se probó de forma manual de extremo a extremo (E2E) contra la base de datos real.
 
+## Inicio rápido
+
+Resumen corto para ejecutar el proyecto:
+
+1. Ten listo **PHP 8.x** con las extensiones `pdo_mysql`, `curl` y `mbstring`, y **MySQL 8**.
+2. Ejecuta `sql/database.sql` (crea la base de datos y las tablas) y después `sql/seed.sql` (datos de ejemplo).
+3. Copia `.env.example` a `.env`.
+4. Edita el `.env` y completa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASS` con los datos de tu MySQL.
+5. Ejecuta el servidor desde la raíz del proyecto:
+
+   ```
+   php -S 127.0.0.1:8000 -t .
+   ```
+
+   En Windows también puedes usar `iniciar.bat`, que verifica PHP, levanta el servidor y abre el navegador.
+6. Abre `http://127.0.0.1:8000` en el navegador e inicia sesión.
+7. Entra con cualquiera de las cuentas de prueba documentadas más abajo en [Usuarios de prueba (seed)](#usuarios-de-prueba-seed).
+8. `AI_API_KEY` puede quedar vacía: el sistema funciona igual en **modo simulado**.
+
+Para instrucciones detalladas, consultar la sección Instalación de este README y
+`docs/MANUAL-TECNICO-Plataforma-Gobierno-Datos-IA.md`.
+
 ## Stack y herramientas
 
 | Tecnologia | Uso |
@@ -29,6 +51,10 @@ gobierno-datos-ia/
 ├── cli/               Monitor por linea de comandos: monitor.php (--list,
 │                      --run-id) y monitor.bat (Programador de tareas de Windows)
 ├── config/            Carga de .env, constantes, conexion PDO
+├── docs/              Documentación formal del proyecto: PRD, MVP,
+│                      requerimientos, propuesta técnica, arquitectura, plan
+│                      del proyecto, reporte QA, manual técnico, plan de
+│                      mantenimiento, acta de capacitación e informe final
 ├── includes/          Funciones (auth, rol, log, JSON), servicio de IA
 │                      (ai_service.php), busqueda semantica
 │                      (semantic_search.php), monitoreo (monitoring_service.php)
