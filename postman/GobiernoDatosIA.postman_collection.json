@@ -13,7 +13,22 @@
     { "key": "control_id", "value": "6" },
     { "key": "lineage_id", "value": "1" },
     { "key": "monitoring_id", "value": "1" },
-    { "key": "source_id", "value": "1" }
+    { "key": "source_id", "value": "1" },
+    { "key": "csrf_token", "value": "" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// Adjunta el token CSRF obtenido en el login a toda peticion que modifica estado.",
+          "var csrfToken = pm.collectionVariables.get('csrf_token');",
+          "if (pm.request.method !== 'GET' && csrfToken) {",
+          "    pm.request.headers.add({ key: 'X-CSRF-Token', value: csrfToken });",
+          "}"
+        ]
+      }
+    }
   ],
   "item": [
     {
@@ -37,6 +52,7 @@
                   "    var d = pm.response.json();",
                   "    pm.expect(d.success).to.eql(true);",
                   "    pm.expect(d.data.rol).to.eql('admin');",
+                  "    pm.collectionVariables.set('csrf_token', d.data.csrf_token);",
                   "});"
                 ]
               }

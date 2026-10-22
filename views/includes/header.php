@@ -70,6 +70,7 @@ if ($initials === '') {
     <script>
         window.APP_URL = "<?= e(APP_URL) ?>";
         window.APP_USER = { id: <?= (int)$current['id'] ?>, rol: "<?= e($current['rol']) ?>" };
+        window.CSRF_TOKEN = "<?= e(csrfToken()) ?>";
     </script>
 </head>
 <body>

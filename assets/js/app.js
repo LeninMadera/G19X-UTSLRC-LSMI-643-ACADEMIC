@@ -11,6 +11,11 @@ async function api(action, data = {}, method = 'POST') {
     const opts = { method, headers: {} };
     const admiteCuerpo = method !== 'GET' && method !== 'HEAD';
 
+    // Token anti-CSRF en toda peticion que modifica estado (POST, etc.).
+    if (admiteCuerpo && window.CSRF_TOKEN) {
+        opts.headers['X-CSRF-Token'] = window.CSRF_TOKEN;
+    }
+
     if (data instanceof FormData) {
         if (admiteCuerpo) opts.body = data;
     } else if (admiteCuerpo) {

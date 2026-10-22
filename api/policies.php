@@ -16,6 +16,8 @@ requireAuth();
 
 $action = query('action', '');
 
+requireCsrfIfPost();
+
 const TIPOS = ['naming', 'retencion', 'acceso', 'clasificacion'];
 
 switch ($action) {

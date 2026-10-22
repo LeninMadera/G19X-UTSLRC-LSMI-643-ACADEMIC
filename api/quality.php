@@ -15,6 +15,8 @@ requireAuth();
 
 $action = query('action', '');
 
+requireCsrfIfPost();
+
 const PESOS = [
     'completitud'  => 0.20,
     'exactitud'    => 0.25,

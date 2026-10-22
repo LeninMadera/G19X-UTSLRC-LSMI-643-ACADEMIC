@@ -14,6 +14,8 @@ requireRole(['admin']);
 
 $action = query('action', '');
 
+requireCsrfIfPost();
+
 /** Devuelve true si el correo ya existe en otro usuario. */
 function emailYaExiste(string $email, int $exceptoId = 0): bool
 {

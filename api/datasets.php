@@ -17,6 +17,8 @@ requireAuth();
 
 $action = query('action', '');
 
+requireCsrfIfPost();
+
 // Catalogos cerrados: evita valores inventados en categoria/origen
 const CATEGORIAS = ['Finanzas', 'Clientes', 'Operaciones', 'Ventas', 'Recursos Humanos', 'Marketing', 'Legal', 'Otros'];
 const ORIGENES  = ['Base de datos', 'Archivo', 'API', 'CRM', 'SQL Server', 'CSV', 'Otro'];

@@ -19,6 +19,8 @@ requireAuth();
 
 $action = query('action', '');
 
+requireCsrfIfPost();
+
 const SEVERIDADES = ['baja', 'media', 'alta', 'critica'];
 const ESTADOS_CONTROL = ['activo', 'inactivo'];
 const ESTADOS_EVALUACION = ['cumple', 'no_cumple', 'pendiente', 'no_aplica'];

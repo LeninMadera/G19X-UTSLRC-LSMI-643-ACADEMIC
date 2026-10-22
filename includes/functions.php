@@ -111,6 +111,57 @@ function startSession(): void
 }
 
 /**
+ * Devuelve el token CSRF de la sesion actual (lo genera si no existe).
+ */
+function csrfToken(): string
+{
+    startSession();
+    if (!isset($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token']) || $_SESSION['csrf_token'] === '') {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Extrae el token CSRF de la peticion: cabecera X-CSRF-Token o campo
+ * csrf_token en el cuerpo (JSON o FormData).
+ */
+function csrfTokenFromRequest(): ?string
+{
+    $header = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    if (is_string($header) && $header !== '') {
+        return $header;
+    }
+
+    $data  = jsonInput();
+    $token = $data['csrf_token'] ?? null;
+    return is_string($token) && $token !== '' ? $token : null;
+}
+
+/**
+ * Responde 403 si el token CSRF no coincide con el de la sesion.
+ */
+function requireCsrf(): void
+{
+    startSession();
+    $expected = $_SESSION['csrf_token'] ?? '';
+    $provided = csrfTokenFromRequest();
+    if (!is_string($expected) || $expected === '' || $provided === null || !hash_equals($expected, $provided)) {
+        respondJson(false, null, 'Token CSRF invalido o ausente.', 403);
+    }
+}
+
+/**
+ * Exige CSRF solo en peticiones POST; las lecturas GET no se validan.
+ */
+function requireCsrfIfPost(): void
+{
+    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+        requireCsrf();
+    }
+}
+
+/**
  * Inicia sesion para un usuario (despues de validar credenciales).
  */
 function loginUser(int $userId, array $user): void

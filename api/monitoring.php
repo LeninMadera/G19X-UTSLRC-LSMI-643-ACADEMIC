@@ -21,6 +21,8 @@ requireAuth();
 
 $action = query('action', '');
 
+requireCsrfIfPost();
+
 switch ($action) {
 
     case 'list':

@@ -21,6 +21,8 @@ requireAuth();
 
 $action = query('action', '');
 
+requireCsrfIfPost();
+
 // Catalogo cerrado de tipos de relacion (mismo que chk_dl_tipo en SQL)
 const TIPOS_LINEAJE = ['derivado_de', 'alimenta', 'integra', 'transforma', 'copia', 'version_de'];
 

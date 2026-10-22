@@ -16,6 +16,8 @@ requireAuth();
 
 $action = query('action', '');
 
+requireCsrfIfPost();
+
 /** True si el rol actual puede editar (o es dueno de) ese dataset. */
 function puedeEditarDataset(int $datasetId): bool
 {

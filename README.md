@@ -379,8 +379,7 @@ Los datos de ejemplo estan en `sql/seed.sql` y solo aplican a bases nuevas.
 - Errores de produccion ocultos (`APP_DEBUG=0`); el JS tolera fallos de red sin romper la interfaz
 - Bitacora de actividad de los movimientos del sistema
 - Proteccion SSRF en el modulo de fuentes externas (esquema, hosts locales, resolucion DNS y limite de tamano del cuerpo)
-
-Limitacion conocida de CSRF: **la sesion por si sola NO protege contra CSRF**. La plataforma no implementa token anti-CSRF en sus endpoints mutantes; es una limitacion documentada, no una garantia.
+- Proteccion CSRF con token por sesion en todas las peticiones POST que modifican datos (cabecera `X-CSRF-Token` o campo `csrf_token`); el login queda exento para permitir el inicio de sesion
 
 ## Pruebas realizadas
 

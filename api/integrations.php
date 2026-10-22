@@ -18,15 +18,16 @@
  * metadatos de cada corrida (total de registros y campos del primer
  * objeto) en external_sync_runs.
  *
- * Nota de seguridad: la sesion por si sola NO protege contra CSRF y
- * este modulo no implementa token anti-CSRF. Es una limitacion
- * conocida de la plataforma, documentada en el README.
+ * Seguridad: las acciones POST de este modulo exigen el token CSRF
+ * de la sesion (ver requireCsrfIfPost() en includes/functions.php).
  */
 require_once __DIR__ . '/../includes/integrations_service.php';
 
 requireAuth();
 
 $action = query('action', '');
+
+requireCsrfIfPost();
 
 switch ($action) {
 

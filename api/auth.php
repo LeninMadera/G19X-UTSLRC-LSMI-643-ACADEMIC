@@ -11,6 +11,11 @@ require_once __DIR__ . '/../includes/functions.php';
 
 $action = query('action', '');
 
+// El login queda exento: la sesion (y su token CSRF) aun no existen.
+if ($action !== 'login') {
+    requireCsrfIfPost();
+}
+
 switch ($action) {
 
     case 'login':
@@ -48,10 +53,11 @@ switch ($action) {
         logActivity('login', ['rol' => $user['rol']]);
 
         respondJson(true, [
-            'id'    => (int)$user['id'],
-            'name'  => $user['nombre'],
-            'email' => $user['email'],
-            'rol'   => $user['rol'],
+            'id'         => (int)$user['id'],
+            'name'       => $user['nombre'],
+            'email'      => $user['email'],
+            'rol'        => $user['rol'],
+            'csrf_token' => csrfToken(),
         ], 'Sesion iniciada correctamente.');
         break;
 
