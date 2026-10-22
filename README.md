@@ -86,6 +86,7 @@ gobierno-datos-ia/
 - PHP 8.x con extensiones `pdo_mysql`, `curl`, `mbstring`
 - MySQL 8 (el esquema usa `caching_sha2_password`; asegurate de usar un cliente compatible, por ejemplo PHP/PDO o MySQL Workbench)
 - Navegador moderno y, opcionalmente, Postman
+- Node.js y npm (opcional, solo para ejecutar las pruebas con Newman)
 
 ## Instalacion
 
@@ -355,6 +356,59 @@ En `postman/` hay una coleccion lista para importar:
 2. Importa tambien el entorno `GobiernoDatosIA.postman_environment.json` y activalo.
 3. Ajusta la variable `baseUrl` a tu servidor.
 4. Ejecuta primero **Auth > Login** (guarda la cookie de sesion) y despues cualquier otro request.
+
+La coleccion incluye pruebas de login, sesion, token CSRF (POST sin token y con token invalido) y de cada modulo. Los requests que crean datos usan valores unicos y los eliminan al final; por eso se puede ejecutar completa varias veces seguidas.
+
+## Pruebas automatizadas con Newman
+
+Newman ejecuta la misma coleccion de Postman desde la terminal. No requiere agregar dependencias al proyecto: se instala de forma global con npm.
+
+### Requisitos
+
+- Node.js y npm instalados (`node --version`, `npm --version`).
+- MySQL con la base `gobierno_datos_ia` creada y el seed cargado.
+- Servidor PHP en marcha (ver [Instalacion](#instalacion)).
+- Conexion a internet para los requests de **Integraciones**, que consultan una API publica de demostracion.
+
+### Instalacion de Newman
+
+```bash
+npm install -g newman
+newman --version
+```
+
+### Ejecucion
+
+En una terminal, desde la raiz del proyecto, levanta el servidor:
+
+```bash
+php -S 127.0.0.1:8000 -t .
+```
+
+En otra terminal, ejecuta la coleccion completa:
+
+```bash
+newman run postman/GobiernoDatosIA.postman_collection.json -e postman/GobiernoDatosIA.postman_environment.json
+```
+
+El entorno incluido apunta a `http://127.0.0.1:8000` y usa las credenciales de ejemplo de `sql/seed.sql` (`admin@example.com` / `Admin123!`). No contiene secretos reales. Para usar otro servidor o usuario, sobreescribe las variables sin editar los archivos:
+
+```bash
+newman run postman/GobiernoDatosIA.postman_collection.json \
+  -e postman/GobiernoDatosIA.postman_environment.json \
+  --env-var baseUrl=http://127.0.0.1:8000 \
+  --env-var adminEmail=admin@example.com \
+  --env-var adminPassword=Admin123!
+```
+
+En PowerShell, usa una sola linea o el caracter de continuacion `` ` `` en lugar de `\`.
+
+### Resultado esperado
+
+Newman muestra el detalle por request y un resumen con `requests`, `assertions`, `passed` y `failed`. La coleccion es repetible: crea dos datasets, un usuario, una politica, un control, una relacion de linaje, una configuracion de monitoreo y una fuente externa temporales; registra una medicion de calidad y localiza su ID por la API; usa todos esos IDs generados en lugar de IDs fijos y elimina los datos al final. El logout es el ultimo request.
+
+Para evitar llamadas reales al proveedor de IA durante la prueba, deja `AI_API_KEY` vacia en `.env` (la aplicacion usa el modo simulado). Si la API publica de **Integraciones** no responde por falta de internet, esos requests pueden fallar aunque el resto de la coleccion sea correcto.
+
 
 ## Base de datos
 
