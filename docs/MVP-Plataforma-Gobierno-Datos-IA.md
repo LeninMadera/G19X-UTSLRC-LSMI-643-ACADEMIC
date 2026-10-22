@@ -23,18 +23,17 @@ Validar que el flujo central funciona de forma real (con base de datos real, ses
 
 ### 3.1 Incluido
 1. **Autenticación y sesiones** con 4 roles (admin, steward, owner, analyst).
-2. **Catálogo de datasets**: alta, edición, baja, búsqueda, ficha de detalle.
+2. **Catálogo de datasets**: alta, edición, baja, búsqueda, ficha de detalle y exportación CSV con filtros.
 3. **Calidad de datos**: registro de mediciones (5 dimensiones), score ponderado automático, alerta visual < 80.
 4. **Políticas**: CRUD y asignación a datasets.
 5. **IA (4 acciones)**: classify, anomalies, summary, suggest — en modo real y modo simulado.
 6. **Dashboard**: KPIs y gráficos básicos.
-7. **Reportes**: estado de calidad, alertas IA y bitácora.
+7. **Reportes**: estado de calidad, alertas IA, bitácora y exportación CSV del reporte de calidad.
 8. **Bitácora de actividad** y **API REST** con colección de Postman.
 
 ### 3.2 Excluido (post-MVP)
 - Ingesta automática de contenido de datasets.
 - Notificaciones por correo.
-- Exportación de reportes (PDF/CSV).
 - Despliegue productivo (HTTPS, dominio).
 - Pruebas automatizadas unitarias.
 
