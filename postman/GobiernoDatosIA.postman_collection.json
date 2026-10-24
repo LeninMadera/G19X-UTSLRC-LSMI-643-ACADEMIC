@@ -6,18 +6,54 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://127.0.0.1:8000" },
-    { "key": "admin_id", "value": "" },
-    { "key": "dataset_id", "value": "" },
-    { "key": "dataset_destino_id", "value": "" },
-    { "key": "user_id", "value": "" },
-    { "key": "policy_id", "value": "" },
-    { "key": "control_id", "value": "" },
-    { "key": "lineage_id", "value": "" },
-    { "key": "monitoring_id", "value": "" },
-    { "key": "source_id", "value": "" },
-    { "key": "quality_id", "value": "" },
-    { "key": "csrf_token", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "admin_id",
+      "value": ""
+    },
+    {
+      "key": "dataset_id",
+      "value": ""
+    },
+    {
+      "key": "dataset_destino_id",
+      "value": ""
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "policy_id",
+      "value": ""
+    },
+    {
+      "key": "control_id",
+      "value": ""
+    },
+    {
+      "key": "lineage_id",
+      "value": ""
+    },
+    {
+      "key": "monitoring_id",
+      "value": ""
+    },
+    {
+      "key": "source_id",
+      "value": ""
+    },
+    {
+      "key": "quality_id",
+      "value": ""
+    },
+    {
+      "key": "csrf_token",
+      "value": ""
+    }
   ],
   "event": [
     {
@@ -41,9 +77,32 @@
           "name": "Login",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth.php?action=login", "host": ["{{baseUrl}}"], "path": ["api", "auth.php"], "query": [{ "key": "action", "value": "login" }] },
-            "body": { "mode": "raw", "raw": "{ \"email\": \"{{adminEmail}}\", \"password\": \"{{adminPassword}}\" }" }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth.php?action=login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "login"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"{{adminEmail}}\", \"password\": \"{{adminPassword}}\" }"
+            }
           },
           "event": [
             {
@@ -70,7 +129,26 @@
         },
         {
           "name": "Session (usuario actual)",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/auth.php?action=session", "host": ["{{baseUrl}}"], "path": ["api", "auth.php"], "query": [{ "key": "action", "value": "session" }] } },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth.php?action=session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "session"
+                }
+              ]
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -97,9 +175,32 @@
           "name": "POST sin token CSRF (debe fallar 403)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/datasets.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "delete" }] },
-            "body": { "mode": "raw", "raw": "{ \"id\": 0 }" }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": 0 }"
+            }
           },
           "event": [
             {
@@ -129,9 +230,32 @@
           "name": "POST con token CSRF invalido (debe fallar 403)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/datasets.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "delete" }] },
-            "body": { "mode": "raw", "raw": "{ \"id\": 0 }" }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": 0 }"
+            }
           },
           "event": [
             {
@@ -165,11 +289,88 @@
       "item": [
         {
           "name": "Listar datasets (busqueda)",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=list&search=ventas&categoria=Finanzas", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "list" }, { "key": "search", "value": "ventas" }, { "key": "categoria", "value": "Finanzas" }] } }
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=list&search=ventas&categoria=Finanzas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "list"
+                },
+                {
+                  "key": "search",
+                  "value": "ventas"
+                },
+                {
+                  "key": "categoria",
+                  "value": "Finanzas"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Listar datasets (busqueda) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Listar datasets (busqueda) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Crear dataset",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Catalogo de productos {{$guid}}\", \"descripcion\": \"Listado maestros de productos para la empresa.\", \"categoria\": \"Operaciones\", \"origen\": \"Base de datos\", \"owner_id\": \"{{admin_id}}\", \"clasificacion\": \"interno\", \"activo\": 1 }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nombre\": \"Catalogo de productos {{$guid}}\", \"descripcion\": \"Listado maestros de productos para la empresa.\", \"categoria\": \"Operaciones\", \"origen\": \"Base de datos\", \"owner_id\": \"{{admin_id}}\", \"clasificacion\": \"interno\", \"activo\": 1 }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -188,7 +389,35 @@
         },
         {
           "name": "Crear dataset destino",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Dataset destino {{$guid}}\", \"descripcion\": \"Dataset temporal para probar relaciones de linaje.\", \"categoria\": \"Operaciones\", \"origen\": \"Base de datos\", \"owner_id\": \"{{admin_id}}\", \"clasificacion\": \"interno\", \"activo\": 1 }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nombre\": \"Dataset destino {{$guid}}\", \"descripcion\": \"Dataset temporal para probar relaciones de linaje.\", \"categoria\": \"Operaciones\", \"origen\": \"Base de datos\", \"owner_id\": \"{{admin_id}}\", \"clasificacion\": \"interno\", \"activo\": 1 }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -207,7 +436,30 @@
         },
         {
           "name": "Detalle dataset (id={{dataset_id}})",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=detail&id={{dataset_id}}", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "detail" }, { "key": "id", "value": "{{dataset_id}}" }] } },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=detail&id={{dataset_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "detail"
+                },
+                {
+                  "key": "id",
+                  "value": "{{dataset_id}}"
+                }
+              ]
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -225,17 +477,143 @@
         },
         {
           "name": "Actualizar dataset (id={{dataset_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{dataset_id}}\", \"nombre\": \"Catalogo de productos (actualizado)\", \"descripcion\": \"Listado maestro de productos con clasificacion IA.\", \"categoria\": \"Operaciones\", \"origen\": \"Base de datos\", \"owner_id\": \"{{admin_id}}\", \"clasificacion\": \"interno\", \"activo\": 1 }" } }
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "update"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{dataset_id}}\", \"nombre\": \"Catalogo de productos (actualizado)\", \"descripcion\": \"Listado maestro de productos con clasificacion IA.\", \"categoria\": \"Operaciones\", \"origen\": \"Base de datos\", \"owner_id\": \"{{admin_id}}\", \"clasificacion\": \"interno\", \"activo\": 1 }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Actualizar dataset (id={{dataset_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Actualizar dataset (id={{dataset_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
     {
       "name": "Calidad",
       "item": [
-        { "name": "Historial del dataset temporal", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/quality.php?action=history&dataset_id={{dataset_id}}", "host": ["{{baseUrl}}"], "path": ["api", "quality.php"], "query": [{ "key": "action", "value": "history" }, { "key": "dataset_id", "value": "{{dataset_id}}" }] } } },
+        {
+          "name": "Historial del dataset temporal",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quality.php?action=history&dataset_id={{dataset_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quality.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "history"
+                },
+                {
+                  "key": "dataset_id",
+                  "value": "{{dataset_id}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Historial del dataset temporal responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Historial del dataset temporal es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
         {
           "name": "Registrar medicion",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/quality.php?action=register", "host": ["{{baseUrl}}"], "path": ["api", "quality.php"], "query": [{ "key": "action", "value": "register" }] }, "body": { "mode": "raw", "raw": "{\n  \"dataset_id\": \"{{dataset_id}}\",\n  \"completitud\": 92.0,\n  \"exactitud\": 88.5,\n  \"consistencia\": 95.0,\n  \"vigencia\": 90.0,\n  \"unicidad\": 97.5\n}" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quality.php?action=register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quality.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "register"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataset_id\": \"{{dataset_id}}\",\n  \"completitud\": 92.0,\n  \"exactitud\": 88.5,\n  \"consistencia\": 95.0,\n  \"vigencia\": 90.0,\n  \"unicidad\": 97.5\n}"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -253,7 +631,30 @@
         },
         {
           "name": "Obtener medicion recien creada",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/quality.php?action=history&dataset_id={{dataset_id}}", "host": ["{{baseUrl}}"], "path": ["api", "quality.php"], "query": [{ "key": "action", "value": "history" }, { "key": "dataset_id", "value": "{{dataset_id}}" }] } },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quality.php?action=history&dataset_id={{dataset_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quality.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "history"
+                },
+                {
+                  "key": "dataset_id",
+                  "value": "{{dataset_id}}"
+                }
+              ]
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -275,10 +676,82 @@
     {
       "name": "Politicas",
       "item": [
-        { "name": "Listar politicas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/policies.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "list" }] } } },
-{
+        {
+          "name": "Listar politicas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/policies.php?action=list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "policies.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "list"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Listar politicas responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Listar politicas es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
           "name": "Crear politica",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"titulo\": \"Retencion minima de ventas\", \"descripcion\": \"Los datos de ventas deben conservarse 5 anios.\", \"tipo\": \"retencion\", \"estado\": \"activa\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/policies.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "policies.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"titulo\": \"Retencion minima de ventas\", \"descripcion\": \"Los datos de ventas deben conservarse 5 anios.\", \"tipo\": \"retencion\", \"estado\": \"activa\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -297,21 +770,193 @@
         },
         {
           "name": "Asignar politica a dataset",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=assign", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "assign" }] }, "body": { "mode": "raw", "raw": "{ \"policy_id\": \"{{policy_id}}\", \"dataset_id\": \"{{dataset_id}}\" }" } }
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/policies.php?action=assign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "policies.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "assign"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"policy_id\": \"{{policy_id}}\", \"dataset_id\": \"{{dataset_id}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Asignar politica a dataset responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Asignar politica a dataset es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Desasignar politica",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=unassign", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "unassign" }] }, "body": { "mode": "raw", "raw": "{ \"policy_id\": \"{{policy_id}}\", \"dataset_id\": \"{{dataset_id}}\" }" } }
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/policies.php?action=unassign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "policies.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "unassign"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"policy_id\": \"{{policy_id}}\", \"dataset_id\": \"{{dataset_id}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Desasignar politica responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Desasignar politica es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
     {
       "name": "Cumplimiento",
       "item": [
-        { "name": "Listar controles", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "list" }] } } },
+        {
+          "name": "Listar controles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compliance.php?action=list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compliance.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "list"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Listar controles responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Listar controles es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
         {
           "name": "Crear control",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Politica de privacidad visible\", \"descripcion\": \"El dataset debe declarar su politica de privacidad.\", \"referencia\": \"LFPDPPP art. 22\", \"severidad\": \"alta\", \"estado\": \"activo\", \"policy_id\": \"{{policy_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/compliance.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compliance.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nombre\": \"Politica de privacidad visible\", \"descripcion\": \"El dataset debe declarar su politica de privacidad.\", \"referencia\": \"LFPDPPP art. 22\", \"severidad\": \"alta\", \"estado\": \"activo\", \"policy_id\": \"{{policy_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -330,7 +975,35 @@
         },
         {
           "name": "Actualizar control (id={{control_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{control_id}}\", \"nombre\": \"Politica de privacidad visible\", \"descripcion\": \"Politica de privacidad declarada y auditable.\", \"referencia\": \"LFPDPPP art. 22\", \"severidad\": \"critica\", \"estado\": \"activo\", \"policy_id\": \"{{policy_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/compliance.php?action=update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compliance.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "update"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{control_id}}\", \"nombre\": \"Politica de privacidad visible\", \"descripcion\": \"Politica de privacidad declarada y auditable.\", \"referencia\": \"LFPDPPP art. 22\", \"severidad\": \"critica\", \"estado\": \"activo\", \"policy_id\": \"{{policy_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -347,7 +1020,35 @@
         },
         {
           "name": "Evaluar control en dataset",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=evaluate", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "evaluate" }] }, "body": { "mode": "raw", "raw": "{ \"control_id\": \"{{control_id}}\", \"dataset_id\": \"{{dataset_id}}\", \"estado\": \"cumple\", \"observaciones\": \"Evidencia verificada.\", \"evidencia\": \"SOP-COM-001\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/compliance.php?action=evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compliance.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "evaluate"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"control_id\": \"{{control_id}}\", \"dataset_id\": \"{{dataset_id}}\", \"estado\": \"cumple\", \"observaciones\": \"Evidencia verificada.\", \"evidencia\": \"SOP-COM-001\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -362,8 +1063,86 @@
             }
           ]
         },
-        { "name": "Estado cumplimiento por dataset (id={{dataset_id}})", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=dataset_status&dataset_id={{dataset_id}}", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "dataset_status" }, { "key": "dataset_id", "value": "{{dataset_id}}" }] } } },
-        { "name": "Eliminar control (id={{control_id}})", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/compliance.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "compliance.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{control_id}}\" }" } },
+        {
+          "name": "Estado cumplimiento por dataset (id={{dataset_id}})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compliance.php?action=dataset_status&dataset_id={{dataset_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compliance.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "dataset_status"
+                },
+                {
+                  "key": "dataset_id",
+                  "value": "{{dataset_id}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Estado cumplimiento por dataset (id={{dataset_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Estado cumplimiento por dataset (id={{dataset_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar control (id={{control_id}})",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/compliance.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compliance.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{control_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -385,7 +1164,26 @@
       "item": [
         {
           "name": "Listar relaciones de linaje",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/lineage.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "lineage.php"], "query": [{ "key": "action", "value": "list" }] } },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lineage.php?action=list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lineage.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "list"
+                }
+              ]
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -403,10 +1201,86 @@
             }
           ]
         },
-        { "name": "Listar relaciones de un dataset (id={{dataset_id}})", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/lineage.php?action=list&dataset_id={{dataset_id}}", "host": ["{{baseUrl}}"], "path": ["api", "lineage.php"], "query": [{ "key": "action", "value": "list" }, { "key": "dataset_id", "value": "{{dataset_id}}" }] } } },
+        {
+          "name": "Listar relaciones de un dataset (id={{dataset_id}})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lineage.php?action=list&dataset_id={{dataset_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lineage.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "list"
+                },
+                {
+                  "key": "dataset_id",
+                  "value": "{{dataset_id}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Listar relaciones de un dataset (id={{dataset_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Listar relaciones de un dataset (id={{dataset_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
         {
           "name": "Crear relacion de linaje",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/lineage.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "lineage.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"origen_id\": \"{{dataset_id}}\", \"destino_id\": \"{{dataset_destino_id}}\", \"tipo\": \"alimenta\", \"descripcion\": \"Relacion de prueba creada desde Postman.\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/lineage.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lineage.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"origen_id\": \"{{dataset_id}}\", \"destino_id\": \"{{dataset_destino_id}}\", \"tipo\": \"alimenta\", \"descripcion\": \"Relacion de prueba creada desde Postman.\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -426,7 +1300,35 @@
         },
         {
           "name": "Actualizar relacion (id={{lineage_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/lineage.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "lineage.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{lineage_id}}\", \"tipo\": \"transforma\", \"descripcion\": \"Tipo y descripcion actualizados desde Postman.\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/lineage.php?action=update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lineage.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "update"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{lineage_id}}\", \"tipo\": \"transforma\", \"descripcion\": \"Tipo y descripcion actualizados desde Postman.\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -444,7 +1346,30 @@
         },
         {
           "name": "Eliminar relacion (id={{lineage_id}})",
-          "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/lineage.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "lineage.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{lineage_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lineage.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lineage.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{lineage_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -465,11 +1390,131 @@
     {
       "name": "Usuarios (admin)",
       "item": [
-        { "name": "Listar usuarios", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/users.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "list" }] } } },
-        { "name": "Usuario por id (get, id={{admin_id}})", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/users.php?action=get&id={{admin_id}}", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "get" }, { "key": "id", "value": "{{admin_id}}" }] } } },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users.php?action=list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "list"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Listar usuarios responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Listar usuarios es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Usuario por id (get, id={{admin_id}})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users.php?action=get&id={{admin_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "get"
+                },
+                {
+                  "key": "id",
+                  "value": "{{admin_id}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Usuario por id (get, id={{admin_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Usuario por id (get, id={{admin_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
         {
           "name": "Crear usuario",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/users.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"Nuevo Analista\", \"email\": \"nuevo-{{$guid}}@example.com\", \"password\": \"Prueba123!\", \"rol_id\": 4, \"activo\": 1 }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nombre\": \"Nuevo Analista\", \"email\": \"nuevo-{{$guid}}@example.com\", \"password\": \"Prueba123!\", \"rol_id\": 4, \"activo\": 1 }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -488,36 +1533,607 @@
         },
         {
           "name": "Actualizar usuario (id={{user_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/users.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{user_id}}\", \"nombre\": \"Nuevo Analista\", \"email\": \"nuevo-{{$guid}}@example.com\", \"password\": \"Prueba123!\", \"rol_id\": 4, \"activo\": 0 }" } }
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users.php?action=update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "update"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{user_id}}\", \"nombre\": \"Nuevo Analista\", \"email\": \"nuevo-{{$guid}}@example.com\", \"password\": \"Prueba123!\", \"rol_id\": 4, \"activo\": 0 }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Actualizar usuario (id={{user_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Actualizar usuario (id={{user_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
-        { "name": "Eliminar usuario (id={{user_id}})", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/users.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "users.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{user_id}}\" }" } } }
+        {
+          "name": "Eliminar usuario (id={{user_id}})",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{user_id}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Eliminar usuario (id={{user_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Eliminar usuario (id={{user_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
       ]
     },
     {
       "name": "Inteligencia Artificial",
       "item": [
-        { "name": "Estado de la IA (real o simulada)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/ai.php?action=status", "host": ["{{baseUrl}}"], "path": ["api", "ai.php"], "query": [{ "key": "action", "value": "status" }] } } },
-        { "name": "Clasificar dataset", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/ai.php?action=classify", "host": ["{{baseUrl}}"], "path": ["api", "ai.php"], "query": [{ "key": "action", "value": "classify" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_id\": \"{{dataset_id}}\" }" } } },
-        { "name": "Detectar anomalias", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/ai.php?action=anomalies", "host": ["{{baseUrl}}"], "path": ["api", "ai.php"], "query": [{ "key": "action", "value": "anomalies" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_id\": \"{{dataset_id}}\" }" } } },
-        { "name": "Resumen del estado", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/ai.php?action=summary", "host": ["{{baseUrl}}"], "path": ["api", "ai.php"], "query": [{ "key": "action", "value": "summary" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_id\": \"{{dataset_id}}\" }" } } },
-        { "name": "Sugerencias de mejora", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/ai.php?action=suggest", "host": ["{{baseUrl}}"], "path": ["api", "ai.php"], "query": [{ "key": "action", "value": "suggest" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_id\": \"{{dataset_id}}\" }" } } }
+        {
+          "name": "Estado de la IA (real o simulada)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ai.php?action=status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "status"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Estado de la IA (real o simulada) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Estado de la IA (real o simulada) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Clasificar dataset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ai.php?action=classify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "classify"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"dataset_id\": \"{{dataset_id}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Clasificar dataset responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Clasificar dataset es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Detectar anomalias",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ai.php?action=anomalies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "anomalies"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"dataset_id\": \"{{dataset_id}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Detectar anomalias responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Detectar anomalias es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Resumen del estado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ai.php?action=summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "summary"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"dataset_id\": \"{{dataset_id}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Resumen del estado responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Resumen del estado es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sugerencias de mejora",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ai.php?action=suggest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "suggest"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"dataset_id\": \"{{dataset_id}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Sugerencias de mejora responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Sugerencias de mejora es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
       ]
     },
     {
       "name": "Reportes",
       "item": [
-        { "name": "Overview del dashboard", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/reports.php?action=overview", "host": ["{{baseUrl}}"], "path": ["api", "reports.php"], "query": [{ "key": "action", "value": "overview" }] } } },
-        { "name": "Alertas de IA", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/reports.php?action=alerts&limit=20", "host": ["{{baseUrl}}"], "path": ["api", "reports.php"], "query": [{ "key": "action", "value": "alerts" }, { "key": "limit", "value": "20" }] } } },
-        { "name": "Bitacora (solo admin)", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/reports.php?action=logs&limit=50", "host": ["{{baseUrl}}"], "path": ["api", "reports.php"], "query": [{ "key": "action", "value": "logs" }, { "key": "limit", "value": "50" }] } } }
+        {
+          "name": "Overview del dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports.php?action=overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "overview"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Overview del dashboard responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Overview del dashboard es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alertas de IA",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports.php?action=alerts&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "alerts"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Alertas de IA responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Alertas de IA es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bitacora (solo admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports.php?action=logs&limit=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "logs"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Bitacora (solo admin) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Bitacora (solo admin) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
       ]
     },
     {
       "name": "Monitoreo",
       "item": [
-        { "name": "Listar configuraciones", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "list" }] } } },
+        {
+          "name": "Listar configuraciones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/monitoring.php?action=list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "monitoring.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "list"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Listar configuraciones responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Listar configuraciones es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
         {
           "name": "Crear configuracion",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"dataset_id\": \"{{dataset_id}}\", \"frecuencia\": 60 }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/monitoring.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "monitoring.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"dataset_id\": \"{{dataset_id}}\", \"frecuencia\": 60 }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -536,7 +2152,35 @@
         },
         {
           "name": "Ejecutar manualmente (id={{monitoring_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=run", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "run" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{monitoring_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/monitoring.php?action=run",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "monitoring.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "run"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{monitoring_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -553,16 +2197,194 @@
             }
           ]
         },
-        { "name": "Historial de ejecuciones (config_id={{monitoring_id}})", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=runs&config_id={{monitoring_id}}", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "runs" }, { "key": "config_id", "value": "{{monitoring_id}}" }] } } },
+        {
+          "name": "Historial de ejecuciones (config_id={{monitoring_id}})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/monitoring.php?action=runs&config_id={{monitoring_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "monitoring.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "runs"
+                },
+                {
+                  "key": "config_id",
+                  "value": "{{monitoring_id}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Historial de ejecuciones (config_id={{monitoring_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Historial de ejecuciones (config_id={{monitoring_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
         {
           "name": "Actualizar configuracion (id={{monitoring_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{monitoring_id}}\", \"frecuencia\": 720, \"activo\": 1 }" } } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/monitoring.php?action=update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "monitoring.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "update"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{monitoring_id}}\", \"frecuencia\": 720, \"activo\": 1 }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Actualizar configuracion (id={{monitoring_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Actualizar configuracion (id={{monitoring_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
         {
           "name": "Desactivar configuracion (id={{monitoring_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=toggle", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "toggle" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{monitoring_id}}\" }" } } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/monitoring.php?action=toggle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "monitoring.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "toggle"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{monitoring_id}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Desactivar configuracion (id={{monitoring_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Desactivar configuracion (id={{monitoring_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
         {
           "name": "Eliminar configuracion (id={{monitoring_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/monitoring.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "monitoring.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{monitoring_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/monitoring.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "monitoring.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{monitoring_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -582,10 +2404,82 @@
     {
       "name": "Integraciones",
       "item": [
-        { "name": "Listar fuentes externas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=list", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "list" }] } } },
+        {
+          "name": "Listar fuentes externas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/integrations.php?action=list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "integrations.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "list"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Listar fuentes externas responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Listar fuentes externas es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
         {
           "name": "Crear fuente externa",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=create", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "create" }] }, "body": { "mode": "raw", "raw": "{ \"nombre\": \"API de indicadores\", \"descripcion\": \"Fuente externa de prueba creada desde Postman.\", \"url\": \"https://api.restful-api.dev/objects\", \"dataset_id\": \"{{dataset_id}}\", \"timeout\": 15, \"activo\": 1 }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/integrations.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "integrations.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nombre\": \"API de indicadores\", \"descripcion\": \"Fuente externa de prueba creada desde Postman.\", \"url\": \"https://api.restful-api.dev/objects\", \"dataset_id\": \"{{dataset_id}}\", \"timeout\": 15, \"activo\": 1 }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -604,11 +2498,89 @@
         },
         {
           "name": "Probar conexion (id={{source_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=probar", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "probar" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{source_id}}\" }" } }
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/integrations.php?action=probar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "integrations.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "probar"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{source_id}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Probar conexion (id={{source_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Probar conexion (id={{source_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Sincronizar ahora (id={{source_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=sincronizar", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "sincronizar" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{source_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/integrations.php?action=sincronizar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "integrations.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "sincronizar"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{source_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -625,18 +2597,194 @@
             }
           ]
         },
-        { "name": "Historial de corridas (source_id={{source_id}})", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=historial&source_id={{source_id}}", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "historial" }, { "key": "source_id", "value": "{{source_id}}" }] } } },
+        {
+          "name": "Historial de corridas (source_id={{source_id}})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/integrations.php?action=historial&source_id={{source_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "integrations.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "historial"
+                },
+                {
+                  "key": "source_id",
+                  "value": "{{source_id}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Historial de corridas (source_id={{source_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Historial de corridas (source_id={{source_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
         {
           "name": "Actualizar fuente (id={{source_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=update", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "update" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{source_id}}\", \"nombre\": \"API de indicadores (actualizada)\", \"descripcion\": \"Fuente externa actualizada desde Postman.\", \"url\": \"https://api.restful-api.dev/objects\", \"dataset_id\": \"{{dataset_id}}\", \"timeout\": 20, \"activo\": 1 }" } }
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/integrations.php?action=update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "integrations.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "update"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{source_id}}\", \"nombre\": \"API de indicadores (actualizada)\", \"descripcion\": \"Fuente externa actualizada desde Postman.\", \"url\": \"https://api.restful-api.dev/objects\", \"dataset_id\": \"{{dataset_id}}\", \"timeout\": 20, \"activo\": 1 }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Actualizar fuente (id={{source_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Actualizar fuente (id={{source_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Desactivar fuente (id={{source_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=toggle", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "toggle" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{source_id}}\" }" } }
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/integrations.php?action=toggle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "integrations.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "toggle"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{source_id}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Desactivar fuente (id={{source_id}}) responde correctamente', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Desactivar fuente (id={{source_id}}) es exitoso', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d).to.have.property('success');",
+                  "        pm.expect(d.success).to.eql(true);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Eliminar fuente (id={{source_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/integrations.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "integrations.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{source_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/integrations.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "integrations.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{source_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -658,7 +2806,35 @@
       "item": [
         {
           "name": "Eliminar medicion (id={{quality_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/quality.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "quality.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{quality_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quality.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quality.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{quality_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -675,7 +2851,35 @@
         },
         {
           "name": "Eliminar politica (id={{policy_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/policies.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "policies.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{policy_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/policies.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "policies.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{policy_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -692,7 +2896,35 @@
         },
         {
           "name": "Eliminar dataset destino (id={{dataset_destino_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{dataset_destino_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{dataset_destino_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -709,7 +2941,35 @@
         },
         {
           "name": "Eliminar dataset (id={{dataset_id}})",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/api/datasets.php?action=delete", "host": ["{{baseUrl}}"], "path": ["api", "datasets.php"], "query": [{ "key": "action", "value": "delete" }] }, "body": { "mode": "raw", "raw": "{ \"id\": \"{{dataset_id}}\" }" } },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": \"{{dataset_id}}\" }"
+            }
+          },
           "event": [
             {
               "listen": "test",
@@ -726,7 +2986,26 @@
         },
         {
           "name": "Logout",
-          "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/auth.php?action=logout", "host": ["{{baseUrl}}"], "path": ["api", "auth.php"], "query": [{ "key": "action", "value": "logout" }] } },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth.php?action=logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "logout"
+                }
+              ]
+            }
+          },
           "event": [
             {
               "listen": "test",
