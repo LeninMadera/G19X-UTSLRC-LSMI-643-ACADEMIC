@@ -746,7 +746,7 @@ Las principales decisiones de seguridad son:
 
 ### 17.1 Consideración pendiente para producción
 
-La arquitectura actual no incluye tokens anti-CSRF para endpoints que modifican información. Para una implementación productiva se recomienda incorporar una protección CSRF dedicada junto con HTTPS y políticas adicionales de endurecimiento.
+La arquitectura cuenta con protección CSRF para las peticiones que modifican estado. El token se genera de forma criptográficamente segura, se almacena en la sesión (`$_SESSION['csrf_token']`), se expone al frontend mediante `window.CSRF_TOKEN` en `views/includes/header.php` y se envía desde `assets/js/app.js` en la cabecera `X-CSRF-Token` para solicitudes con cuerpo. Los endpoints API aplican `requireCsrfIfPost()` (con excepción deliberada de `POST api/auth.php?action=login`), validando con comparación segura (`hash_equals`) y respondiendo HTTP 403 si es inválido o ausente. Las solicitudes GET no requieren token CSRF. Para un entorno productivo se recomienda complementar con HTTPS y políticas adicionales de endurecimiento.
 
 ---
 

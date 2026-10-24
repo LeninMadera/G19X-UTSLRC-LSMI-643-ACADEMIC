@@ -782,12 +782,12 @@ El sistema implementa:
 
 ### Limitación conocida
 
-La versión actual no implementa tokens anti-CSRF en los endpoints que modifican información.
+La plataforma implementa protección CSRF para las peticiones que modifican estado. El token se almacena en la sesión del usuario, se genera con `bin2hex(random_bytes(32))` mediante `csrfToken()` y se envía desde el frontend en la cabecera `X-CSRF-Token` (gestionado por `assets/js/app.js` mediante `window.CSRF_TOKEN`). Los endpoints validan el token con `requireCsrf()` o `requireCsrfIfPost()` (aplicado en todos los endpoints API que aceptan POST, con excepción deliberada de `POST api/auth.php?action=login`). En caso de token inválido o ausente se devuelve HTTP 403. Las solicitudes GET no requieren validación CSRF.
 
 Antes de un despliegue productivo debe considerarse:
 
 - HTTPS.
-- Protección CSRF.
+- Protección CSRF para peticiones POST mutantes (token en sesión, envío vía `X-CSRF-Token` desde el frontend, validación en backend; excepción `login`).
 - Gestión segura de secretos.
 - Políticas de respaldo.
 - Registro centralizado.

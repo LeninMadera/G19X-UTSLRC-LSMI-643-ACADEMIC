@@ -136,7 +136,7 @@ Corresponde a mejoras futuras que amplíen la solución sin modificar su objetiv
 
 Ejemplos posibles:
 
-- Protección CSRF.
+- Protección CSRF para peticiones POST mutantes (token en sesión, envío vía `X-CSRF-Token`, validación en backend; excepción `login`, sin validación en GET).
 - Nuevos reportes.
 - Nuevos formatos de exportación.
 - Nuevas fuentes externas.
@@ -402,7 +402,7 @@ Actividades recomendadas:
 
 ### Mejora futura
 
-Antes de utilizar la plataforma en producción se recomienda agregar protección CSRF dedicada y HTTPS.
+Antes de utilizar la plataforma en producción se recomienda asegurar el uso de HTTPS y aplicar endurecimiento adicional. La protección CSRF ya está implementada para las peticiones POST mutantes (con excepción deliberada de `login` y sin validación para solicitudes GET).
 
 ---
 
@@ -641,7 +641,7 @@ Las mejoras deben priorizarse según:
 
 Posibles mejoras futuras:
 
-- Protección CSRF.
+- Protección CSRF para peticiones POST mutantes (token en sesión, envío vía `X-CSRF-Token`, validación en backend; excepción `login`, sin validación en GET).
 - Despliegue HTTPS.
 - Pruebas automatizadas unitarias.
 - Mayor cobertura automatizada E2E.

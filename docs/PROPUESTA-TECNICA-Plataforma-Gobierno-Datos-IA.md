@@ -329,7 +329,7 @@ La solución incorpora las siguientes medidas:
 
 ### Consideración conocida
 
-La implementación actual no incorpora tokens anti-CSRF en los endpoints mutantes. Este punto debe considerarse antes de un posible despliegue productivo.
+La implementación actual incorpora protección CSRF para las peticiones que modifican estado. Los tokens se generan criptográficamente, se almacenan en la sesión, se exponen al frontend (`window.CSRF_TOKEN`) y se envían desde `assets/js/app.js` en la cabecera `X-CSRF-Token`. Los endpoints validan el token con `requireCsrfIfPost()` (excepción deliberada en `POST api/auth.php?action=login`) y devuelven HTTP 403 en caso de token inválido o ausente; las solicitudes GET no requieren validación. Esta protección complementa el control de sesión y roles.
 
 ---
 
@@ -402,7 +402,7 @@ La versión actual:
 - No incluye notificaciones por correo o mensajería.
 - No incluye un servicio interno permanente de programación.
 - No se encuentra desplegada en un entorno productivo.
-- Requiere controles adicionales como CSRF y HTTPS antes de una operación productiva real.
+- Requiere controles adicionales como HTTPS antes de una operación productiva real (la protección CSRF ya está implementada para las peticiones POST mutantes).
 
 Estas limitaciones no impiden cubrir el alcance funcional definido para la entrega académica.
 

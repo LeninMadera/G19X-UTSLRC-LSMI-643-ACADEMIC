@@ -563,7 +563,7 @@ La base de datos real permaneció sin modificaciones durante esta batería.
 - Validación más estricta del formato de IDs.
 - Corrección gramatical del texto simulado.
 - Unificación de la fuente de rol utilizada por frontend.
-- Protección CSRF dedicada.
+- Protección CSRF para peticiones POST mutantes (token en sesión, envío vía `X-CSRF-Token`, validación en backend; excepción `login`, sin validación en GET).
 - Endurecimiento adicional para un despliegue productivo.
 
 Estas mejoras no impiden la entrega académica del sistema.

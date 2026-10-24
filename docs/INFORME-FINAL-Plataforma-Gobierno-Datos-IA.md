@@ -345,7 +345,7 @@ Entre las medidas implementadas se encuentran:
 - Restricción para impedir que un Admin se desactive a sí mismo.
 - Restricción para mantener al menos un administrador activo.
 
-Como mejora futura se identificó la incorporación de protección CSRF dedicada antes de un posible despliegue productivo.
+Se incorporó protección CSRF para las peticiones que modifican estado (token almacenado en sesión, envío vía `X-CSRF-Token` desde el frontend, validación en backend; excepción deliberada para `POST api/auth.php?action=login`, sin validación para solicitudes GET). Esta medida se añadió tras la revisión inicial para fortalecer la seguridad antes de consideraciones productivas.
 
 ---
 
@@ -496,7 +496,7 @@ La solución no incluye:
 - Alta disponibilidad.
 - Infraestructura productiva.
 - HTTPS incluido dentro del proyecto.
-- Protección CSRF dedicada.
+- Protección CSRF para peticiones POST mutantes (token en sesión, cabecera `X-CSRF-Token`, validación en backend con respuesta 403 en caso de fallo; excepción `login`).
 
 Estas limitaciones corresponden al alcance actual y no impiden el funcionamiento académico de la solución.
 
@@ -525,7 +525,7 @@ En caso de continuar el proyecto, las mejoras deben priorizarse de acuerdo con n
 
 Posibles mejoras:
 
-- Protección CSRF.
+- Protección CSRF (implementada en endpoints POST mutantes con token de sesión y validación en backend).
 - HTTPS y despliegue productivo.
 - Pruebas unitarias automatizadas.
 - Mayor automatización E2E.

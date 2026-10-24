@@ -290,7 +290,7 @@ El esquema físico se encuentra definido en `sql/database.sql` y en las migracio
 
 - Las tecnologías indicadas originalmente en la propuesta del proyecto fueron consideradas como referencia. La implementación final utiliza las tecnologías autorizadas y conocidas por el estudiante.
 - El sistema se encuentra orientado a un entorno académico/local y no debe considerarse listo para producción sin controles adicionales.
-- La plataforma no implementa actualmente tokens anti-CSRF en los endpoints mutantes.
+- La plataforma implementa protección CSRF para las peticiones POST que modifican estado (token en sesión, envío vía cabecera `X-CSRF-Token` desde el frontend, validación en backend con `requireCsrfIfPost()`/`requireCsrf()`, respuesta 403 si es inválido o ausente). El inicio de sesión queda exento de forma deliberada y las solicitudes GET no requieren validación CSRF.
 - `sql/database.sql` recrea la base de datos; debe utilizarse únicamente cuando se requiera una instalación nueva o una base que pueda ser reemplazada.
 - Las pruebas con fuentes locales requieren habilitar explícitamente `INTEGRACION_PERMITIR_LOCALHOST`, opción que no debe mantenerse activa en operación normal.
 - La calidad de las respuestas de IA depende del proveedor y modelo configurados.

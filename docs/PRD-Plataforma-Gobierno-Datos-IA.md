@@ -179,7 +179,7 @@ Centralizar el gobierno de datos empresariales en una plataforma web que permita
 
 ### 7.1 Limitación de seguridad conocida
 
-La plataforma no implementa actualmente tokens anti-CSRF en los endpoints mutantes. La sesión y el control por rol no sustituyen una protección CSRF dedicada, por lo que este punto se considera una mejora futura si el sistema se despliega en un entorno productivo.
+La plataforma cuenta con protección CSRF para las peticiones que modifican estado. Los tokens se generan de forma criptográficamente segura, se almacenan en la sesión del usuario y se exponen al frontend mediante `window.CSRF_TOKEN`. Las solicitudes mutantes enviadas con `POST` incluyen el token en la cabecera `X-CSRF-Token` (o, alternativamente, en el cuerpo) y los endpoints validan el token con `requireCsrf()`/`requireCsrfIfPost()`, respondiendo con HTTP 403 cuando es inválido o está ausente. El inicio de sesión (`POST api/auth.php?action=login`) queda exento deliberadamente, ya que la sesión y el token CSRF aún no existen en ese momento. Las solicitudes `GET` no requieren validación CSRF. El control de sesión y roles complementa, pero no sustituye, esta protección.
 
 ---
 
@@ -408,7 +408,7 @@ La revisión funcional final del proyecto incluyó pruebas de sintaxis PHP/JavaS
 | Datos de calidad inexistentes | El monitoreo informa el caso y no inventa mediciones |
 | Acceso indebido por rol | Validación de sesión, rol y propiedad en el servidor |
 | Exposición de actividad administrativa | Feed filtrado por rol y bitácora completa restringida a Admin |
-| Despliegue productivo sin controles adicionales | Mantener el uso académico/local y considerar CSRF, HTTPS y endurecimiento adicional antes de producción |
+| Despliegue productivo sin controles adicionales | Mantener el uso académico/local y considerar HTTPS y endurecimiento adicional antes de producción (la protección CSRF ya se encuentra implementada en las peticiones POST mutantes) |
 
 ---
 
