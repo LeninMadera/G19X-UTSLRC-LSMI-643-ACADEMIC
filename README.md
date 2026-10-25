@@ -486,3 +486,12 @@ proyecto sin conocer tus secretos.
 - Postman: <https://learning.postman.com/>
 - API de OpenAI: <https://platform.openai.com/docs/>
 - Groq (API compatible con OpenAI): <https://console.groq.com/docs>
+
+
+## Uso de herramientas de inteligencia artificial
+
+Durante el desarrollo del proyecto se utilizaron **ChatGPT** y **OpenCode** como herramientas de apoyo para la revisión de código, la resolución de errores, el ajuste de la documentación y la preparación de pruebas reproducibles con Postman y Newman.
+
+Las sugerencias generadas por estas herramientas fueron revisadas antes de incorporar los cambios correspondientes al proyecto.
+
+Este uso de herramientas de apoyo es independiente de la inteligencia artificial integrada en la plataforma, implementada en `api/ai.php` e `includes/ai_service.php`, que proporciona funciones de clasificación, detección de anomalías, generación de resúmenes y sugerencias de mejora.
