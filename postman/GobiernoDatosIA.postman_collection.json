@@ -53,6 +53,14 @@
     {
       "key": "csrf_token",
       "value": ""
+    },
+    {
+      "key": "analystEmail",
+      "value": "analyst@example.com"
+    },
+    {
+      "key": "analystPassword",
+      "value": "Analyst123!"
     }
   ],
   "event": [
@@ -165,6 +173,157 @@
               }
             }
           ]
+        },
+        {
+          "name": "Login como analyst y crear usuario (debe fallar 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login analyst exitoso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.rol).to.eql('analyst');",
+                  "    pm.collectionVariables.set('csrf_token', d.data.csrf_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth.php?action=login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "login"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"{{analystEmail}}\", \"password\": \"{{analystPassword}}\" }"
+            }
+          }
+        },
+        {
+          "name": "Crear usuario como analyst (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechazado con 403', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "pm.test('success false', function () {",
+                  "    try {",
+                  "        var d = pm.response.json();",
+                  "        pm.expect(d.success).to.eql(false);",
+                  "    } catch (e) {",
+                  "        pm.expect.fail('Respuesta no es JSON');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nombre\": \"Test Analyst\", \"email\": \"testanalyst1792969756@example.com\", \"password\": \"Pass123!\", \"rol_id\": 4 }"
+            }
+          }
+        },
+        {
+          "name": "Restaurar sesion admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login admin restaurado', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.rol).to.eql('admin');",
+                  "    pm.collectionVariables.set('csrf_token', d.data.csrf_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth.php?action=login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "login"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"{{adminEmail}}\", \"password\": \"{{adminPassword}}\" }"
+            }
+          }
         }
       ]
     },
@@ -331,7 +490,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -520,7 +679,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -574,7 +733,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -712,7 +871,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -813,7 +972,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -867,7 +1026,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -917,7 +1076,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1103,7 +1262,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1241,7 +1400,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1426,7 +1585,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1475,7 +1634,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1576,7 +1735,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1630,7 +1789,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1680,7 +1839,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1734,7 +1893,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1788,7 +1947,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1842,7 +2001,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1896,7 +2055,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1946,7 +2105,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1995,7 +2154,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2044,7 +2203,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2094,7 +2253,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2237,7 +2396,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2291,7 +2450,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2345,7 +2504,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2440,7 +2599,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2541,7 +2700,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2637,7 +2796,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2691,7 +2850,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2745,7 +2904,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON vÃ¡lido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã‚Â¡lido');",
                   "    }",
                   "});"
                 ],
