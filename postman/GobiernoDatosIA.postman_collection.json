@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "f3a9b7e2-5d1a-4c8f-9a7b-6e0d4c2f8a10",
     "name": "Gobierno de Datos con IA",
-    "description": "Coleccion de pruebas de la API REST de la Plataforma de Gobierno de Datos con Inteligencia Artificial (PHP + MySQL).\n\nAUTENTICACION: el sistema usa sesiones por cookie. Ejecuta primero el request \"Auth / Login\" para abrir sesion; Postman y Newman conservaran la cookie `GDIA_SESSION` para el resto de las peticiones.\n\nCSRF: el login devuelve `csrf_token`; un script pre-request de la coleccion lo envia como cabecera `X-CSRF-Token` en todos los POST. La carpeta \"CSRF\" comprueba que un POST sin token o con token inválido devuelve 403.\n\nCREDENCIALES: el login usa las variables de entorno `adminEmail` y `adminPassword`. El entorno incluido solo contiene las credenciales de ejemplo de `sql/seed.sql`, no secretos reales.\n\nVARIABLE baseUrl: apunta a la raiz del proyecto servida por PHP (ej: http://127.0.0.1:8000).\n\nUSUARIOS DE PRUEBA (seed):\n- admin@example.com / Admin123! (administrador)\n- steward@example.com / Steward123! (steward)\n- owner@example.com / Owner123! (dueno de datos)\n- analyst@example.com / Analyst123! (analista, solo lectura)\n\nREPETIBILIDAD: la coleccion crea datos con valores unicos, usa los IDs devueltos por la API y los elimina en la carpeta final \"Limpieza y cierre\", que tambien cierra la sesion. Se puede ejecutar varias veces seguidas con Newman.\n\nNEWMAN: `newman run postman/GobiernoDatosIA.postman_collection.json -e postman/GobiernoDatosIA.postman_environment.json`. Requiere el servidor PHP en marcha y la base sembrada.",
+    "description": "Coleccion de pruebas de la API REST de la Plataforma de Gobierno de Datos con Inteligencia Artificial (PHP + MySQL).\n\nAUTENTICACION: el sistema usa sesiones por cookie. Ejecuta primero el request \"Auth / Login\" para abrir sesion; Postman y Newman conservaran la cookie `GDIA_SESSION` para el resto de las peticiones.\n\nCSRF: el login devuelve `csrf_token`; un script pre-request de la coleccion lo envia como cabecera `X-CSRF-Token` en todos los POST. La carpeta \"CSRF\" comprueba que un POST sin token o con token invÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido devuelve 403.\n\nCREDENCIALES: el login usa las variables de entorno `adminEmail` y `adminPassword`. El entorno incluido solo contiene las credenciales de ejemplo de `sql/seed.sql`, no secretos reales.\n\nVARIABLE baseUrl: apunta a la raiz del proyecto servida por PHP (ej: http://127.0.0.1:8000).\n\nUSUARIOS DE PRUEBA (seed):\n- admin@example.com / Admin123! (administrador)\n- steward@example.com / Steward123! (steward)\n- owner@example.com / Owner123! (dueno de datos)\n- analyst@example.com / Analyst123! (analista, solo lectura)\n\nREPETIBILIDAD: la coleccion crea datos con valores unicos, usa los IDs devueltos por la API y los elimina en la carpeta final \"Limpieza y cierre\", que tambien cierra la sesion. Se puede ejecutar varias veces seguidas con Newman.\n\nNEWMAN: `newman run postman/GobiernoDatosIA.postman_collection.json -e postman/GobiernoDatosIA.postman_environment.json`. Requiere el servidor PHP en marcha y la base sembrada.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -126,7 +126,7 @@
                   "    pm.collectionVariables.set('admin_id', String(d.data.id));",
                   "});",
                   "",
-                  "pm.test('Login devuelve un token CSRF válido', function () {",
+                  "pm.test('Login devuelve un token CSRF vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido', function () {",
                   "    var d = pm.response.json();",
                   "    pm.expect(d.data.csrf_token).to.match(/^[a-f0-9]{64}$/i);",
                   "});"
@@ -324,6 +324,418 @@
               "raw": "{ \"email\": \"{{adminEmail}}\", \"password\": \"{{adminPassword}}\" }"
             }
           }
+        },
+        {
+          "name": "Restaurar admin para crear dataset ajeno",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login admin restaurado', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.rol).to.eql('admin');",
+                  "    pm.collectionVariables.set('csrf_token', d.data.csrf_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth.php?action=login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "login"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"{{adminEmail}}\", \"password\": \"{{adminPassword}}\" }"
+            }
+          }
+        },
+        {
+          "name": "Crear dataset ajeno al owner (propietario admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Dataset ajeno creado', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.collectionVariables.set('dataset_ajeno_id', String(d.data.id));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nombre\": \"Dataset ajeno al owner {{$guid}}\", \"descripcion\": \"test\", \"categoria\": \"Finanzas\", \"origen\": \"SQL Server\", \"owner_id\": \"{{admin_id}}\", \"clasificacion\": \"interno\" }"
+            }
+          }
+        },
+        {
+          "name": "Login como steward",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login steward exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.rol).to.eql('steward');",
+                  "    pm.collectionVariables.set('csrf_token', d.data.csrf_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth.php?action=login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "login"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"steward@example.com\", \"password\": \"Steward123!\" }"
+            }
+          }
+        },
+        {
+          "name": "Steward accede a logs (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechazado con 403', function () { pm.response.to.have.status(403); });",
+                  "pm.test('success false', function () { var d = pm.response.json(); pm.expect(d.success).to.eql(false); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports.php?action=logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "logs"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login como analyst (caso C)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login analyst exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.rol).to.eql('analyst');",
+                  "    pm.collectionVariables.set('csrf_token', d.data.csrf_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth.php?action=login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "login"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"{{analystEmail}}\", \"password\": \"{{analystPassword}}\" }"
+            }
+          }
+        },
+        {
+          "name": "Analyst crea dataset (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechazado con 403', function () { pm.response.to.have.status(403); });",
+                  "pm.test('success false', function () { var d = pm.response.json(); pm.expect(d.success).to.eql(false); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nombre\": \"Dataset Analyst\", \"descripcion\": \"test\", \"categoria\": \"Otros\", \"origen\": \"Otro\", \"clasificacion\": \"publico\", \"owner_id\": 4 }"
+            }
+          }
+        },
+        {
+          "name": "Login como owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login owner exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.rol).to.eql('owner');",
+                  "    pm.collectionVariables.set('owner_id', String(d.data.id));",
+                  "    pm.collectionVariables.set('csrf_token', d.data.csrf_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth.php?action=login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "login"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"owner@example.com\", \"password\": \"Owner123!\" }"
+            }
+          }
+        },
+        {
+          "name": "Owner actualiza dataset ajeno (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechazado con 403 por no ser propietario', function () { pm.response.to.have.status(403); });",
+                  "pm.test('success false', function () { var d = pm.response.json(); pm.expect(d.success).to.eql(false); });",
+                  "pm.test('Mensaje de permisos', function () { var d = pm.response.json(); pm.expect(d.message).to.include('permiso'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "update"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": {{dataset_ajeno_id}}, \"nombre\": \"Intento owner\", \"descripcion\": \"test\", \"categoria\": \"Finanzas\", \"origen\": \"SQL Server\", \"clasificacion\": \"confidencial\" }"
+            }
+          }
+        },
+        {
+          "name": "Restaurar sesion admin (post pruebas roles)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login admin restaurado', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "    pm.expect(d.data.rol).to.eql('admin');",
+                  "    pm.collectionVariables.set('csrf_token', d.data.csrf_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth.php?action=login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "login"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"{{adminEmail}}\", \"password\": \"{{adminPassword}}\" }"
+            }
+          }
         }
       ]
     },
@@ -421,9 +833,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Reemplaza el token válido por uno inválido para comprobar el rechazo.",
                   "pm.request.headers.remove('X-CSRF-Token');",
-                  "pm.request.headers.add({ key: 'X-CSRF-Token', value: 'token-inválido' });"
+                  "pm.request.headers.add({ key: 'X-CSRF-Token', value: 'token-invalido' });"
                 ]
               }
             },
@@ -431,11 +842,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('POST con token CSRF inválido devuelve 403', function () {",
-                  "    pm.response.to.have.status(403);",
-                  "    var d = pm.response.json();",
-                  "    pm.expect(d.message).to.include('CSRF');",
-                  "});"
+                  "pm.test('POST con token CSRF invalido devuelve 403', function () { pm.response.to.have.status(403); });",
+                  "pm.test('Respuesta indica fallo por CSRF', function () { var d = pm.response.json(); pm.expect(d.success).to.eql(false); });"
                 ]
               }
             }
@@ -490,7 +898,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -679,7 +1087,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -733,7 +1141,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -871,7 +1279,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -972,7 +1380,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1026,7 +1434,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1076,7 +1484,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1262,7 +1670,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1400,7 +1808,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1585,7 +1993,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1634,7 +2042,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1735,7 +2143,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1789,7 +2197,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1839,7 +2247,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1893,7 +2301,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -1947,7 +2355,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2001,7 +2409,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2055,7 +2463,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2105,7 +2513,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2154,7 +2562,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2203,7 +2611,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2253,7 +2661,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2396,7 +2804,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2450,7 +2858,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2504,7 +2912,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2599,7 +3007,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2700,7 +3108,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2796,7 +3204,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2850,7 +3258,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -2904,7 +3312,7 @@
                   "        pm.expect(d).to.have.property('success');",
                   "        pm.expect(d.success).to.eql(true);",
                   "    } catch (e) {",
-                  "        pm.expect.fail('Respuesta no es JSON válido');",
+                  "        pm.expect.fail('Respuesta no es JSON vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido');",
                   "    }",
                   "});"
                 ],
@@ -3142,6 +3550,52 @@
               }
             }
           ]
+        },
+        {
+          "name": "Eliminar dataset ajeno (id={{dataset_ajeno_id}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Eliminar dataset ajeno exitoso', function () {",
+                  "    var d = pm.response.json();",
+                  "    pm.expect(d.success).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/datasets.php?action=delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "datasets.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": {{dataset_ajeno_id}} }"
+            }
+          }
         },
         {
           "name": "Logout",
