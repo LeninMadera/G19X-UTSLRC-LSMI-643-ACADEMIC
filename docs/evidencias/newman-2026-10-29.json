@@ -1,0 +1,624 @@
+{
+  "evidence_type": "sanitized_newman_execution",
+  "note": "Derived from a real Newman run. Sensitive data (passwords, cookies, tokens, session headers/responses) removed.",
+  "execution_date": "2026-10-29",
+  "collection": "Gobierno de Datos con IA",
+  "run": {
+    "stats": {
+      "iterations": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "items": {
+        "total": 73,
+        "pending": 0,
+        "failed": 0
+      },
+      "scripts": {
+        "total": 148,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequests": {
+        "total": 73,
+        "pending": 0,
+        "failed": 0
+      },
+      "requests": {
+        "total": 73,
+        "pending": 0,
+        "failed": 0
+      },
+      "tests": {
+        "total": 73,
+        "pending": 0,
+        "failed": 0
+      },
+      "assertions": {
+        "total": 110,
+        "pending": 0,
+        "failed": 0
+      },
+      "testScripts": {
+        "total": 73,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequestScripts": {
+        "total": 75,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "timings": {
+      "responseAverage": 138.38356164383563,
+      "responseMin": 4,
+      "responseMax": 1988,
+      "responseSd": 351.85931303311645,
+      "dnsAverage": 0,
+      "dnsMin": 0,
+      "dnsMax": 0,
+      "dnsSd": 0,
+      "firstByteAverage": 0,
+      "firstByteMin": 0,
+      "firstByteMax": 0,
+      "firstByteSd": 0,
+      "started": 1793302480140,
+      "completed": 1793302496406
+    },
+    "failures": []
+  },
+  "tests_summary": [
+    {
+      "request": "Login",
+      "test": "Login exitoso",
+      "passed": true
+    },
+    {
+      "request": "Login",
+      "test": "Login devuelve un token CSRF valido",
+      "passed": true
+    },
+    {
+      "request": "Session (usuario actual)",
+      "test": "Sesion activa",
+      "passed": true
+    },
+    {
+      "request": "Login como analyst y crear usuario (debe fallar 403)",
+      "test": "Login analyst exitoso",
+      "passed": true
+    },
+    {
+      "request": "Crear usuario como analyst (403)",
+      "test": "Rechazado con 403",
+      "passed": true
+    },
+    {
+      "request": "Crear usuario como analyst (403)",
+      "test": "success false",
+      "passed": true
+    },
+    {
+      "request": "Restaurar sesion admin",
+      "test": "Login admin restaurado",
+      "passed": true
+    },
+    {
+      "request": "Restaurar admin para crear dataset ajeno",
+      "test": "Login admin restaurado",
+      "passed": true
+    },
+    {
+      "request": "Crear dataset ajeno al owner (propietario admin)",
+      "test": "Dataset ajeno creado",
+      "passed": true
+    },
+    {
+      "request": "Login como steward",
+      "test": "Login steward exitoso",
+      "passed": true
+    },
+    {
+      "request": "Steward accede a logs (403)",
+      "test": "Rechazado con 403",
+      "passed": true
+    },
+    {
+      "request": "Steward accede a logs (403)",
+      "test": "success false",
+      "passed": true
+    },
+    {
+      "request": "Login como analyst (caso C)",
+      "test": "Login analyst exitoso",
+      "passed": true
+    },
+    {
+      "request": "Analyst crea dataset (403)",
+      "test": "Rechazado con 403",
+      "passed": true
+    },
+    {
+      "request": "Analyst crea dataset (403)",
+      "test": "success false",
+      "passed": true
+    },
+    {
+      "request": "Login como owner",
+      "test": "Login owner exitoso",
+      "passed": true
+    },
+    {
+      "request": "Owner actualiza dataset ajeno (403)",
+      "test": "Rechazado con 403 por no ser propietario",
+      "passed": true
+    },
+    {
+      "request": "Owner actualiza dataset ajeno (403)",
+      "test": "success false",
+      "passed": true
+    },
+    {
+      "request": "Owner actualiza dataset ajeno (403)",
+      "test": "Mensaje de permisos",
+      "passed": true
+    },
+    {
+      "request": "Restaurar sesion admin (post pruebas roles)",
+      "test": "Login admin restaurado",
+      "passed": true
+    },
+    {
+      "request": "POST sin token CSRF (debe fallar 403)",
+      "test": "POST sin token CSRF devuelve 403",
+      "passed": true
+    },
+    {
+      "request": "POST con token CSRF invalido (debe fallar 403)",
+      "test": "POST con token CSRF invalido devuelve 403",
+      "passed": true
+    },
+    {
+      "request": "POST con token CSRF invalido (debe fallar 403)",
+      "test": "Respuesta indica fallo por CSRF",
+      "passed": true
+    },
+    {
+      "request": "Listar datasets (busqueda)",
+      "test": "Listar datasets (busqueda) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Listar datasets (busqueda)",
+      "test": "Listar datasets (busqueda) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Crear dataset",
+      "test": "Crear dataset exitoso",
+      "passed": true
+    },
+    {
+      "request": "Crear dataset destino",
+      "test": "Crear dataset destino exitoso",
+      "passed": true
+    },
+    {
+      "request": "Detalle dataset (id={{dataset_id}})",
+      "test": "Detalle de dataset exitoso",
+      "passed": true
+    },
+    {
+      "request": "Actualizar dataset (id={{dataset_id}})",
+      "test": "Actualizar dataset (id={{dataset_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Actualizar dataset (id={{dataset_id}})",
+      "test": "Actualizar dataset (id={{dataset_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Historial del dataset temporal",
+      "test": "Historial del dataset temporal responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Historial del dataset temporal",
+      "test": "Historial del dataset temporal es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Registrar medicion",
+      "test": "Registrar medicion exitoso",
+      "passed": true
+    },
+    {
+      "request": "Obtener medicion recien creada",
+      "test": "Obtener id de la medicion creada",
+      "passed": true
+    },
+    {
+      "request": "Listar politicas",
+      "test": "Listar politicas responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Listar politicas",
+      "test": "Listar politicas es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Crear politica",
+      "test": "Crear politica exitoso",
+      "passed": true
+    },
+    {
+      "request": "Asignar politica a dataset",
+      "test": "Asignar politica a dataset responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Asignar politica a dataset",
+      "test": "Asignar politica a dataset es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Desasignar politica",
+      "test": "Desasignar politica responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Desasignar politica",
+      "test": "Desasignar politica es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Listar controles",
+      "test": "Listar controles responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Listar controles",
+      "test": "Listar controles es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Crear control",
+      "test": "Crear control exitoso",
+      "passed": true
+    },
+    {
+      "request": "Actualizar control (id={{control_id}})",
+      "test": "Actualizar control exitoso",
+      "passed": true
+    },
+    {
+      "request": "Evaluar control en dataset",
+      "test": "Evaluar control exitoso",
+      "passed": true
+    },
+    {
+      "request": "Estado cumplimiento por dataset (id={{dataset_id}})",
+      "test": "Estado cumplimiento por dataset (id={{dataset_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Estado cumplimiento por dataset (id={{dataset_id}})",
+      "test": "Estado cumplimiento por dataset (id={{dataset_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Eliminar control (id={{control_id}})",
+      "test": "Eliminar control exitoso",
+      "passed": true
+    },
+    {
+      "request": "Listar relaciones de linaje",
+      "test": "Listar linaje exitoso",
+      "passed": true
+    },
+    {
+      "request": "Listar relaciones de un dataset (id={{dataset_id}})",
+      "test": "Listar relaciones de un dataset (id={{dataset_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Listar relaciones de un dataset (id={{dataset_id}})",
+      "test": "Listar relaciones de un dataset (id={{dataset_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Crear relacion de linaje",
+      "test": "Crear relacion de linaje exitoso",
+      "passed": true
+    },
+    {
+      "request": "Actualizar relacion (id={{lineage_id}})",
+      "test": "Actualizar relacion de linaje exitoso",
+      "passed": true
+    },
+    {
+      "request": "Eliminar relacion (id={{lineage_id}})",
+      "test": "Eliminar relacion de linaje exitoso",
+      "passed": true
+    },
+    {
+      "request": "Listar usuarios",
+      "test": "Listar usuarios responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Listar usuarios",
+      "test": "Listar usuarios es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Usuario por id (get, id={{admin_id}})",
+      "test": "Usuario por id (get, id={{admin_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Usuario por id (get, id={{admin_id}})",
+      "test": "Usuario por id (get, id={{admin_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Crear usuario",
+      "test": "Crear usuario exitoso",
+      "passed": true
+    },
+    {
+      "request": "Actualizar usuario (id={{user_id}})",
+      "test": "Actualizar usuario (id={{user_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Actualizar usuario (id={{user_id}})",
+      "test": "Actualizar usuario (id={{user_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Eliminar usuario (id={{user_id}})",
+      "test": "Eliminar usuario (id={{user_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Eliminar usuario (id={{user_id}})",
+      "test": "Eliminar usuario (id={{user_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Estado de la IA (real o simulada)",
+      "test": "Estado de la IA (real o simulada) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Estado de la IA (real o simulada)",
+      "test": "Estado de la IA (real o simulada) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Clasificar dataset",
+      "test": "Clasificar dataset responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Clasificar dataset",
+      "test": "Clasificar dataset es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Detectar anomalias",
+      "test": "Detectar anomalias responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Detectar anomalias",
+      "test": "Detectar anomalias es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Resumen del estado",
+      "test": "Resumen del estado responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Resumen del estado",
+      "test": "Resumen del estado es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Sugerencias de mejora",
+      "test": "Sugerencias de mejora responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Sugerencias de mejora",
+      "test": "Sugerencias de mejora es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Overview del dashboard",
+      "test": "Overview del dashboard responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Overview del dashboard",
+      "test": "Overview del dashboard es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Alertas de IA",
+      "test": "Alertas de IA responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Alertas de IA",
+      "test": "Alertas de IA es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Bitacora (solo admin)",
+      "test": "Bitacora (solo admin) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Bitacora (solo admin)",
+      "test": "Bitacora (solo admin) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Listar configuraciones",
+      "test": "Listar configuraciones responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Listar configuraciones",
+      "test": "Listar configuraciones es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Crear configuracion",
+      "test": "Crear configuracion exitoso",
+      "passed": true
+    },
+    {
+      "request": "Ejecutar manualmente (id={{monitoring_id}})",
+      "test": "Ejecutar monitoreo exitoso",
+      "passed": true
+    },
+    {
+      "request": "Historial de ejecuciones (config_id={{monitoring_id}})",
+      "test": "Historial de ejecuciones (config_id={{monitoring_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Historial de ejecuciones (config_id={{monitoring_id}})",
+      "test": "Historial de ejecuciones (config_id={{monitoring_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Actualizar configuracion (id={{monitoring_id}})",
+      "test": "Actualizar configuracion (id={{monitoring_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Actualizar configuracion (id={{monitoring_id}})",
+      "test": "Actualizar configuracion (id={{monitoring_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Desactivar configuracion (id={{monitoring_id}})",
+      "test": "Desactivar configuracion (id={{monitoring_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Desactivar configuracion (id={{monitoring_id}})",
+      "test": "Desactivar configuracion (id={{monitoring_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Eliminar configuracion (id={{monitoring_id}})",
+      "test": "Eliminar configuracion exitoso",
+      "passed": true
+    },
+    {
+      "request": "Listar fuentes externas",
+      "test": "Listar fuentes externas responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Listar fuentes externas",
+      "test": "Listar fuentes externas es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Crear fuente externa",
+      "test": "Crear fuente externa exitoso",
+      "passed": true
+    },
+    {
+      "request": "Probar conexion (id={{source_id}})",
+      "test": "Probar conexion (id={{source_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Probar conexion (id={{source_id}})",
+      "test": "Probar conexion (id={{source_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Sincronizar ahora (id={{source_id}})",
+      "test": "Sincronizar fuente externa exitoso",
+      "passed": true
+    },
+    {
+      "request": "Historial de corridas (source_id={{source_id}})",
+      "test": "Historial de corridas (source_id={{source_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Historial de corridas (source_id={{source_id}})",
+      "test": "Historial de corridas (source_id={{source_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Actualizar fuente (id={{source_id}})",
+      "test": "Actualizar fuente (id={{source_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Actualizar fuente (id={{source_id}})",
+      "test": "Actualizar fuente (id={{source_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Desactivar fuente (id={{source_id}})",
+      "test": "Desactivar fuente (id={{source_id}}) responde correctamente",
+      "passed": true
+    },
+    {
+      "request": "Desactivar fuente (id={{source_id}})",
+      "test": "Desactivar fuente (id={{source_id}}) es exitoso",
+      "passed": true
+    },
+    {
+      "request": "Eliminar fuente (id={{source_id}})",
+      "test": "Eliminar fuente externa exitoso",
+      "passed": true
+    },
+    {
+      "request": "Eliminar medicion (id={{quality_id}})",
+      "test": "Eliminar medicion exitoso",
+      "passed": true
+    },
+    {
+      "request": "Eliminar politica (id={{policy_id}})",
+      "test": "Eliminar politica exitoso",
+      "passed": true
+    },
+    {
+      "request": "Eliminar dataset destino (id={{dataset_destino_id}})",
+      "test": "Eliminar dataset destino exitoso",
+      "passed": true
+    },
+    {
+      "request": "Eliminar dataset (id={{dataset_id}})",
+      "test": "Eliminar dataset exitoso",
+      "passed": true
+    },
+    {
+      "request": "Eliminar dataset ajeno (id={{dataset_ajeno_id}})",
+      "test": "Eliminar dataset ajeno exitoso",
+      "passed": true
+    },
+    {
+      "request": "Logout",
+      "test": "Logout exitoso",
+      "passed": true
+    }
+  ]
+}
