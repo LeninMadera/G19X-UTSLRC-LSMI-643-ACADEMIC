@@ -357,7 +357,7 @@ En `postman/` hay una coleccion lista para importar:
 3. Ajusta la variable `baseUrl` a tu servidor.
 4. Ejecuta primero **Auth > Login** (guarda la cookie de sesion) y despues cualquier otro request.
 
-La coleccion incluye pruebas de login, sesion, token CSRF (POST sin token y con token invalido) y de cada modulo. Los requests que crean datos usan valores unicos y los eliminan al final; por eso se puede ejecutar completa varias veces seguidas.
+La coleccion incluye pruebas de login, sesion, token CSRF (POST sin token y con token invalido) y de cada modulo. Tambien se incluyen pruebas de control de acceso por roles: **analyst** intenta crear usuarios (403), **steward** intenta consultar logs exclusivos del administrador mediante `reports.php?action=logs` (403), **analyst** intenta crear datasets (403) y **owner** intenta modificar un dataset ajeno (403). Los requests que crean datos usan valores unicos y los eliminan al final; por eso se puede ejecutar completa varias veces seguidas.
 
 ## Pruebas automatizadas con Newman
 
@@ -369,6 +369,7 @@ Newman ejecuta la misma coleccion de Postman desde la terminal. No requiere agre
 - MySQL con la base `gobierno_datos_ia` creada y el seed cargado.
 - Servidor PHP en marcha (ver [Instalacion](#instalacion)).
 - Conexion a internet para los requests de **Integraciones**, que consultan una API publica de demostracion.
+- **Certificados raíz para PHP cURL (HTTPS):** En el entorno de pruebas (XAMPP) la configuración existente (`php.ini`) apunta `curl.cainfo` y `openssl.cafile` al bundle `C:\xampp\apache\bin\curl-ca-bundle.crt`. Para que PHP cURL pueda validar correctamente certificados HTTPS al consumir fuentes externas con `CURLOPT_SSL_VERIFYPEER => true`, es necesario disponer de un bundle de CA válido. Si usas otra instalación de PHP, asegúrate de que `curl.cainfo`/`openssl.cafile` apunten a un archivo `cacert.pem` actualizado.
 
 ### Instalacion de Newman
 
@@ -405,10 +406,10 @@ En PowerShell, usa una sola linea o el caracter de continuacion `` ` `` en lugar
 
 ### Resultado esperado
 
-Newman muestra el detalle por request y un resumen con `requests`, `assertions`, `passed` y `failed`. La coleccion es repetible: crea dos datasets, un usuario, una politica, un control, una relacion de linaje, una configuracion de monitoreo y una fuente externa temporales; registra una medicion de calidad y localiza su ID por la API; usa todos esos IDs generados en lugar de IDs fijos y elimina los datos al final. El logout es el ultimo request.
-
-Para evitar llamadas reales al proveedor de IA durante la prueba, deja `AI_API_KEY` vacia en `.env` (la aplicacion usa el modo simulado). Si la API publica de **Integraciones** no responde por falta de internet, esos requests pueden fallar aunque el resto de la coleccion sea correcto.
-
+Newman muestra el detalle por request y un resumen con `requests`, `assertions`, `passed` y `failed`.
+**Ejecución verificada (29 de octubre de 2026):** **73 peticiones ejecutadas**, **110 aserciones**, **0 fallos**.
+La colección es repetible: crea **tres datasets temporales** (incluido el **dataset ajeno** utilizado para comprobar los permisos del owner), un usuario, una política, un control, una relación de linaje, una configuración de monitoreo y una fuente externa temporales; registra una medición de calidad y localiza su ID por la API; usa todos esos IDs generados en lugar de IDs fijos y elimina los datos al final. El logout es el último request.
+**Evidencia sanitizada (ejecución real):** [docs/evidencias/newman-2026-10-29.json](docs/evidencias/newman-2026-10-29.json). Se trata de una versión sanitizada derivada de un reporte real de Newman, sin credenciales, cookies ni tokens CSRF.
 
 ## Base de datos
 
