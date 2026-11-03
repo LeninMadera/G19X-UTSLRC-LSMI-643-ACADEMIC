@@ -96,7 +96,7 @@ switch ($action) {
             $stmt = db()->prepare('SELECT id FROM datasets WHERE id = :id AND owner_id = :owner LIMIT 1');
             $stmt->execute(['id' => $datasetId, 'owner' => currentUser()['id']]);
             if ($stmt->fetch() === false) {
-                respondJson(false, null, 'Solo puedes registrar calidad en tus datasets.');
+                respondJson(false, null, 'Solo puedes registrar calidad en tus datasets.', 403);
             }
         }
 

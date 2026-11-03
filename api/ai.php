@@ -131,8 +131,11 @@ switch ($action) {
         requireRole(['admin', 'steward', 'owner']);
         $data = jsonInput();
         $datasetId = (int)($data['dataset_id'] ?? 0);
-        if ($datasetId <= 0 || !puedeEditarDataset($datasetId)) {
-            respondJson(false, null, 'Dataset invalido o sin permisos.');
+        if ($datasetId <= 0) {
+            respondJson(false, null, 'Dataset invalido.');
+        }
+        if (!puedeEditarDataset($datasetId)) {
+            respondJson(false, null, 'No tienes permisos sobre este dataset.', 403);
         }
 
         $stmt = db()->prepare('SELECT nombre, descripcion FROM datasets WHERE id = :id LIMIT 1');
@@ -174,8 +177,11 @@ switch ($action) {
         requireRole(['admin', 'steward', 'owner']);
         $data = jsonInput();
         $datasetId = (int)($data['dataset_id'] ?? 0);
-        if ($datasetId <= 0 || !puedeEditarDataset($datasetId)) {
-            respondJson(false, null, 'Dataset invalido o sin permisos.');
+        if ($datasetId <= 0) {
+            respondJson(false, null, 'Dataset invalido.');
+        }
+        if (!puedeEditarDataset($datasetId)) {
+            respondJson(false, null, 'No tienes permisos sobre este dataset.', 403);
         }
 
         try {
@@ -192,8 +198,11 @@ switch ($action) {
         requireRole(['admin', 'steward', 'owner']);
         $data = jsonInput();
         $datasetId = (int)($data['dataset_id'] ?? 0);
-        if ($datasetId <= 0 || !puedeEditarDataset($datasetId)) {
-            respondJson(false, null, 'Dataset invalido o sin permisos.');
+        if ($datasetId <= 0) {
+            respondJson(false, null, 'Dataset invalido.');
+        }
+        if (!puedeEditarDataset($datasetId)) {
+            respondJson(false, null, 'No tienes permisos sobre este dataset.', 403);
         }
 
         $stmt = db()->prepare(
@@ -237,8 +246,11 @@ switch ($action) {
         requireRole(['admin', 'steward', 'owner']);
         $data = jsonInput();
         $datasetId = (int)($data['dataset_id'] ?? 0);
-        if ($datasetId <= 0 || !puedeEditarDataset($datasetId)) {
-            respondJson(false, null, 'Dataset invalido o sin permisos.');
+        if ($datasetId <= 0) {
+            respondJson(false, null, 'Dataset invalido.');
+        }
+        if (!puedeEditarDataset($datasetId)) {
+            respondJson(false, null, 'No tienes permisos sobre este dataset.', 403);
         }
 
         $stmt = db()->prepare(
