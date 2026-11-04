@@ -337,3 +337,17 @@ function fmtFecha(valor) {
     const p = (n) => String(n).padStart(2, '0');
     return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
 }
+
+// Cerrar menú móvil al hacer clic en enlaces del sidebar
+document.addEventListener('click', function(e) {
+    const link = e.target.closest('.sidebar-nav a');
+    if (!link) return;
+    if (window.innerWidth <= 820 && typeof navToggle !== 'undefined' && navToggle && navToggle.checked) {
+        navToggle.checked = false;
+        if (typeof sincronizarCajon === 'function') {
+            sincronizarCajon();
+        } else {
+            document.body.classList.remove('nav-abierto');
+        }
+    }
+});

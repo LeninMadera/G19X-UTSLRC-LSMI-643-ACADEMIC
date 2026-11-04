@@ -1741,3 +1741,11 @@ input[type="radio"] { accent-color: var(--primary); }
     .ai-actions { grid-template-columns: minmax(0, 1fr); }
     .ai-action p { flex: none; }
 }
+
+@media (max-width: 360px) {
+    .content { padding: 0 0.75rem 2rem; }
+    .topbar { margin-inline: -0.75rem; padding-inline: 0.75rem; }
+    .panel { padding: 0.9rem; }
+    .kpi-num { font-size: 1.6rem; }
+    .sidebar { width: min(86vw, 288px); }
+}
