@@ -156,17 +156,26 @@ switch ($action) {
             'UPDATE datasets SET categoria_ia = :cat, etiquetas_ia = :tags WHERE id = :id'
         )->execute(['cat' => $res['categoria'], 'tags' => $jsonEtiquetas, 'id' => $datasetId]);
 
-        db()->prepare(
-            'INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, recomendacion_ia, estado)
-             VALUES (:id, :tipo, :sev, :desc, :rec, :est)'
-        )->execute([
-            'id'    => $datasetId,
-            'tipo'  => 'clasificacion',
-            'sev'   => 'baja',
-            'desc'  => 'Categoria sugerida: ' . $res['categoria'] . '. Etiquetas: ' . implode(', ', $res['etiquetas']),
-            'rec'   => 'Revisa y confirma la clasificacion sugerida por la IA.',
-            'est'   => 'pendiente',
-        ]);
+        $descClasif = 'Categoria sugerida: ' . $res['categoria'] . '. Etiquetas: ' . implode(', ', $res['etiquetas']);
+        $prevClasif = db()->prepare(
+            "SELECT id FROM ai_detections
+             WHERE dataset_id = :id AND tipo = 'clasificacion' AND estado = 'pendiente' AND descripcion_ia = :desc
+             LIMIT 1"
+        );
+        $prevClasif->execute(['id' => $datasetId, 'desc' => $descClasif]);
+        if ($prevClasif->fetch() === false) {
+            db()->prepare(
+                'INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, recomendacion_ia, estado)
+                 VALUES (:id, :tipo, :sev, :desc, :rec, :est)'
+            )->execute([
+                'id'    => $datasetId,
+                'tipo'  => 'clasificacion',
+                'sev'   => 'baja',
+                'desc'  => $descClasif,
+                'rec'   => 'Revisa y confirma la clasificacion sugerida por la IA.',
+                'est'   => 'pendiente',
+            ]);
+        }
 
         logActivity('ai:classify', ['dataset_id' => $datasetId, 'simulado' => ai_simulado()]);
         respondJson(true, ['categoria' => $res['categoria'], 'etiquetas' => $res['etiquetas']],
@@ -228,15 +237,24 @@ switch ($action) {
             respondJson(false, null, $e->getMessage());
         }
 
-        db()->prepare(
-            "INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, estado)
-             VALUES (:id, :tipo, :sev, :desc, 'aplicada')"
-        )->execute([
-            'id'    => $datasetId,
-            'tipo'  => 'resumen',
-            'sev'   => 'baja',
-            'desc'  => mb_substr($texto, 0, 500),
-        ]);
+        $descResumen = mb_substr($texto, 0, 500);
+        $prevResumen = db()->prepare(
+            "SELECT id FROM ai_detections
+             WHERE dataset_id = :id AND tipo = 'resumen' AND descripcion_ia = :desc
+             LIMIT 1"
+        );
+        $prevResumen->execute(['id' => $datasetId, 'desc' => $descResumen]);
+        if ($prevResumen->fetch() === false) {
+            db()->prepare(
+                "INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, estado)
+                 VALUES (:id, :tipo, :sev, :desc, 'aplicada')"
+            )->execute([
+                'id'    => $datasetId,
+                'tipo'  => 'resumen',
+                'sev'   => 'baja',
+                'desc'  => $descResumen,
+            ]);
+        }
 
         logActivity('ai:summary', ['dataset_id' => $datasetId, 'simulado' => ai_simulado()]);
         respondJson(true, ['resumen' => $texto], '');
