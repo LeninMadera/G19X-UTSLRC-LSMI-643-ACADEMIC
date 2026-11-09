@@ -407,9 +407,11 @@ En PowerShell, usa una sola linea o el caracter de continuacion `` ` `` en lugar
 ### Resultado esperado
 
 Newman muestra el detalle por request y un resumen con `requests`, `assertions`, `passed` y `failed`.
-**Ejecución verificada (29 de octubre de 2026):** **73 peticiones ejecutadas**, **110 aserciones**, **0 fallos**.
+**Ejecución verificada (09 de noviembre de 2026):** **73 peticiones ejecutadas**, **110 aserciones**, **0 fallos**. Commit comprobado: **47fa655**.
 La colección es repetible: crea **tres datasets temporales** (incluido el **dataset ajeno** utilizado para comprobar los permisos del owner), un usuario, una política, un control, una relación de linaje, una configuración de monitoreo y una fuente externa temporales; registra una medición de calidad y localiza su ID por la API; usa todos esos IDs generados en lugar de IDs fijos y elimina los datos al final. El logout es el último request.
-**Evidencia sanitizada (ejecución real):** [docs/evidencias/newman-2026-10-29.json](docs/evidencias/newman-2026-10-29.json). Se trata de una versión sanitizada derivada de un reporte real de Newman, sin credenciales, cookies ni tokens CSRF.
+**Evidencia sanitizada (ejecución real):** [docs/evidencias/newman-2026-11-09.json](docs/evidencias/newman-2026-11-09.json). Se trata de una versión sanitizada derivada de un reporte real de Newman, sin credenciales, cookies ni tokens CSRF.
+
+**Historial:** [docs/evidencias/newman-2026-10-29.json](docs/evidencias/newman-2026-10-29.json) (ejecución anterior).
 
 ## Base de datos
 
