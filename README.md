@@ -6,6 +6,8 @@ La aplicación se construyó por etapas hasta la Etapa 12, y cada una se probó 
 
 ## Inicio rápido
 
+[Guía de demostración de 10 minutos](docs/GUIA-DEMOSTRACION-10-MINUTOS.md)
+
 Resumen corto para ejecutar el proyecto:
 
 1. Ten listo **PHP 8.x** con las extensiones `pdo_mysql`, `curl` y `mbstring`, y **MySQL 8**.
