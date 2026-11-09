@@ -686,6 +686,52 @@
           }
         },
         {
+          "name": "Owner mide calidad en dataset ajeno (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rechazado con 403 por falta de permisos', function () { pm.response.to.have.status(403); });",
+                  "pm.test('Respuesta JSON valida', function () { pm.response.to.be.json; var d = pm.response.json(); pm.expect(d).to.be.an('object'); });",
+                  "pm.test('success false', function () { var d = pm.response.json(); pm.expect(d.success).to.eql(false); });",
+                  "pm.test('Mensaje de falta de permisos', function () { var d = pm.response.json(); pm.expect(d.message).to.be.a('string'); pm.expect(d.message.toLowerCase()).to.satisfy(function(m){ return m.includes('permiso') || m.includes('propiet') || m.includes('tus datasets'); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quality.php?action=register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quality.php"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "register"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataset_id\": \"{{dataset_ajeno_id}}\",\n  \"completitud\": 92.0,\n  \"exactitud\": 88.5,\n  \"consistencia\": 95.0,\n  \"vigencia\": 90.0,\n  \"unicidad\": 97.5\n}"
+            }
+          }
+        },
+        {
           "name": "Restaurar sesion admin (post pruebas roles)",
           "event": [
             {
