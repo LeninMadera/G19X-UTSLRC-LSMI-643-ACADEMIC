@@ -170,13 +170,19 @@ if ($initials === '') {
         </div>
     </div>
     <nav class="sidebar-nav" aria-label="Navegacion principal">
-        <?php foreach ($navItems as $item): ?>
-            <?php if (!empty($item['group'])): ?>
-                <div class="nav-group"><?= e($item['group']) ?></div>
-            <?php endif; ?>
-            <?php if (!empty($item['adminOnly']) && $current['rol'] !== 'admin') {
+        <?php
+        $groupesVistos = [];
+        foreach ($navItems as $item):
+            if (!empty($item['adminOnly']) && $current['rol'] !== 'admin') {
                 continue;
-            } ?>
+            }
+            if (!empty($item['group'])) {
+                if (!in_array($item['group'], $groupesVistos, true)) {
+                    echo '<div class="nav-group">' . e($item['group']) . '</div>';
+                    $groupesVistos[] = $item['group'];
+                }
+            }
+        ?>
             <a href="<?= e(APP_URL) ?>/views/<?= e($item['href']) ?>"
                <?= in_array($currentPage, $item['match'], true) ? ' class="is-active" aria-current="page"' : '' ?>>
                 <svg class="ico" aria-hidden="true"><use href="#<?= e($item['icon']) ?>"></use></svg>

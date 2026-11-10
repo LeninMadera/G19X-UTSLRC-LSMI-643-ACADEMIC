@@ -43,6 +43,11 @@ $rolPuedeUsarIA = in_array($current['rol'], ['admin', 'steward', 'owner'], true)
         <svg class="ico" aria-hidden="true"><use href="#i-alert"></use></svg>
         <span>Elige un dataset arriba para habilitar las acciones de IA.</span>
     </p>
+    <?php else: ?>
+    <div class="alert">
+        <svg class="ico" aria-hidden="true"><use href="#i-alert"></use></svg>
+        <span>Tu rol permite consultar esta sección, pero no ejecutar estas acciones de inteligencia artificial.</span>
+    </div>
     <?php endif; ?>
 
     <div id="msg" class="alert hidden" role="status"></div>
