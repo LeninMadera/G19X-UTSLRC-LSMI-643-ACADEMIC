@@ -176,12 +176,13 @@ function simular_clasificar(string $nombre, string $descripcion): array
         foreach ($palabras as $p) {
             if (mb_strpos($texto, $p) !== false) {
                 $categoria = $cat;
-                $etiquetas = array_slice([$palabras[0], 'general', 'organizacional'], 0, 3);
+                $catSlug = mb_strtolower(str_replace(' ', '_', $cat));
+                $etiquetas = array_slice([$palabras[0], $catSlug, 'autoclasificado'], 0, 3);
                 break 2;
             }
         }
     }
-    return ['categoria' => $categoria, 'etiquetas' => array_values(array_unique($etiquetas))];
+    return ['categoria' => $categoria, 'etiquetas' => array_values(array_unique(array_filter($etiquetas)))];
 }
 
 // ============================================================
@@ -289,9 +290,10 @@ function simular_anomalias(array $metrics): array
 
 /**
  * Ejecuta la deteccion de anomalias de un dataset y registra en
- * ai_detections unicamente las nuevas (deduplicando por descripcion
- * y estado pendiente). Se reutiliza desde api/ai.php y desde el
- * motor de monitoreo continuo para que ambos usen la misma logica.
+ * ai_detections unicamente las nuevas o actualiza las pendientes del
+ * mismo tema (deduplicando por dataset, tipo y tema, sin usar la
+ * descripcion completa con el score). Se reutiliza desde api/ai.php y
+ * desde el motor de monitoreo continuo para que ambos usen la misma logica.
  *
  * Devuelve ['detectadas' => lista de anomalias, 'insertadas' => int].
  */
@@ -313,24 +315,69 @@ function ai_ejecutar_anomalias(int $datasetId): array
     $insertadas = 0;
     foreach ($anomalias as $a) {
         $desc = mb_substr($a['descripcion'], 0, 500);
+        $rec = mb_substr($a['recomendacion'] ?? '', 0, 500) ?: null;
+        $sev = $a['severidad'];
+
+        // Identificar tema estable (sin incluir el valor numérico del score)
+        $tema = null;
+        $descLower = mb_strtolower($desc);
+        if (mb_strpos($descLower, 'score global de calidad') !== false || mb_strpos($descLower, 'umbral minimo') !== false) {
+            $tema = 'score_bajo_umbral';
+        } else {
+            $dims = ['completitud', 'exactitud', 'consistencia', 'vigencia', 'unicidad'];
+            foreach ($dims as $dim) {
+                if (mb_strpos($descLower, $dim) !== false) {
+                    $tema = 'dimension_' . $dim;
+                    break;
+                }
+            }
+        }
+        if ($tema === null) {
+            $tema = 'anomalia_general';
+        }
+
+        // Buscar alerta pendiente activa para el mismo dataset y tema
         $prev = db()->prepare(
-            "SELECT id FROM ai_detections
-             WHERE dataset_id = :id AND tipo = 'anomalia' AND estado = 'pendiente' AND descripcion_ia = :desc
+            "SELECT id, descripcion_ia, recomendacion_ia, severidad FROM ai_detections
+             WHERE dataset_id = :id AND tipo = 'anomalia' AND estado = 'pendiente'
+             AND (
+                 (descripcion_ia LIKE '%score global de calidad%' AND :tema1 = 'score_bajo_umbral') OR
+                 (descripcion_ia LIKE '%completitud%' AND :tema2 = 'dimension_completitud') OR
+                 (descripcion_ia LIKE '%exactitud%' AND :tema3 = 'dimension_exactitud') OR
+                 (descripcion_ia LIKE '%consistencia%' AND :tema4 = 'dimension_consistencia') OR
+                 (descripcion_ia LIKE '%vigencia%' AND :tema5 = 'dimension_vigencia') OR
+                 (descripcion_ia LIKE '%unicidad%' AND :tema6 = 'dimension_unicidad') OR
+                 (:tema7 = 'anomalia_general' AND descripcion_ia NOT LIKE '%score global de calidad%' AND descripcion_ia NOT LIKE '%completitud%' AND descripcion_ia NOT LIKE '%exactitud%' AND descripcion_ia NOT LIKE '%consistencia%' AND descripcion_ia NOT LIKE '%vigencia%' AND descripcion_ia NOT LIKE '%unicidad%')
+             )
              LIMIT 1"
         );
-        $prev->execute(['id' => $datasetId, 'desc' => $desc]);
-        if ($prev->fetch() !== false) {
+        $prev->execute(['id' => $datasetId, 'tema1' => $tema, 'tema2' => $tema, 'tema3' => $tema, 'tema4' => $tema, 'tema5' => $tema, 'tema6' => $tema, 'tema7' => $tema]);
+        $existente = $prev->fetch();
+
+        if ($existente !== false) {
+            // Actualizar la alerta existente con la información más reciente si cambió
+            if ($existente['descripcion_ia'] !== $desc || $existente['recomendacion_ia'] !== $rec || $existente['severidad'] !== $sev) {
+                db()->prepare(
+                    'UPDATE ai_detections SET descripcion_ia = :desc, recomendacion_ia = :rec, severidad = :sev WHERE id = :id'
+                )->execute([
+                    'desc' => $desc,
+                    'rec'  => $rec,
+                    'sev'  => $sev,
+                    'id'   => $existente['id'],
+                ]);
+            }
             continue;
         }
+
         db()->prepare(
             'INSERT INTO ai_detections (dataset_id, tipo, severidad, descripcion_ia, recomendacion_ia, estado)
              VALUES (:id, :tipo, :sev, :desc, :rec, :est)'
         )->execute([
             'id'    => $datasetId,
             'tipo'  => 'anomalia',
-            'sev'   => $a['severidad'],
+            'sev'   => $sev,
             'desc'  => $desc,
-            'rec'   => mb_substr($a['recomendacion'] ?? '', 0, 500) ?: null,
+            'rec'   => $rec,
             'est'   => 'pendiente',
         ]);
         $insertadas++;
